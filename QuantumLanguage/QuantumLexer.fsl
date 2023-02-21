@@ -14,7 +14,7 @@ System.Globalization.CultureInfo.CurrentCulture <- new System.Globalization.Cult
 // We define macros for some regular expressions we will use later
 let digit       = ['0'-'9'] 
 let num         = digit+
-let float       = ['-' '+']? (digit* \. digit+ | digit+)
+let float       = ['-' '+']? (digit* '.' digit+ | digit+)
 let whitespace  = [' ' '\t' '\r' '\n']
 let newline     = "\n\r" | '\n' | '\r'
 let char        = ['a'-'z' 'A'-'Z']
@@ -55,16 +55,19 @@ rule tokenize = parse
 | "Calloc"              { CLASSREG }
 | ":="                  { ASSIGN }
 | ';'                   { ORDER }
+| ','                   { COMMA }
 | "Measure"whitespace   { MEASURE }
 | "->"                  { MESHOST }
 | "Reset"whitespace     { RESET }
 | "If"whitespace        { CONDITIONAL }
-| "Barrier"whitespace         { BARRIER }
+| "Barrier"whitespace   { BARRIER }
+| "PhaseDisk"whitespace { PHASEDISK }
 
 // Gates expression to TOKENs 
 | "H"whitespace         { HADAMARD }
 | "ID"whitespace        { IDENTITY }
 | "X"whitespace         { PAULIX }
+| "Y"whitespace         { PAULIY }
 | "Z"whitespace         { PAULIZ }
 | "TDG"whitespace       { TDAGGER }
 | "T"whitespace         { TGATE }
@@ -81,7 +84,7 @@ rule tokenize = parse
 | "RXX"whitespace       { MOLMERSOR }
 | "RZZ"whitespace       { SYMMRZZ }
 | "SX"whitespace        { SQRTNOT }
-| "SXDG"whitespace      { SQRTXDAG }
+| "SXDG"whitespace      { SQRTXDG }
 
 
 // Boolean expression to TOKENs
