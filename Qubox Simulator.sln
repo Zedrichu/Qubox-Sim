@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Qubox Simulator", "Qubox Simulator.csproj", "{EDF2939D-140C-42CD-8BDB-186B8DD323FB}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "QuantumLanguage", "QuantumLanguage\QuantumLanguage.fsproj", "{75AB5B95-C7BC-4B6F-BC59-9DB0614AE9CF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EDF2939D-140C-42CD-8BDB-186B8DD323FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDF2939D-140C-42CD-8BDB-186B8DD323FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDF2939D-140C-42CD-8BDB-186B8DD323FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDF2939D-140C-42CD-8BDB-186B8DD323FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75AB5B95-C7BC-4B6F-BC59-9DB0614AE9CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75AB5B95-C7BC-4B6F-BC59-9DB0614AE9CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75AB5B95-C7BC-4B6F-BC59-9DB0614AE9CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75AB5B95-C7BC-4B6F-BC59-9DB0614AE9CF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

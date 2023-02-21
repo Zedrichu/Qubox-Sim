@@ -1,0 +1,98 @@
+// The generated lexer module will start with this code
+{
+module QuantumLexer
+open FSharp.Text.Lexing
+open System
+
+// Open the module that defines the Tokens
+open QuantumParser
+
+// Set the language to English such that 4.0 is parsed as 4 and not 40.
+System.Globalization.CultureInfo.CurrentCulture <- new System.Globalization.CultureInfo("en-US")
+}
+
+// We define macros for some regular expressions we will use later
+let digit       = ['0'-'9'] 
+let num         = digit+
+let float       = ['-' '+']? (digit* \. digit+ | digit+)
+let whitespace  = [' ' '\t' '\r' '\n']
+let newline     = "\n\r" | '\n' | '\r'
+let char        = ['a'-'z' 'A'-'Z']
+let variable    =  char ( char | digit )*
+let bool        = "true"|"false"
+//digit can also be \d+ 
+//whitespace can also be [\u00A0 \n \r \t]
+
+// We define now the rules for recognising and building tokens
+// for each of the tokens of our language we need a rule
+// NOTE: rules are applied in order top-down.
+//       This is important when tokens overlap (not in this example)
+rule tokenize = parse
+
+// deal with tokens that need to be ignored (skip them)
+| whitespace    { tokenize lexbuf }
+| newline       { lexbuf.EndPos <- lexbuf.EndPos.NextLine; tokenize lexbuf; }
+// deal with tokens that need to be built
+| float         { FLOAT(Single.Parse(LexBuffer<_>.LexemeString lexbuf ))}
+| num           { NUM(Int32.Parse(LexBuffer<_>.LexemeString lexbuf )) }
+| bool          { BOOL(Boolean.Parse(LexBuffer<_>.LexemeString lexbuf )) }
+| variable      { let str = LexBuffer<_>.LexemeString lexbuf in VARIABLE(str) }
+
+// Arithmetic expressions to TOKENs
+| '*'           { TIMES }
+| '/'           { DIV }
+| '+'           { PLUS }
+| '-'           { MINUS }
+| "Pi"          { MATHPI }
+| '('           { LPAR }
+| ')'           { RPAR }
+| eof           { EOF }
+| '['           { LBRAK }
+| ']'           { RBRAK }
+
+// Command expressions to TOKENs
+| "Qalloc"              { QUANTREG }
+| "Calloc"              { CLASSREG }
+| ":="                  { ASSIGN }
+| ';'                   { ORDER }
+| "Measure"whitespace   { MEASURE }
+| "->"                  { MESHOST }
+| "Reset"whitespace     { RESET }
+| "If"whitespace        { CONDITIONAL }
+| "Barrier"whitespace         { BARRIER }
+
+// Gates expression to TOKENs 
+| "H"whitespace         { HADAMARD }
+| "ID"whitespace        { IDENTITY }
+| "X"whitespace         { PAULIX }
+| "Z"whitespace         { PAULIZ }
+| "TDG"whitespace       { TDAGGER }
+| "T"whitespace         { TGATE }
+| "S"whitespace         { SGATE }
+| "SDG"whitespace       { SDAGGER }
+| "P"whitespace         { PHASE }
+| "RZ"whitespace        { RZGATE }
+| "RY"whitespace        { RYGATE }
+| "RX"whitespace        { RXGATE }
+| "U"whitespace         { UNITARY }
+| "SWAP"whitespace      { SWAP }
+| "CCX"whitespace       { TOFFOLI }
+| "CNOT"whitespace      { CTRLNOT }
+| "RXX"whitespace       { MOLMERSOR }
+| "RZZ"whitespace       { SYMMRZZ }
+| "SX"whitespace        { SQRTNOT }
+| "SXDG"whitespace      { SQRTXDAG }
+
+
+// Boolean expression to TOKENs
+| "and"         { AND }
+| "or"          { OR }
+| "&&"          { SAND }
+| "||"          { SOR }
+| "not"         { NEG }
+| '='           { EQUAL }
+| "!="          { NOTEQ }
+| '>'           { GREATER }
+| ">="          { GREATEREQ }
+| '<'           { LESS }
+| "<="          { LESSEQ }
