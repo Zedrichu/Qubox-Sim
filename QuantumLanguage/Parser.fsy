@@ -1,6 +1,6 @@
 // Open the file that defines the types used as AST in the QuLang-parser
 %{
-open QuantumAST
+open AST
 %}
 
 // Declare the tokens (terminal symbols)
@@ -31,7 +31,7 @@ open QuantumAST
 %start start
 
 // Specify the return type of each of then non-terminal symbols
-%type <operator> start
+%type <AST.operator> start
 %type <operator> allocation
 %type <operator> operator
 %type <operator> measurement
@@ -108,7 +108,7 @@ boolexpression:
 // ALLC ::= Qalloc str n; Calloc str n; | Qalloc bitseq; Calloc bitseq;
 allocation:
   | QUANTREG bitsequence ORDER CLASSREG bitsequence { AllocSeq($2, $5) }
-  | QUANTREG str NUM ORDER CLASSREG str NUM ORDER   { AllocQC($2, $3, $4, $5) }
+  | QUANTREG bit ORDER CLASSREG bit ORDER           { AllocQC($2, $5) }
 
 // Measurement production - to simplify operators
 // M::= Measure bit -> bit
@@ -145,13 +145,13 @@ operator:
   | RYGATE LPAR expression RPAR bit    { RY($3, $5) }
   | RXGATE LPAR expression RPAR bit    { RX($3, $5) }
   | UNITARY LPAR expression COMMA expression COMMA expression RPAR bit { U($3, $5, $7, $9) }
-// Gates on multiple qubits  
-  | SWAP bit COMMA bit                  { SWAP($2, $4) }
-  | CTRLNOT bit COMMA bit               { CNOT($2, $4) }
-  | TOFFOLI bit COMMA bit COMMA bit     { CCX($2, $4, $6) }
+// Gates on multiple qubits
+  | CTRLNOT bit COMMA bit              { CNOT($2, $4) }
+  | TOFFOLI bit COMMA bit COMMA bit    { CCX($2, $4, $6) }
+  | SWAP bit COMMA bit                 { AST.SWAP($2, $4) } // Conflict with some swap function
 // Parametric gates on multiple qubits
-  | SYMMRXX LPAR expression RPAR bit COMMA bit     { RXX($3, $5, $7) }
-  | SYMMRZZ LPAR expression RPAR bit COMMA bit     { RZZ($3, $5, $7) }
+  | SYMMRXX LPAR expression RPAR bit COMMA bit      { RXX($3, $5, $7) } 
+  | SYMMRZZ LPAR expression RPAR bit COMMA bit      { RZZ($3, $5, $7) } 
    
 // Again, the code annotation specifies the result of parsing
 // For example { TimesExpr($1,$3) } specifies that parsing with the production

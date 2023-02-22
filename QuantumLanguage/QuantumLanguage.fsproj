@@ -3,18 +3,30 @@
     <PropertyGroup>
         <TargetFramework>net7.0</TargetFramework>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <AssemblyName>QuLangParse</AssemblyName>
+        <OutputType>Exe</OutputType>
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="Library.fs" />
-        <Content Include="QuantumLexer.fsl" />
-        <Content Include="QuantumParser.fsp" />
-        <Compile Include="QuantumAST.fs" />
+        <PackageReference Include="FsLexYacc" Version="11.0.1" GeneratePathProperty="true" />
+        <PackageReference Include="FsLexYacc.Runtime" Version="11.0.1" />
+        <Compile Include="AST.fs" />
+        <FsYacc Include="Parser.fsy">
+            <OtherFlags>--module QuantumLanguage.Parser</OtherFlags>
+        </FsYacc>
+        <FsLex Include="Lexer.fsl">
+            <OtherFlags>--module QuantumLanguage.Lexer --unicode</OtherFlags>
+        </FsLex>
+        <Compile Include="Parser.fsi" />
+        <Compile Include="Parser.fs" />
+        <Compile Include="Lexer.fs" />
+        <Compile Include="Interpreter.fs" />
+        <Compile Include="Program.fs" />
+        <None Include="Tester.fsx" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="FsLexYacc" Version="11.0.1" />
-      <PackageReference Include="FsLexYacc.Runtime" Version="11.0.1" />
+      <ProjectReference Include="..\Qubox Simulator.csproj" />
     </ItemGroup>
 
 </Project>

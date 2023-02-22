@@ -1,11 +1,10 @@
 // The generated lexer module will start with this code
 {
-module QuantumLexer
 open FSharp.Text.Lexing
 open System
 
 // Open the module that defines the Tokens
-open QuantumParser
+open Parser
 
 // Set the language to English such that 4.0 is parsed as 4 and not 40.
 System.Globalization.CultureInfo.CurrentCulture <- new System.Globalization.CultureInfo("en-US")
@@ -31,7 +30,7 @@ rule tokenize = parse
 | whitespace    { tokenize lexbuf }
 | newline       { lexbuf.EndPos <- lexbuf.EndPos.NextLine; tokenize lexbuf; }
 // deal with tokens that need to be built
-| float         { FLOAT(Single.Parse(LexBuffer<_>.LexemeString lexbuf ))}
+| float         { FLOAT(Double.Parse(LexBuffer<_>.LexemeString lexbuf ))}
 | num           { NUM(Int32.Parse(LexBuffer<_>.LexemeString lexbuf )) }
 | bool          { BOOL(Boolean.Parse(LexBuffer<_>.LexemeString lexbuf )) }
 | variable      { let str = LexBuffer<_>.LexemeString lexbuf in VARIABLE(str) }
@@ -84,15 +83,15 @@ rule tokenize = parse
 | "T"whitespace         { TGATE }
 | "S"whitespace         { SGATE }
 | "SDG"whitespace       { SDAGGER }
+| "SX"whitespace        { SQRTNOT }
+| "SXDG"whitespace      { SQRTXDG }
 | "P"whitespace         { PHASE }
 | "RZ"whitespace        { RZGATE }
 | "RY"whitespace        { RYGATE }
 | "RX"whitespace        { RXGATE }
 | "U"whitespace         { UNITARY }
-| "SWAP"whitespace      { SWAP }
-| "CCX"whitespace       { TOFFOLI }
 | "CNOT"whitespace      { CTRLNOT }
-| "RXX"whitespace       { MOLMERSOR }
+| "CCX"whitespace       { TOFFOLI }
+| "SWAP"whitespace      { SWAP }
+| "RXX"whitespace       { SYMMRXX }
 | "RZZ"whitespace       { SYMMRZZ }
-| "SX"whitespace        { SQRTNOT }
-| "SXDG"whitespace      { SQRTXDG }
