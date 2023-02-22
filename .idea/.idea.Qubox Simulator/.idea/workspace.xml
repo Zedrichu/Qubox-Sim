@@ -5,17 +5,16 @@
     <projectFile profileName="https">Qubox Simulator.csproj</projectFile>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="61904447-d037-4233-9dc0-ed8bc546f559" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.Qubox Simulator/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.Qubox Simulator/.idea/indexLayout.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.Qubox Simulator/.idea/projectSettingsUpdater.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.Qubox Simulator/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.Qubox Simulator/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/QuantumLanguage/QuantumLexer.fs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/QuantumLanguage/QuantumParser.fs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/QuantumLanguage/QuantumParser.fsi" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    <list default="true" id="61904447-d037-4233-9dc0-ed8bc546f559" name="Changes" comment="Declared Parser and built QuLang grammar handler utilities with FsLex and FsYacc">
+      <change afterPath="$PROJECT_DIR$/QuantumLanguage/.gitattributes" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/QuantumLanguage/QuantumAST.fs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Qubox Simulator/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Qubox Simulator/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/QuantumLanguage/Library.fs" beforeDir="false" afterPath="$PROJECT_DIR$/QuantumLanguage/Library.fs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/QuantumLanguage/QuantumLanguage.fsproj" beforeDir="false" afterPath="$PROJECT_DIR$/QuantumLanguage/QuantumLanguage.fsproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/QuantumLanguage/QuantumLexer.fs" beforeDir="false" afterPath="$PROJECT_DIR$/QuantumLanguage/QuantumLexer.fs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/QuantumLanguage/QuantumLexer.fsl" beforeDir="false" afterPath="$PROJECT_DIR$/QuantumLanguage/QuantumLexer.fsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/QuantumLanguage/QuantumParser.fs" beforeDir="false" afterPath="$PROJECT_DIR$/QuantumLanguage/QuantumParser.fs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/QuantumLanguage/QuantumParser.fsi" beforeDir="false" afterPath="$PROJECT_DIR$/QuantumLanguage/QuantumParser.fsi" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/QuantumLanguage/QuantumParser.fsp" beforeDir="false" afterPath="$PROJECT_DIR$/QuantumLanguage/QuantumParser.fsp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -41,24 +40,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settingsdialog.IDE.editor.colors.Color Scheme Font&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "editor.preferences.fonts.default",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;rider.external.source.directories&quot;: [
-      &quot;/Users/adrianzvizdenco/Library/Application Support/JetBrains/Rider2022.3/resharper-host/DecompilerCache&quot;,
-      &quot;/Users/adrianzvizdenco/Library/Application Support/JetBrains/Rider2022.3/resharper-host/SourcesCache&quot;,
-      &quot;/Users/adrianzvizdenco/.local/share/Symbols/src&quot;
+  "keyToStringList": {
+    "rider.external.source.directories": [
+      "/Users/adrianzvizdenco/Library/Application Support/JetBrains/Rider2022.3/resharper-host/DecompilerCache",
+      "/Users/adrianzvizdenco/Library/Application Support/JetBrains/Rider2022.3/resharper-host/SourcesCache",
+      "/Users/adrianzvizdenco/.local/share/Symbols/src"
     ]
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected=".NET Launch Settings Profile.Qubox Simulator: http">
     <configuration name="Qubox Simulator: http" type="LaunchSettings" factoryName=".NET Launch Settings Profile">
       <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/Qubox Simulator.csproj" />
@@ -106,7 +105,7 @@
       <workItem from="1676471817110" duration="2189000" />
       <workItem from="1676477220256" duration="1048000" />
       <workItem from="1676551989507" duration="14513000" />
-      <workItem from="1676970008556" duration="9403000" />
+      <workItem from="1676970008556" duration="21852000" />
     </task>
     <task id="LOCAL-00001" summary="Created Solution &amp; Declared Lexer&#10;Solution formed of 2 projects in F# and C#. The LEXER contains all the quantum grammar tokens required in parser productions.">
       <created>1676942577840</created>
@@ -115,7 +114,14 @@
       <option name="project" value="LOCAL" />
       <updated>1676942577840</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Declared Parser and built QuLang grammar handler utilities with FsLex and FsYacc">
+      <created>1676984586890</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1676984586890</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -150,7 +156,8 @@
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
     <MESSAGE value="Created Solution &amp; Declared Lexer&#10;Solution formed of 2 projects in F# and C#. The LEXER contains all the quantum grammar tokens required in parser productions." />
-    <option name="LAST_COMMIT_MESSAGE" value="Created Solution &amp; Declared Lexer&#10;Solution formed of 2 projects in F# and C#. The LEXER contains all the quantum grammar tokens required in parser productions." />
+    <MESSAGE value="Declared Parser and built QuLang grammar handler utilities with FsLex and FsYacc" />
+    <option name="LAST_COMMIT_MESSAGE" value="Declared Parser and built QuLang grammar handler utilities with FsLex and FsYacc" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

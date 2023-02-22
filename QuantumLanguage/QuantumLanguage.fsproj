@@ -9,6 +9,7 @@
         <Compile Include="Library.fs" />
         <Content Include="QuantumLexer.fsl" />
         <Content Include="QuantumParser.fsp" />
+        <Compile Include="QuantumAST.fs" />
     </ItemGroup>
 
     <ItemGroup>

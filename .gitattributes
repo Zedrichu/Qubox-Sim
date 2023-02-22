@@ -1,0 +1,3 @@
+*.fsp linguist-language=F#
+*.fsi linguist-language=F#
+*.fsl linguist-language=F#

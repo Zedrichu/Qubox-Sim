@@ -13,11 +13,10 @@ Description: Library to assist the parsing/compilation process of QuLang from us
 
 namespace QuantumLanguage
 
-module Parser =
+module QuantumHandler =
 
 open System
 open QuantumAST
-
 let ParseQuCode code =
     let lexbuf = Lexing.LexBuffer<_>.FromString code
     let output = QuantumParser.start QuantumLexer.tokenize lexbuf

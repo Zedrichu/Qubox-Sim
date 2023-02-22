@@ -1,4 +1,4 @@
-// Open the file that defines the different types we shall use as AST in out GCL-parser
+// Open the file that defines the types used as AST in the QuLang-parser
 %{
 open QuantumAST
 %}
@@ -9,15 +9,14 @@ open QuantumAST
 %token <string> VARIABLE
 %token <bool> BOOL
 %token TIMES DIV PLUS MINUS LPAR RPAR MATHPI EOF LBRAK RBRAK
-%token QUANTREG CLASSREG ASSIGN ORDER COMMA MEASURE MESHOST CONDITIONAL RESET
+%token QUANTREG CLASSREG ASSIGN ORDER COMMA MEASURE MESHOST CONDITIONAL RESET PHASEDISK
 %token BARRIER HADAMARD IDENTITY PAULIX PAULIY PAULIZ TDAGGER TGATE SGATE SDAGGER PHASE UNITARY
-%token RZGATE RYGATE RXGATE SWAP TOFFOLI CTRLNOT MOLMERSOR SYMMRZZ SQRTNOT SQRTXDG
+%token RZGATE RYGATE RXGATE SWAP TOFFOLI CTRLNOT SYMMRXX SYMMRZZ SQRTNOT SQRTXDG
 %token SAND SOR AND OR NEG EQUAL NOTEQ GREATER LESS GREATEREQ LESSEQ
-//the actual formats of these tokens are defined in the lexer file as regular expressions
+//Formats of these tokens are defined in the Lexer (.fsl) file as regular expressions
 
 // Specify precedence and associativity of operators
 // Precedence is given by the order (from low to high)
-
 %left PLUS MINUS
 %left TIMES DIV
 
@@ -25,13 +24,13 @@ open QuantumAST
 %left AND SAND
 %right NEG
 
-%right ORDER 
+%right ORDER COMMA
 %nonassoc LPAR RPAR
 
-// We declare the initial non-terminal symbol
+// Declare the initial non-terminal symbol
 %start start
 
-// We specify the return type of each of then non-terminal symbols
+// Specify the return type of each of then non-terminal symbols
 %type <operator> start
 %type <operator> allocation
 %type <operator> operator
@@ -41,23 +40,19 @@ open QuantumAST
 %type <arithExpr> expression
 %type <arithExpr> expression1
 %type <boolExpr> boolexpression
+
 // Grammar productions
 %%
 
-// The first production in "formal" notation is
-// start -> expression
-// here written:
+// The first production in "formal" notation is start -> expression
 start:  allocation operator EOF             { $1 }
 
-// Note that we need to insert an End-Of-File (EOF)
+// Note that an End-Of-File (EOF) is inserted
 // The code annotation { $1 } specifies that parsing with this production
 // returns whatever parsing the expression returns: $1 is the result of parsing
 // the first component of the production (i.e. expression)
 
-// The productions for expressions are like in the grammar we saw in class
-// written in the yacc format:
-
-
+// The productions for expressions are grammar written in the yacc format:
 // Arithmetic productions
 //a ::= n | x | a + a | a - a | a * a | a / a | - a | (a)
 expression:
@@ -80,10 +75,12 @@ expression1:
 str:
   | VARIABLE                        { $1 }
 
+// Qubit/Cbit production (can be either array or single var)
 bit:
-  | VARIABLE                        { Bit($1) }
-  | str LBRAK NUM RBRAK             { Bit($1, $3) }
-  
+  | VARIABLE                        { BitS($1) }
+  | str LBRAK NUM RBRAK             { BitA($1, $3) }
+
+// Production for producing bit definition sequences  
 bitsequence:
   | bit                 { $1 } 
   | bit COMMA bit       { BitSeq($1, $3) }
@@ -107,12 +104,13 @@ boolexpression:
   | expression LESSEQ expression            { LessEqual($1,$3) }
   | LPAR boolexpression RPAR                { $2 }
 
-// Allocation production
-// ALLC ::= Qalloc str n; Calloc str n; 
+// Allocation production - to simplify operators
+// ALLC ::= Qalloc str n; Calloc str n; | Qalloc bitseq; Calloc bitseq;
 allocation:
-  | QUANTREG bitsequence ORDER CLASSREG bitsequence { Alloc($2, $5) }
-  | QUANTREG str NUM ORDER CLASSREG str NUM ORDER   { Alloc($2, $3, $4, $5) }
+  | QUANTREG bitsequence ORDER CLASSREG bitsequence { AllocSeq($2, $5) }
+  | QUANTREG str NUM ORDER CLASSREG str NUM ORDER   { AllocQC($2, $3, $4, $5) }
 
+// Measurement production - to simplify operators
 // M::= Measure bit -> bit
 measurement:
   | MEASURE bit MESHOST bit { Measure($2, $4) }
@@ -123,10 +121,11 @@ operator:
   | str ASSIGN expression                         { Assign($1, $3) }
   | operator ORDER operator                       { Order($1,$3)}
   | measurement                                   { $1 }
-  | RESET str LBRAK NUM RBRAK                     { Reset($2, $4) }
+  | RESET bit                                     { Reset($2) }
   | CONDITIONAL LPAR boolexpression RPAR operator { Condition($3, $5) }
   | BARRIER bit                                   { Barrier($2) }
-// Quantum Gate production --- part of operators
+  | PHASEDISK                                     { PhaseDisk }
+// Quantum Gate productions ---- part of operators
 // G::= H | ID | X | Z | TDG | T | S | SDG | P | RZ | RY | RX
 // ::= U | SWAP | CCX | CNOT | RXX | RZZ | SX | SXDG
   | HADAMARD bit            { H($2) }
@@ -134,29 +133,28 @@ operator:
   | PAULIX bit              { X($2) }
   | PAULIY bit              { Y($2) }
   | PAULIZ bit              { Z($2) }
-  | TDAGGER bit             { T+($2) }
+  | TDAGGER bit             { TDG($2) }
   | TGATE bit               { T($2) }
   | SGATE bit               { S($2) }
-  | SDAGGER bit             { S+($2) }
+  | SDAGGER bit             { SDG($2) }
   | SQRTNOT bit             { SX($2) } 
-  | SQRTXDG bit             { SX+($2) }
+  | SQRTXDG bit             { SXDG($2) }
 // Parametric gates on one qubit
   | PHASE LPAR expression RPAR bit     { P($3, $5) }
   | RZGATE LPAR expression RPAR bit    { RZ($3, $5) }
   | RYGATE LPAR expression RPAR bit    { RY($3, $5) }
-  | RXGATE LPAR expression RPAR bit    { RZ($3, $5) }
+  | RXGATE LPAR expression RPAR bit    { RX($3, $5) }
   | UNITARY LPAR expression COMMA expression COMMA expression RPAR bit { U($3, $5, $7, $9) }
 // Gates on multiple qubits  
   | SWAP bit COMMA bit                  { SWAP($2, $4) }
   | CTRLNOT bit COMMA bit               { CNOT($2, $4) }
   | TOFFOLI bit COMMA bit COMMA bit     { CCX($2, $4, $6) }
 // Parametric gates on multiple qubits
-  | MOLMERSOR LPAR expression RPAR bit COMMA bit   { RXX($3, $5, $7) }
+  | SYMMRXX LPAR expression RPAR bit COMMA bit     { RXX($3, $5, $7) }
   | SYMMRZZ LPAR expression RPAR bit COMMA bit     { RZZ($3, $5, $7) }
    
 // Again, the code annotation specifies the result of parsing
 // For example { TimesExpr($1,$3) } specifies that parsing with the production
 // returns the value TimesExpr($1,$3), where $i is the result of parsing
 // component i in the production (in this case the lhs and rhs operands)
-
 %%

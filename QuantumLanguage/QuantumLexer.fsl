@@ -11,7 +11,7 @@ open QuantumParser
 System.Globalization.CultureInfo.CurrentCulture <- new System.Globalization.CultureInfo("en-US")
 }
 
-// We define macros for some regular expressions we will use later
+// Define macros for some regular expressions used later
 let digit       = ['0'-'9'] 
 let num         = digit+
 let float       = ['-' '+']? (digit* '.' digit+ | digit+)
@@ -23,10 +23,8 @@ let bool        = "true"|"false"
 //digit can also be \d+ 
 //whitespace can also be [\u00A0 \n \r \t]
 
-// We define now the rules for recognising and building tokens
-// for each of the tokens of our language we need a rule
+// Define rules for recognising and building tokens
 // NOTE: rules are applied in order top-down.
-//       This is important when tokens overlap (not in this example)
 rule tokenize = parse
 
 // deal with tokens that need to be ignored (skip them)
@@ -50,7 +48,20 @@ rule tokenize = parse
 | '['           { LBRAK }
 | ']'           { RBRAK }
 
-// Command expressions to TOKENs
+// Boolean expression to TOKENs
+| "and"         { AND }
+| "or"          { OR }
+| "&&"          { SAND }
+| "||"          { SOR }
+| "not"         { NEG }
+| '='           { EQUAL }
+| "!="          { NOTEQ }
+| '>'           { GREATER }
+| ">="          { GREATEREQ }
+| '<'           { LESS }
+| "<="          { LESSEQ }
+
+// Operator expressions to TOKENs
 | "Qalloc"              { QUANTREG }
 | "Calloc"              { CLASSREG }
 | ":="                  { ASSIGN }
@@ -63,7 +74,7 @@ rule tokenize = parse
 | "Barrier"whitespace   { BARRIER }
 | "PhaseDisk"whitespace { PHASEDISK }
 
-// Gates expression to TOKENs 
+// Quantum gate expression to TOKENs 
 | "H"whitespace         { HADAMARD }
 | "ID"whitespace        { IDENTITY }
 | "X"whitespace         { PAULIX }
@@ -85,17 +96,3 @@ rule tokenize = parse
 | "RZZ"whitespace       { SYMMRZZ }
 | "SX"whitespace        { SQRTNOT }
 | "SXDG"whitespace      { SQRTXDG }
-
-
-// Boolean expression to TOKENs
-| "and"         { AND }
-| "or"          { OR }
-| "&&"          { SAND }
-| "||"          { SOR }
-| "not"         { NEG }
-| '='           { EQUAL }
-| "!="          { NOTEQ }
-| '>'           { GREATER }
-| ">="          { GREATEREQ }
-| '<'           { LESS }
-| "<="          { LESSEQ }
