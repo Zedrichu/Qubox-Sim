@@ -31,7 +31,7 @@ open AST
 %start start
 
 // Specify the return type of each of then non-terminal symbols
-%type <AST.operator> start
+%type <AST.operator * AST.operator> start
 %type <operator> allocation
 %type <operator> operator
 %type <operator> measurement
@@ -45,7 +45,7 @@ open AST
 %%
 
 // The first production in "formal" notation is start -> expression
-start:  allocation operator EOF             { $1 }
+start:  allocation operator ORDER EOF             { ($1, $2) }
 
 // Note that an End-Of-File (EOF) is inserted
 // The code annotation { $1 } specifies that parsing with this production
@@ -105,7 +105,7 @@ boolexpression:
   | LPAR boolexpression RPAR                { $2 }
 
 // Allocation production - to simplify operators
-// ALLC ::= Qalloc str n; Calloc str n; | Qalloc bitseq; Calloc bitseq;
+// ALLC ::= Qalloc bit; Calloc bit; | Qalloc bitseq; Calloc bitseq;
 allocation:
   | QUANTREG bitsequence ORDER CLASSREG bitsequence { AllocSeq($2, $5) }
   | QUANTREG bit ORDER CLASSREG bit ORDER           { AllocQC($2, $5) }

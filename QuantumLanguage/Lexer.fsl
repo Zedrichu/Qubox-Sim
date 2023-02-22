@@ -61,8 +61,8 @@ rule tokenize = parse
 | "<="          { LESSEQ }
 
 // Operator expressions to TOKENs
-| "Qalloc"              { QUANTREG }
-| "Calloc"              { CLASSREG }
+| "Qalloc"whitespace    { QUANTREG }
+| "Calloc"whitespace    { CLASSREG }
 | ":="                  { ASSIGN }
 | ';'                   { ORDER }
 | ','                   { COMMA }
