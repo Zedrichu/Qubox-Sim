@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <AssemblyName>QuLangParse</AssemblyName>
         <OutputType>Exe</OutputType>
@@ -20,9 +20,9 @@
         <Compile Include="Parser.fsi" />
         <Compile Include="Parser.fs" />
         <Compile Include="Lexer.fs" />
-        <Compile Include="Interpreter.fs" />
         <Compile Include="Program.fs" />
         <None Include="Tester.fsx" />
+        <Compile Include="Interpreter.fs" />
     </ItemGroup>
 
     <ItemGroup>

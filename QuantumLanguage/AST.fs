@@ -19,6 +19,8 @@ type arithExpr =
   | Float of float
   | StrA of string
   | Pi // Mathematical π=3.141592...
+  | One // Computational basis Z (spin-down) #TODO!
+  | Zero // Computational basis Z (spin-up) #TODO!
   | TimesExpr of (arithExpr * arithExpr)
   | DivExpr of (arithExpr * arithExpr)
   | PlusExpr of (arithExpr * arithExpr)
@@ -51,6 +53,7 @@ type bit =
   
 /// Type of quantum gates and operators
 type operator =
+  | Error of string // Accumulate grammar error (syntax/semantics/evaluations)
   | AllocSeq of (bit * bit) // Allocate sequences of qubits and cbits
   | AllocQC of (bit * bit) // Allocate arrays of qubits and cbits
   | Measure of (bit * bit) // Measurement of qubit on classical bit

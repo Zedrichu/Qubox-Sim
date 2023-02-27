@@ -51,6 +51,8 @@ type token =
   | LPAR
   | RPAR
   | MATHPI
+  | ONE
+  | ZERO
   | EOF
   | LBRAK
   | RBRAK
@@ -109,6 +111,8 @@ type tokenId =
     | TOKEN_LPAR
     | TOKEN_RPAR
     | TOKEN_MATHPI
+    | TOKEN_ONE
+    | TOKEN_ZERO
     | TOKEN_EOF
     | TOKEN_LBRAK
     | TOKEN_RBRAK

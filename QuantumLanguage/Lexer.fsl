@@ -41,6 +41,8 @@ rule tokenize = parse
 | '+'           { PLUS }
 | '-'           { MINUS }
 | "Pi"          { MATHPI }
+| "One"         { ONE }
+| "Zero"        { ZERO }
 | '('           { LPAR }
 | ')'           { RPAR }
 | eof           { EOF }

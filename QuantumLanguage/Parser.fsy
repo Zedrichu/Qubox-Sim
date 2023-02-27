@@ -8,7 +8,7 @@ open AST
 %token <float> FLOAT
 %token <string> VARIABLE
 %token <bool> BOOL
-%token TIMES DIV PLUS MINUS LPAR RPAR MATHPI EOF LBRAK RBRAK
+%token TIMES DIV PLUS MINUS LPAR RPAR MATHPI ONE ZERO EOF LBRAK RBRAK
 %token QUANTREG CLASSREG ASSIGN ORDER COMMA MEASURE MESHOST CONDITIONAL RESET PHASEDISK
 %token BARRIER HADAMARD IDENTITY PAULIX PAULIY PAULIZ TDAGGER TGATE SGATE SDAGGER PHASE UNITARY
 %token RZGATE RYGATE RXGATE SWAP TOFFOLI CTRLNOT SYMMRXX SYMMRZZ SQRTNOT SQRTXDG
@@ -45,7 +45,7 @@ open AST
 %%
 
 // The first production in "formal" notation is start -> expression
-start:  allocation operator ORDER EOF             { ($1, $2) }
+start:  allocation operator EOF             { ($1, $2) }
 
 // Note that an End-Of-File (EOF) is inserted
 // The code annotation { $1 } specifies that parsing with this production
@@ -66,6 +66,8 @@ expression1:
   | NUM                             { Num($1) }
   | FLOAT                           { Float($1) }
   | MATHPI                          { Pi }
+  | ZERO                            { One }
+  | ONE                             { Zero }
   | str                             { StrA($1) }
   | MINUS expression1               { UMinusExpr($2) }
   | PLUS expression1                { UPlusExpr($2) }
@@ -157,4 +159,5 @@ operator:
 // For example { TimesExpr($1,$3) } specifies that parsing with the production
 // returns the value TimesExpr($1,$3), where $i is the result of parsing
 // component i in the production (in this case the lhs and rhs operands)
+
 %%

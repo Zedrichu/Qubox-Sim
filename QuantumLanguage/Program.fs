@@ -1,4 +1,4 @@
-﻿module QuantumLanguage.QuantumHandler
+﻿module QuantumLanguage.Handler
 (* F#
  -*- coding: utf-8 -*-
 Quantum Language Handler
@@ -21,17 +21,17 @@ let ParseQuLang code =
     try  
         let output = Parser.start Lexer.tokenize lexbuffer
         output
-    //Undefined string encountered   
-    with e -> printfn "Parse error in program at : Line %i, %i, Unexpected token: %s" (lexbuffer.EndPos.pos_lnum+ 1) 
-                        (lexbuffer.EndPos.pos_cnum - lexbuffer.EndPos.pos_bol) (Lexing.LexBuffer<_>.LexemeString lexbuffer)
-              (AST.Barrier (BitS "a"), AST.Barrier (BitS "a"))
+    //Undefined string TOKEN encountered   
+    with e -> printfn $"Parse error in program at : Line %i{lexbuffer.EndPos.pos_lnum+ 1},
+                %i{lexbuffer.EndPos.pos_cnum - lexbuffer.EndPos.pos_bol},
+                    Unexpected token: %s{Lexing.LexBuffer<_>.LexemeString lexbuffer}"
+              (AST.Error "Parse Error", AST.Error "Parse Error")
 
-let getInput() = Int32.TryParse(Console.ReadLine())
+let getMenuInput() = Int32.TryParse(Console.ReadLine())
 
-let printMenu () = 
-    printfn "Menu: "
-    printfn "1. Quit"
-    printf "Enter your choice:"
+let getInputCode() = Console.ReadLine()
+
+
 
 // [<EntryPoint>]
 // let main (args) =

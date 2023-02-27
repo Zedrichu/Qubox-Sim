@@ -10,9 +10,8 @@ open QuantumLanguage.Parser
 #load "Lexer.fs"
 open QuantumLanguage.Lexer
 #load "Program.fs"
-open QuantumLanguage.QuantumHandler
+open QuantumLanguage.Handler
 
-let code = Console.ReadLine()
 
 let printMenu() =
     printfn "Menu: "
@@ -26,7 +25,8 @@ let rec menu () =
     printfn ""
     printMenu()
     match getInput() with
-    | true, 1 -> printfn "%A" (ParseQuLang code)
+    | true, 1 -> let code = Console.ReadLine()
+                 printfn "%A" (ParseQuLang code[0..(String.length code - 2)])
                  menu()
     | true, 2 -> ()
     | _ -> menu()
