@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "QuantumLanguage", "QuantumLanguage\QuantumLanguage.fsproj", "{75AB5B95-C7BC-4B6F-BC59-9DB0614AE9CF}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "QuantumLanguage.Tests", "QuantumLanguage.Tests\QuantumLanguage.Tests.fsproj", "{B0716619-35AC-42F7-A492-78D957C996C8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuboxSimulator.Tests", "QuboxSimulator.Tests\QuboxSimulator.Tests.csproj", "{6388E92A-0B11-4682-BC15-9FA6CB6D91A4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuboxSimulator", "QuboxSimulator\QuboxSimulator.csproj", "{74D2D2BB-7608-4A32-86D4-5B34CE4998A5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IonQApp", "IonQApp\IonQApp.csproj", "{38F5C743-41B1-42EA-BF87-F9121D3784EC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{75AB5B95-C7BC-4B6F-BC59-9DB0614AE9CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75AB5B95-C7BC-4B6F-BC59-9DB0614AE9CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75AB5B95-C7BC-4B6F-BC59-9DB0614AE9CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75AB5B95-C7BC-4B6F-BC59-9DB0614AE9CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0716619-35AC-42F7-A492-78D957C996C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0716619-35AC-42F7-A492-78D957C996C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0716619-35AC-42F7-A492-78D957C996C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0716619-35AC-42F7-A492-78D957C996C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6388E92A-0B11-4682-BC15-9FA6CB6D91A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6388E92A-0B11-4682-BC15-9FA6CB6D91A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6388E92A-0B11-4682-BC15-9FA6CB6D91A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6388E92A-0B11-4682-BC15-9FA6CB6D91A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{74D2D2BB-7608-4A32-86D4-5B34CE4998A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74D2D2BB-7608-4A32-86D4-5B34CE4998A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74D2D2BB-7608-4A32-86D4-5B34CE4998A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74D2D2BB-7608-4A32-86D4-5B34CE4998A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38F5C743-41B1-42EA-BF87-F9121D3784EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38F5C743-41B1-42EA-BF87-F9121D3784EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38F5C743-41B1-42EA-BF87-F9121D3784EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38F5C743-41B1-42EA-BF87-F9121D3784EC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
