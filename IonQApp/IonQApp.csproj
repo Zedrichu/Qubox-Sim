@@ -4,5 +4,9 @@
         <TargetFramework>net6.0</TargetFramework>
         <ExecutionTarget>ionq.qpu</ExecutionTarget>
     </PropertyGroup>
+    
+    <ItemGroup>
+        <Compile Include="Program.qs"/>
+    </ItemGroup>
 
 </Project>

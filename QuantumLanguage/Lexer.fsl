@@ -41,13 +41,15 @@ rule tokenize = parse
 | '+'           { PLUS }
 | '-'           { MINUS }
 | "Pi"          { MATHPI }
-| "One"         { ONE }
-| "Zero"        { ZERO }
 | '('           { LPAR }
 | ')'           { RPAR }
 | eof           { EOF }
 | '['           { LBRAK }
 | ']'           { RBRAK }
+
+// Result TOKENs
+| "Click"        { CLICK }
+| "NoClick"      { NOCLICK }
 
 // Boolean expression to TOKENs
 | "and"         { AND }
@@ -55,7 +57,8 @@ rule tokenize = parse
 | "&&"          { SAND }
 | "||"          { SOR }
 | "not"         { NEG }
-| '='           { EQUAL }
+| '=='          { EQUAL }
+| "|>"          { ISQ }
 | "!="          { NOTEQ }
 | '>'           { GREATER }
 | ">="          { GREATEREQ }

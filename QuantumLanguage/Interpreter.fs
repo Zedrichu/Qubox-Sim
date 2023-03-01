@@ -1,7 +1,5 @@
 module QuantumLanguage.Interpreter
-
-(*
-/* F#
+(** F#
  -*- coding: utf-8 -*-
 Interpreter
 
@@ -10,26 +8,82 @@ Description: Module defining the Q# compilation transitions and other useful han
 @__Author --> Created by Adrian Zvizdenco aka Zedrichu
 @__Date & Time --> Created on 24/02/2023
 @__Email --> adrzvizdencojr@gmail.com
-@__Version --> 1.1
+@__Version --> 1.2
 @__Status --> DEV
-*/
-
 *)
 
 open AST
-open Handler
 open System
-open System.IO
 
-// Arithmetic translator to Q#
+/// <summary>Function to evaluate arithmetic expressions given memory</summary>
+/// <param name="expr"> Arithmetic expression to be evaluated</param>
+/// <param name="memory">Mapping of variables to values used to evaluate expression on memory</param>
+let rec evalArith expr memory =
+    match expr with
+    | Num x -> x:float
+    | Float x -> x
+    | StrA x -> try
+                    Map.find x memory
+                 with err ->
+                     let mes = $"ERROR: Unknown arithmetic variable %s{x} in expression.
+                                            \nRevise your variable declarations!"
+                     failwith mes
+    | Pi -> Math.PI
+    | TimesExpr(x, y) -> (evalArith x memory) * (evalArith y memory)
+    | DivExpr(x,y) -> 
+                    let res = evalArith y memory
+                    if res = 0 then 
+                            failwith "ERROR: Invalid division by 0 - undefined."
+                    else (evalArith x memory) / (evalArith y memory)
+    | PlusExpr(x,y) -> (evalArith x memory) + (evalArith y memory) 
+    | MinusExpr(x,y) -> (evalArith x memory) - (evalArith y memory)
+    | UMinusExpr expr -> -(evalArith expr memory)
+    | UPlusExpr expr -> (evalArith expr memory)
+
+/// Function to evaluate boolean expressions given
+///     a boolean memory and an arithmetic memory
+let rec evalBool expr boolMem arithMem =
+    match expr with
+    | Bool x -> x
+    | StrB x -> try
+                    Map.find x boolMem
+                 with err ->
+                     let mes = $"ERROR: Unknown boolean variable %s{x} in expression.
+                                            \nRevise your variable declarations!"
+                     failwith mes
+    | ShortCircuitAnd(x,y) -> (evalBool x boolMem arithMem) && (evalBool y boolMem arithMem)
+    | ShortCircuitOr(x,y) -> (evalBool x boolMem arithMem) || (evalBool y boolMem arithMem)
+    | LogAnd(x,y) -> (evalBool x boolMem arithMem) && (evalBool y boolMem arithMem)
+    | LogOr(x,y) -> (evalBool x boolMem arithMem) || (evalBool y boolMem arithMem)
+    | Neg x -> not (evalBool x boolMem arithMem)
+    | Check _ -> failwith "ERROR: Measurement evaluation requires simulation."
+    | Equal(x,y) -> (evalArith x arithMem) = (evalArith y arithMem)
+    | NotEqual(x,y) -> (evalArith x arithMem) <> (evalArith y arithMem)
+    | Greater(x,y) -> (evalArith x arithMem) > (evalArith y arithMem)
+    | GreaterEqual(x,y) -> (evalArith x arithMem) >= (evalArith y arithMem)
+    | Less(x,y) -> (evalArith x arithMem) < (evalArith y arithMem)
+    | LessEqual(x,y) -> (evalArith x arithMem) <= (evalArith y arithMem)
+
+/// Result translator to Q# 
+let rec transResult result =
+    match result with
+    | Click -> "Zero"
+    | NoClick -> "One"
+
+// Bit translator to Q#
+let rec transBit expr =
+    match expr with
+    | BitA(q, i) -> q + $"[%i{i}]"
+    | BitS(q) -> q
+    | BitSeq(q,q_seq) -> transBit q + ", " + transBit q_seq
+    
+/// Arithmetic translator to Q#
 let rec transArith expr =
     match expr with
     | StrA(x) -> x
     | Num(x) -> x.ToString()
     | Float(x) -> x.ToString()
-    | One -> "ONE"
-    | Zero -> "ZERO"
-    | Pi -> Math.PI.ToString()
+    | Pi -> "PI ()"
     | TimesExpr(x,y) -> "("+(transArith x)+"*"+(transArith y)+")"
     | DivExpr(x,y) -> "("+(transArith x)+"/"+(transArith y)+")"
     | PlusExpr(x,y) -> "("+transArith x+"+"+(transArith y)+")"
@@ -37,7 +91,7 @@ let rec transArith expr =
     | UPlusExpr(x) -> "(+"+(transArith x)+")"
     | UMinusExpr(x) -> "(-"+(transArith x)+")"
     
-// Boolean translator to Q#
+/// Boolean translator to Q#
 let rec transBool expr = 
     match expr with 
     | Bool(x) -> x.ToString()
@@ -47,6 +101,7 @@ let rec transBool expr =
     | LogAnd(x,y) -> "("+(transBool x)+") and ("+(transBool y)+")"
     | LogOr(x,y) -> "("+(transBool x)+") or ("+(transBool y)+")"
     | Neg(x) -> "!("+(transBool x)+")"
+    | Check(bit, res) -> "("+transBit bit+" == "+(transResult res)+")"
     | Equal(x,y) -> (transArith x)+"=="+(transArith y)
     | NotEqual(x,y) -> (transArith x)+"!="+(transArith y)
     | Greater(x,y) -> (transArith x)+">"+(transArith y)
@@ -54,12 +109,6 @@ let rec transBool expr =
     | Less(x,y) -> (transArith x)+"<"+(transArith y)
     | LessEqual(x,y) -> (transArith x)+"<="+(transArith y)
 
-// Bit translator to Q#
-let rec transBit expr =
-    match expr with
-    | BitA(q, i) -> q + $"[%i{i}]"
-    | BitS(q) -> q
-    | BitSeq(q,q_seq) -> transBit q + ", " + transBit q_seq
     
 let rec transOperator expr =
     match expr with
@@ -68,32 +117,31 @@ let rec transOperator expr =
                                     + " = new Result;"
     | AllocQC(BitA(q, n), BitA(c, i)) -> "use "+q+" = Qubit["+n.ToString()+
                                             "];\nmutable "+c+" = new Result["+i.ToString()+"];"
-    //| Measure() ->
-    //| Measure() -> 
+    | Measure(q_bit, c_bit) -> "let "+transBit c_bit+" = M("+transBit q_bit+");"
     | Assign(var, value) -> "let "+var+" = "+transArith value
-    | Order(op1, op2) -> transOperator op1 + transOperator op2
+    | Order(op1, op2) -> transOperator op1 + "\n" + transOperator op2
     | Reset(BitS(q)) -> "Reset("+q+");"
     | Reset(BitA(q, _)) -> "ResetAll("+q+");"
-    //| Condition() ->
+    | Condition(b, operator) -> "if ("+transBool b+") {\n"+transOperator operator+"\n}"
     //| Barrier() ->
     | H(bit) -> "H("+transBit bit+");"
     | I(bit) -> "I("+transBit bit+");"
     | X(bit) -> "X("+transBit bit+");"
     | Y(bit) -> "Y("+transBit bit+");"
     | Z(bit) -> "Z("+transBit bit+");"
-    | TDG(bit) -> "TDG("+transBit bit+");"
-    | SDG(bit) -> "SDG("+transBit bit+");"
+    | TDG(bit) -> "TDG("+transBit bit+");" // T† #TODO!
+    | SDG(bit) -> "Rz(-PI()/2, "+transBit bit+");" // S†
     | S(bit) -> "S("+transBit bit+");"
     | T(bit) -> "T("+transBit bit+");"
-    | SX(bit) -> "SX("+transBit bit+");"
-    | SXDG(bit) -> "SXDG("+transBit bit+");"
+    | SX(bit) -> "Rx(PI()/2, "+transBit bit+");"
+    | SXDG(bit) -> "Rx(-PI()/2, "+transBit bit+");"
     //| P(phase, bit) ->
-    //| RZ(angle, bit) ->
-    //| RY(angle, bit) ->
-    //| RX(angle, bit) ->
+    | RZ(angle, bit) -> "Rz("+(evalArith angle).ToString()+", "+transBit bit+");"
+    | RY(angle, bit) -> "Ry("+(evalArith angle).ToString()+", "+transBit bit+");"
+    | RX(angle, bit) -> "Rx("+(evalArith angle).ToString()+", "+transBit bit+");"
     //| U(exp1, exp2, exp3, bit) ->
     | CNOT(bit1, bit2) -> "CNOT("+transBit bit1+", "+transBit bit2+");"
-    //| CCX(bit1, bit2, bit3) ->
+    | CCX(bit1, bit2, bit3) -> "CCNOT("+transBit bit1+", "+transBit bit2+", "+transBit bit3+");"
     | SWAP(bit1, bit2) -> "SWAP("+transBit bit1+", "+transBit bit2+");"
     //| RXX(expr, bit1, bit2) ->
     //| RZZ(expr, bit1, bit2) ->
@@ -101,5 +149,3 @@ let rec transOperator expr =
     
 // Map union function
 let mapUnion map1 map2 = Map.fold (fun acc key value -> Map.add key value acc) map1 map2
-
-

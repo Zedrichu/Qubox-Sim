@@ -7,22 +7,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Antlr4.CodeGenerator" Version="4.6.6">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageReference>
+      
       <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
       <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor" />
-      <PackageReference Include="Antlr4.Runtime.Standard" Version="4.11.1" />
       <PackageReference Include="Microsoft.Quantum.Canon" Version="0.5.1904.1302" />
       <PackageReference Include="Microsoft.Quantum.Runtime.Core" Version="0.27.257618-beta" />
       <PackageReference Include="Microsoft.Quantum.Sdk" Version="0.27.253010" />
       <PackageReference Include="Microsoft.Quantum.Simulators" Version="0.27.257618-beta" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <_ContentIncludedByDefault Remove="QuantumLanguage.Test\obj\project.assets.json" />
-      <_ContentIncludedByDefault Remove="QuantumLanguage.Test\obj\QuantumLanguage.Test.fsproj.nuget.dgspec.json" />
     </ItemGroup>
 
     <ItemGroup>

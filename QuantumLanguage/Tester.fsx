@@ -26,7 +26,7 @@ let rec menu () =
     printMenu()
     match getInput() with
     | true, 1 -> let code = Console.ReadLine()
-                 printfn "%A" (ParseQuLang code[0..(String.length code - 2)])
+                 printfn "%A" (ParseQuLang code(*[0..(String.length code - 2)]*))
                  menu()
     | true, 2 -> ()
     | _ -> menu()

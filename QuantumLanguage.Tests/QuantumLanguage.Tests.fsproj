@@ -2,14 +2,12 @@
 
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
-
         <IsPackable>false</IsPackable>
         <GenerateProgramFile>false</GenerateProgramFile>
-        <RootNamespace>QuantumLanguage.Test</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="UnitTest1.fs" />
+        <Compile Include="UnitTests.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
 
@@ -21,4 +19,8 @@
         <PackageReference Include="coverlet.collector" Version="3.1.2" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\QuantumLanguage\QuantumLanguage.fsproj" />
+    </ItemGroup>
+    
 </Project>

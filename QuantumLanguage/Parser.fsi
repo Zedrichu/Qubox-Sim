@@ -7,6 +7,7 @@ type token =
   | OR
   | NEG
   | EQUAL
+  | EQUALR
   | NOTEQ
   | GREATER
   | LESS
@@ -51,8 +52,8 @@ type token =
   | LPAR
   | RPAR
   | MATHPI
-  | ONE
-  | ZERO
+  | CLICK
+  | NOCLICK
   | EOF
   | LBRAK
   | RBRAK
@@ -67,6 +68,7 @@ type tokenId =
     | TOKEN_OR
     | TOKEN_NEG
     | TOKEN_EQUAL
+    | TOKEN_EQUALR
     | TOKEN_NOTEQ
     | TOKEN_GREATER
     | TOKEN_LESS
@@ -111,8 +113,8 @@ type tokenId =
     | TOKEN_LPAR
     | TOKEN_RPAR
     | TOKEN_MATHPI
-    | TOKEN_ONE
-    | TOKEN_ZERO
+    | TOKEN_CLICK
+    | TOKEN_NOCLICK
     | TOKEN_EOF
     | TOKEN_LBRAK
     | TOKEN_RBRAK
@@ -128,6 +130,7 @@ type nonTerminalId =
     | NONTERM_expression
     | NONTERM_expression1
     | NONTERM_str
+    | NONTERM_result
     | NONTERM_bit
     | NONTERM_bitsequence
     | NONTERM_boolexpression
