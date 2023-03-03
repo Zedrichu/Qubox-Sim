@@ -9,7 +9,7 @@ open AST
 %token <string> VARIABLE
 %token <bool> BOOL
 %token TIMES DIV PLUS MINUS LPAR RPAR MATHPI CLICK NOCLICK EOF LBRAK RBRAK
-%token QUANTREG CLASSREG ASSIGN ORDER COMMA MEASURE MESHOST CONDITIONAL RESET PHASEDISK
+%token QUANTREG CLASSREG ASSIGN BASSIGN ORDER COMMA MEASURE MESHOST CONDITIONAL RESET PHASEDISK
 %token BARRIER HADAMARD IDENTITY PAULIX PAULIY PAULIZ TDAGGER TGATE SGATE SDAGGER PHASE UNITARY
 %token RZGATE RYGATE RXGATE SWAP TOFFOLI CTRLNOT SYMMRXX SYMMRZZ SQRTNOT SQRTXDG
 %token SAND SOR AND OR NEG EQUAL ISQ NOTEQ GREATER LESS GREATEREQ LESSEQ
@@ -47,8 +47,8 @@ open AST
 
 // The first production in "formal" notation is start -> expression
 start:
-  | allocation operator EOF                     { ($1, $2) }
-  | EOF                                         { (NOP, NOP) }
+  | allocation statement EOF                  { ($1, $2) }
+  | EOF                                       { (NOP, NOP) }
   
 // Note that an End-Of-File (EOF) is inserted
 // The code annotation { $1 } specifies that parsing with this production
@@ -80,17 +80,23 @@ expression:
   | expression1                     { $1 }
 
 expression1:
+  | MATHPI                          { Pi }
   | NUM                             { Num($1) }
   | FLOAT                           { Float($1) }
-  | MATHPI                          { Pi }
-  | str                             { StrA($1) }
   | MINUS expression1               { UMinusExpr($2) }
   | PLUS expression1                { UPlusExpr($2) }
   | LPAR expression RPAR            { $2 }
+  | str                             { StrA($1) }
 
 // Variable string production
 str:
   | VARIABLE                        { $1 }
+  
+// Statement terminator
+statement:
+    | statement statement         { Order($1, $2) }
+    | operator ORDER              { $1 }
+    | /* EMPTY */                 { NOP }
 
 // Result production
 // R ::= Click | NoClick
@@ -110,22 +116,21 @@ bitsequence:
 
 // Boolean productions
 //b ::= true | false | b and b | b or b | b && b | b || b | not b |
-//  | a = a | a != a | a > a | a >= a | a < a | a <= a | (b)
+// | bit |> R | a == a | a != a | a > a | a >= a | a < a | a <= a | (b)
 boolexpression:
   | BOOL                                    { Bool($1) }
-  | str                                     { StrB($1) }
-  | boolexpression SAND boolexpression      { ShortCircuitAnd($1,$3) }
-  | boolexpression SOR boolexpression       { ShortCircuitOr($1,$3) }
+  | boolexpression SAND boolexpression      { LogAnd($1,$3) }
+  | boolexpression SOR boolexpression       { LogOr($1,$3) }
   | boolexpression AND boolexpression       { LogAnd($1,$3) }
   | boolexpression OR boolexpression        { LogOr($1,$3) }
   | NEG boolexpression                      { Neg($2)}
   | bit ISQ result                          { Check($1,$3) }
-  | expression EQUAL expression             { Equal($1,$3) }
-  | expression NOTEQ expression             { NotEqual($1,$3) }
-  | expression GREATER expression           { Greater($1,$3) }
-  | expression GREATEREQ expression         { GreaterEqual($1,$3) }
-  | expression LESS expression              { Less($1,$3) }
-  | expression LESSEQ expression            { LessEqual($1,$3) }
+  | expression1 EQUAL expression1           { Equal($1,$3) }
+  | expression1 NOTEQ expression1           { NotEqual($1,$3) }
+  | expression1 GREATER expression1         { Greater($1,$3) }
+  | expression1 GREATEREQ expression1       { GreaterEqual($1,$3) }
+  | expression1 LESS expression1            { Less($1,$3) }
+  | expression1 LESSEQ expression1          { LessEqual($1,$3) }
   | LPAR boolexpression RPAR                { $2 }
 
 
@@ -135,12 +140,12 @@ measurement:
   | MEASURE bit MESHOST bit { Measure($2, $4) }
 
 // Operators productions
-//O ::= x := a | C ; C | M | Reset bit | If (b) C | Barrier bit | G bit | G bit, bit | G bit, bit, bit
+//O ::= x = a | y := b | M | Reset bit | If (b) C | Barrier bit | G bit | G bit, bit | G bit, bit, bit
 operator:
-  | str ASSIGN expression                         { Assign($1, $3) }
-  | operator ORDER operator                       { Order($1,$3)}
   | measurement                                   { $1 }
   | RESET bit                                     { Reset($2) }
+  | str ASSIGN expression                         { Assign($1, $3) }
+  | boolexpression BASSIGN str                    { AssignB($3, $1) }
   | CONDITIONAL LPAR boolexpression RPAR operator { Condition($3, $5) }
   | BARRIER bit                                   { Barrier($2) }
   | PHASEDISK                                     { PhaseDisk }

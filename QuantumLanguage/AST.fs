@@ -14,10 +14,10 @@ Description: Declaration file containing the types required to build the abstrac
 
 /// Type of basic arithmetic expressions
 type arithExpr =
+  | Pi // Mathematical π=3.141592...
   | Num of int
   | Float of float
   | StrA of string
-  | Pi // Mathematical π=3.141592...
   | TimesExpr of (arithExpr * arithExpr)
   | DivExpr of (arithExpr * arithExpr)
   | PlusExpr of (arithExpr * arithExpr)
@@ -39,9 +39,6 @@ type result =
 /// Type of basic boolean expression
 type boolExpr = 
   | Bool of bool
-  | StrB of string
-  | ShortCircuitAnd of (boolExpr * boolExpr)
-  | ShortCircuitOr of (boolExpr * boolExpr)
   | LogAnd of (boolExpr * boolExpr)
   | LogOr of (boolExpr * boolExpr)
   | Neg of boolExpr
@@ -61,6 +58,7 @@ type operator =
   | Error of string // Accumulate grammar error (syntax/semantics/evaluations)
   | AllocQC of (bit * bit) // Allocate arrays/sequences of qubits/cbits
   | Measure of (bit * bit) // Computational measurement of qubit on classical bit
+  | AssignB of (string * boolExpr)
   | Assign of (string * arithExpr) // Arithmetic variable declaration
   | Order of (operator * operator) // Operator linker
   | Reset of bit // Reset bit to |0⟩

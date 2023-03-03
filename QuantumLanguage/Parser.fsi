@@ -38,6 +38,7 @@ type token =
   | QUANTREG
   | CLASSREG
   | ASSIGN
+  | BASSIGN
   | ORDER
   | COMMA
   | MEASURE
@@ -99,6 +100,7 @@ type tokenId =
     | TOKEN_QUANTREG
     | TOKEN_CLASSREG
     | TOKEN_ASSIGN
+    | TOKEN_BASSIGN
     | TOKEN_ORDER
     | TOKEN_COMMA
     | TOKEN_MEASURE
@@ -133,6 +135,7 @@ type nonTerminalId =
     | NONTERM_expression
     | NONTERM_expression1
     | NONTERM_str
+    | NONTERM_statement
     | NONTERM_result
     | NONTERM_bit
     | NONTERM_bitsequence

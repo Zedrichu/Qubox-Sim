@@ -1,5 +1,33 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=d78997a8_002D5b09_002D4c5d_002Dad30_002D065a9df9a8f2/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Tests" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=QuLangParse_003B_002A_003BQuantumLanguage_002ELexer_003B_002A_005F_005Ffslex_005Ftables/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=QuLangParse_003B_002A_003BQuantumLanguage_002ELexer_003B_002A_005Factions/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=QuLangParse_003B_002A_003BQuantumLanguage_002ELexer_003B_002A_005Ftrans/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=QuLangParse_003B_002A_003BQuantumLanguage_002ELexer_003B_005Ffslex_005Fdummy/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=QuLangParse_003B_002A_003BQuantumLanguage_002EParser_003BprodIdxToNonTerminal/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=QuLangParse_003B_002A_003BQuantumLanguage_002EParser_003Btoken_005Fto_005Fstring/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=QuLangParse_003B_002A_003BQuantumLanguage_002EParser_003BtokenTagToTokenId/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=QuLangParse_003B_002A_003BQuantumLanguage_002EParser_003B_002A_005F_005Ffsyacc_005FactionTableRowOffsets/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=QuLangParse_003B_002A_003BQuantumLanguage_002EParser_003B_002A_005F_005Ffsyacc_005Faction_005Frows/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=QuLangParse_003B_002A_003BQuantumLanguage_002EParser_003B_002A_005F_005Ffsyacc_005FactionTableElements/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=QuLangParse_003B_002A_003BQuantumLanguage_002EParser_003B_002A_005F_005Ffsyacc_005FendOfInputTag/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=QuLangParse_003B_002A_003BQuantumLanguage_002EParser_003B_002A_005F_005Ffsyacc_005Fgotos/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=QuLangParse_003B_002A_003BQuantumLanguage_002EParser_003B_002A_005F_005Ffsyacc_005FimmediateActions/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=QuLangParse_003B_002A_003BQuantumLanguage_002EParser_003B_002A_005F_005Ffsyacc_005FproductionToNonTerminalTable/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=QuLangParse_003B_002A_003BQuantumLanguage_002EParser_003B_002A_005F_005Ffsyacc_005Freductions/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=QuLangParse_003B_002A_003BQuantumLanguage_002EParser_003B_002A_005F_005Ffsyacc_005FreductionSymbolCounts/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=QuLangParse_003B_002A_003BQuantumLanguage_002EParser_003B_002A_005Ftables/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=QuLangParse_003B_002A_003BQuantumLanguage_002EParser_003B_002A_005F_005Ffsyacc_005FsparseGotoTableRowOffsets/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=QuLangParse_003B_002A_003BQuantumLanguage_002EParser_003B_002A_005F_005Ffsyacc_005FstateToProdIdxsTableElements/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=QuLangParse_003B_002A_003BQuantumLanguage_002EParser_003B_002A_005F_005Ffsyacc_005FstateToProdIdxsTableRowOffsets/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=QuLangParse_003B_002A_003BQuantumLanguage_002EParser_003B_002A_005F_005Ffsyacc_005FtagOfErrorTerminal/@EntryIndexedValue">True</s:Boolean>
+	
+	<s:Boolean x:Key="/Default/Environment/Filtering/IncludeCoverageFilters/=_002A_003B_002A_003B_002ALexer_003B_002A/@EntryIndexedValue">True</s:Boolean>
+	
+	<s:Boolean x:Key="/Default/Environment/Filtering/IncludeCoverageFilters/=_002A_003B_002A_003B_002AParser_003B_002A/@EntryIndexedValue">True</s:Boolean>
+	<s:String x:Key="/Default/Environment/Highlighting/HighlightingSourceSnapshotLocation/@EntryValue">/Users/adrianzvizdenco/Library/Caches/JetBrains/Rider2022.3/resharper-host/temp/Rider/vAny/CoverageData/_QuboxSimulator.853814830/Snapshot/snapshot.utdcvr</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=61a8418e_002D5858_002D409c_002D892c_002D3f3b29322f79/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="All tests from Solution" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
   &lt;Solution /&gt;
 &lt;/SessionState&gt;</s:String>
+	
+	
 	<s:Boolean x:Key="/Default/UnloadedProject/UnloadedProjects/=38f5c743_002D41b1_002D42ea_002Dbf87_002Df9121d3784ec_0023IonQApp/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>

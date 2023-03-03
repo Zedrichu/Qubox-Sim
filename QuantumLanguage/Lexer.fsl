@@ -14,6 +14,7 @@ System.Globalization.CultureInfo.CurrentCulture <- new System.Globalization.Cult
 let digit       = ['0'-'9'] 
 let num         = digit+
 let float       = ['-' '+']? (digit* '.' digit+ )
+//let float       = digit+ ( '.' digit+ | 'E' ('+'|'-')? digit+ )+
 let whitespace  = [' ' '\t' '\r' '\n']
 let newline     = "\n\r" | '\n' | '\r'
 let char        = ['a'-'z' 'A'-'Z']
@@ -33,19 +34,18 @@ rule tokenize = parse
 | float         { FLOAT(Double.Parse(LexBuffer<_>.LexemeString lexbuf ))}
 | num           { NUM(Int32.Parse(LexBuffer<_>.LexemeString lexbuf )) }
 | bool          { BOOL(Boolean.Parse(LexBuffer<_>.LexemeString lexbuf )) }
-| variable      { let str = LexBuffer<_>.LexemeString lexbuf in VARIABLE(str) }
 
 // Arithmetic expressions to TOKENs
-| '*'           { TIMES }
-| '/'           { DIV }
-| '+'           { PLUS }
-| '-'           { MINUS }
-| "Pi"          { MATHPI }
-| '('           { LPAR }
-| ')'           { RPAR }
-| eof           { EOF }
-| '['           { LBRAK }
-| ']'           { RBRAK }
+| '*'               { TIMES }
+| '/'               { DIV }
+| '+'               { PLUS }
+| '-'               { MINUS }
+| "Pi"              { MATHPI }
+| '('               { LPAR }
+| ')'               { RPAR }
+| eof               { EOF }
+| '['               { LBRAK }
+| ']'               { RBRAK }
 
 // Result TOKENs
 | "Click"        { CLICK }
@@ -68,15 +68,16 @@ rule tokenize = parse
 // Operator expressions to TOKENs
 | "Qalloc"whitespace    { QUANTREG }
 | "Calloc"whitespace    { CLASSREG }
+| "=|"                  { BASSIGN }
 | ":="                  { ASSIGN }
 | ';'                   { ORDER }
 | ','                   { COMMA }
 | "Measure"whitespace   { MEASURE }
 | "->"                  { MESHOST }
 | "Reset"whitespace     { RESET }
-| "If"whitespace        { CONDITIONAL }
+| "If"                  { CONDITIONAL }
 | "Barrier"whitespace   { BARRIER }
-| "PhaseDisk"whitespace { PHASEDISK }
+| "PhaseDisk"           { PHASEDISK }
 
 // Quantum gate expression to TOKENs 
 | "H"whitespace         { HADAMARD }
@@ -90,13 +91,16 @@ rule tokenize = parse
 | "SDG"whitespace       { SDAGGER }
 | "SX"whitespace        { SQRTNOT }
 | "SXDG"whitespace      { SQRTXDG }
-| "P"whitespace         { PHASE }
-| "RZ"whitespace        { RZGATE }
-| "RY"whitespace        { RYGATE }
-| "RX"whitespace        { RXGATE }
-| "U"whitespace         { UNITARY }
+| "P"                   { PHASE }
+| "RZ"                  { RZGATE }
+| "RY"                  { RYGATE }
+| "RX"                  { RXGATE }
+| "U"                   { UNITARY }
 | "CNOT"whitespace      { CTRLNOT }
 | "CCX"whitespace       { TOFFOLI }
 | "SWAP"whitespace      { SWAP }
-| "RXX"whitespace       { SYMMRXX }
-| "RZZ"whitespace       { SYMMRZZ }
+| "RZZ"                 { SYMMRZZ }
+| "RXX"                 { SYMMRXX }
+
+// String definitions
+| variable      { let str = LexBuffer<_>.LexemeString lexbuf in VARIABLE(str) }

@@ -46,14 +46,6 @@ let rec evalArith expr memory =
 let rec evalBool expr boolMem arithMem =
     match expr with
     | Bool x -> x
-    | StrB x -> try
-                    Map.find x boolMem
-                 with err ->
-                     let mes = $"ERROR: Unknown boolean variable %s{x} in expression.
-                                            \nRevise your variable declarations!"
-                     failwith mes
-    | ShortCircuitAnd(x,y) -> (evalBool x boolMem arithMem) && (evalBool y boolMem arithMem)
-    | ShortCircuitOr(x,y) -> (evalBool x boolMem arithMem) || (evalBool y boolMem arithMem)
     | LogAnd(x,y) -> (evalBool x boolMem arithMem) && (evalBool y boolMem arithMem)
     | LogOr(x,y) -> (evalBool x boolMem arithMem) || (evalBool y boolMem arithMem)
     | Neg x -> not (evalBool x boolMem arithMem)
@@ -96,9 +88,6 @@ let rec transArith expr =
 let rec transBool expr = 
     match expr with 
     | Bool(x) -> x.ToString()
-    | StrB(x) -> x
-    | ShortCircuitAnd(x,y) -> "("+(transBool x)+")&&("+(transBool y)+")"
-    | ShortCircuitOr(x,y) -> "("+(transBool x)+")||("+(transBool y)+")"
     | LogAnd(x,y) -> "("+(transBool x)+") and ("+(transBool y)+")"
     | LogOr(x,y) -> "("+(transBool x)+") or ("+(transBool y)+")"
     | Neg(x) -> "!("+(transBool x)+")"
@@ -120,6 +109,7 @@ let rec transOperator expr =
                                             "];\nmutable "+c+" = new Result["+i.ToString()+"];"
     | Measure(q_bit, c_bit) -> "let "+transBit c_bit+" = M("+transBit q_bit+");"
     | Assign(var, value) -> "let "+var+" = "+transArith value
+    | AssignB(var, value) -> "let "+var+" = "+transBool value
     | Order(op1, op2) -> transOperator op1 + "\n" + transOperator op2
     | Reset(BitS(q)) -> "Reset("+q+");"
     | Reset(BitA(q, _)) -> "ResetAll("+q+");"

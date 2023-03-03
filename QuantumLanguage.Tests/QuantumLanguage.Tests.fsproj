@@ -9,6 +9,7 @@
     <ItemGroup>
         <Compile Include="UnitTests.fs" />
         <Compile Include="Program.fs" />
+        <Content Include="QCode.txt" />
     </ItemGroup>
 
     <ItemGroup>

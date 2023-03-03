@@ -1,0 +1,5 @@
+Qalloc q[2]; Calloc c,r; T x; SX x; RZ (5+3*Pi/2) q[1];
+
+Qalloc x,a; Calloc c; If ( 5>6 or (not 4>=3) and (5.2==5)) SXDG a; SWAP x,a;
+
+Qalloc x; Calloc a; b:=-Pi/2-(+3); RY (4) z; RX (3-2) k; true && (5<3 || false || 5<=10)=:c;
