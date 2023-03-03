@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/adrianzvizdenco/RiderProjects/QuboxSimulator/QuantumLanguage/Lexer.fsl</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+// The generated lexer module will start with this code
+{
+open FSharp.Text.Lexing
+open System
+
+// Open the module that defines the Tokens
+open Parser
+
+// Set the language to English such that 4.0 is parsed as 4 and not 40.
+System.Globalization.CultureInfo.CurrentCulture &lt;- new System.Globalization.CultureInfo(&quot;en-US&quot;)
+}
+
+// Define macros for some regular expressions used later
+let digit       = [&#39;0&#39;-&#39;9&#39;] 
+let num         = digit+
+let float       = [&#39;-&#39; &#39;+&#39;]? (digit* &#39;.&#39; digit+ )
+//let float       = digit+ ( &#39;.&#39; digit+ | &#39;E&#39; (&#39;+&#39;|&#39;-&#39;)? digit+ )+
+let whitespace  = [&#39; &#39; &#39;\t&#39; &#39;\r&#39; &#39;\n&#39;]
+let newline     = &quot;\n\r&quot; | &#39;\n&#39; | &#39;\r&#39;
+let char        = [&#39;a&#39;-&#39;z&#39; &#39;A&#39;-&#39;Z&#39;]
+let variable    =  char ( char | digit )*
+let bool        = &quot;true&quot;|&quot;false&quot;
+//digit can also be \d+ 
+//whitespace can also be [\u00A0 \n \r \t]
+
+// Define rules for recognising and building tokens
+// NOTE: rules are applied in order top-down.
+rule tokenize = parse
+
+// deal with tokens that need to be ignored (skip them)
+| whitespace    { tokenize lexbuf }
+| newline       { lexbuf.EndPos &lt;- lexbuf.EndPos.NextLine; tokenize lexbuf; }
+// deal with tokens that need to be built
+| float         { FLOAT(Double.Parse(LexBuffer&lt;_&gt;.LexemeString lexbuf ))}
+| num           { NUM(Int32.Parse(LexBuffer&lt;_&gt;.LexemeString lexbuf )) }
+| bool          { BOOL(Boolean.Parse(LexBuffer&lt;_&gt;.LexemeString lexbuf )) }
+
+// Arithmetic expressions to TOKENs
+| &#39;*&#39;               { TIMES }
+| &#39;/&#39;               { DIV }
+| &#39;+&#39;               { PLUS }
+| &#39;-&#39;               { MINUS }
+| &quot;Pi&quot;              { MATHPI }
+| &#39;(&#39;               { LPAR }
+| &#39;)&#39;               { RPAR }
+| eof               { EOF }
+| &#39;[&#39;               { LBRAK }
+| &#39;]&#39;               { RBRAK }
+
+// Result TOKENs
+| &quot;Click&quot;        { CLICK }
+| &quot;NoClick&quot;      { NOCLICK }
+
+// Boolean expression to TOKENs
+| &quot;and&quot;         { AND }
+| &quot;or&quot;          { OR }
+| &quot;&amp;&amp;&quot;          { SAND }
+| &quot;||&quot;          { SOR }
+| &quot;not&quot;         { NEG }
+| &quot;==&quot;          { EQUAL }
+| &quot;|&gt;&quot;          { ISQ }
+| &quot;!=&quot;          { NOTEQ }
+| &#39;&gt;&#39;           { GREATER }
+| &quot;&gt;=&quot;          { GREATEREQ }
+| &#39;&lt;&#39;           { LESS }
+| &quot;&lt;=&quot;          { LESSEQ }
+
+// Operator expressions to TOKENs
+| &quot;Qalloc&quot;whitespace    { QUANTREG }
+| &quot;Calloc&quot;whitespace    { CLASSREG }
+| &quot;=|&quot;                  { BASSIGN }
+| &quot;:=&quot;                  { ASSIGN }
+| &#39;;&#39;                   { ORDER }
+| &#39;,&#39;                   { COMMA }
+| &quot;Measure&quot;whitespace   { MEASURE }
+| &quot;-&gt;&quot;                  { MESHOST }
+| &quot;Reset&quot;whitespace     { RESET }
+| &quot;If&quot;                  { CONDITIONAL }
+| &quot;Barrier&quot;whitespace   { BARRIER }
+| &quot;PhaseDisk&quot;           { PHASEDISK }
+
+// Quantum gate expression to TOKENs 
+| &quot;H&quot;whitespace         { HADAMARD }
+| &quot;ID&quot;whitespace        { IDENTITY }
+| &quot;X&quot;whitespace         { PAULIX }
+| &quot;Y&quot;whitespace         { PAULIY }
+| &quot;Z&quot;whitespace         { PAULIZ }
+| &quot;TDG&quot;whitespace       { TDAGGER }
+| &quot;T&quot;whitespace         { TGATE }
+| &quot;S&quot;whitespace         { SGATE }
+| &quot;SDG&quot;whitespace       { SDAGGER }
+| &quot;SX&quot;whitespace        { SQRTNOT }
+| &quot;SXDG&quot;whitespace      { SQRTXDG }
+| &quot;P&quot;                   { PHASE }
+| &quot;RZ&quot;                  { RZGATE }
+| &quot;RY&quot;                  { RYGATE }
+| &quot;RX&quot;                  { RXGATE }
+| &quot;U&quot;                   { UNITARY }
+| &quot;CNOT&quot;whitespace      { CTRLNOT }
+| &quot;CCX&quot;whitespace       { TOFFOLI }
+| &quot;SWAP&quot;whitespace      { SWAP }
+| &quot;RZZ&quot;                 { SYMMRZZ }
+| &quot;RXX&quot;                 { SYMMRXX }
+
+// String definitions
+| variable      { let str = LexBuffer&lt;_&gt;.LexemeString lexbuf in VARIABLE(str) }
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[10,1,10,97,1],[13,1,331,7,1],[332,1,332,830,1],[333,1,333,75,1]]);
+    </script>
+  </body>
+</html>
