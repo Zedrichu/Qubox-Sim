@@ -1,7 +1,7 @@
 module QuantumLanguage.Interpreter
 (** F#
  -*- coding: utf-8 -*-
-Interpreter
+Interpreter 
 
 Description: Module defining the Q# compilation transitions and other useful handlers for interpretation/optimization of AST
 
@@ -11,6 +11,7 @@ Description: Module defining the Q# compilation transitions and other useful han
 @__Version --> 1.2
 @__Status --> DEV
 *)
+// #TODO! Separate the interpreter QuLang -> Circuit, translator QuLang -> Q# and compiler Circuit -> QuLang
 
 open AST
 open System
@@ -101,7 +102,7 @@ let rec transBool expr =
     | LogAnd(x,y) -> "("+(transBool x)+") and ("+(transBool y)+")"
     | LogOr(x,y) -> "("+(transBool x)+") or ("+(transBool y)+")"
     | Neg(x) -> "!("+(transBool x)+")"
-    | Check(bit, res) -> "("+transBit bit+" == "+(transResult res)+")"
+    | Check(bit, res) -> "("+transBit bit+" |> "+(transResult res)+")"
     | Equal(x,y) -> (transArith x)+"=="+(transArith y)
     | NotEqual(x,y) -> (transArith x)+"!="+(transArith y)
     | Greater(x,y) -> (transArith x)+">"+(transArith y)
@@ -112,9 +113,9 @@ let rec transBool expr =
     
 let rec transOperator expr =
     match expr with
-    | AllocSeq(q_seq, c_seq) -> "use " + transBit q_seq +
-                                  " = Qubit();\nmutable " + transBit c_seq
-                                    + " = new Result;"
+    | AllocQC(BitSeq q, BitSeq c) -> "use " + transBit (BitSeq q) +
+                                        " = Qubit();\nmutable " + transBit (BitSeq c)
+                                            + " = new Result;"
     | AllocQC(BitA(q, n), BitA(c, i)) -> "use "+q+" = Qubit["+n.ToString()+
                                             "];\nmutable "+c+" = new Result["+i.ToString()+"];"
     | Measure(q_bit, c_bit) -> "let "+transBit c_bit+" = M("+transBit q_bit+");"
@@ -143,8 +144,8 @@ let rec transOperator expr =
     | CNOT(bit1, bit2) -> "CNOT("+transBit bit1+", "+transBit bit2+");"
     | CCX(bit1, bit2, bit3) -> "CCNOT("+transBit bit1+", "+transBit bit2+", "+transBit bit3+");"
     | SWAP(bit1, bit2) -> "SWAP("+transBit bit1+", "+transBit bit2+");"
-    //| RXX(expr, bit1, bit2) ->
-    //| RZZ(expr, bit1, bit2) ->
+    | RXX(theta, bit1, bit2) -> "Rxx("+(evalArith theta).ToString()+", "+transBit bit1+", "+transBit bit2+");"
+    | RZZ(theta, bit1, bit2) -> "Rzz("+(evalArith theta).ToString()+", "+transBit bit1+", "+transBit bit2+");"
     | _ -> ""
     
 // Map union function

@@ -10,7 +10,7 @@ Description: Class defining the global state of the quantum system
 @__Version --> 1.0
 @__Status --> DEV
 */
-namespace Qubox_Simulator.Models;
+namespace QuboxSimulator.Models;
 
 public class State
 {

@@ -47,14 +47,28 @@ open AST
 
 // The first production in "formal" notation is start -> expression
 start:
-  | EOF                                 { (NOP, NOP) }
-  | allocation EOF                      { ($1, NOP) }
-  | allocation operator ORDER EOF       { ($1, $2) }
+  | allocation operator EOF                     { ($1, $2) }
+  | EOF                                         { (NOP, NOP) }
+  
 // Note that an End-Of-File (EOF) is inserted
 // The code annotation { $1 } specifies that parsing with this production
 // returns whatever parsing the expression returns: $1 is the result of parsing
 // the first component of the production (i.e. expression)
 
+
+// Allocation productions - to simplify operators
+allocation: qallocation callocation     { AllocQC($1, $2) }
+// QALLC ::= Qalloc bit; | Qalloc bitseq;
+qallocation:
+  | QUANTREG bitsequence ORDER      { $2 }
+  | QUANTREG bit ORDER              { $2 }
+
+// CALLC ::= Calloc bit; | Calloc bitseq;
+callocation:
+  | CLASSREG bitsequence ORDER      { $2 }
+  | CLASSREG bit ORDER              { $2 }
+  
+  
 // The productions for expressions are grammar written in the yacc format:
 // Arithmetic productions
 //a ::= n | x | a + a | a - a | a * a | a / a | - a | (a)
@@ -114,11 +128,6 @@ boolexpression:
   | expression LESSEQ expression            { LessEqual($1,$3) }
   | LPAR boolexpression RPAR                { $2 }
 
-// Allocation production - to simplify operators
-// ALLC ::= Qalloc bit; Calloc bit; | Qalloc bitseq; Calloc bitseq;
-allocation:
-  | QUANTREG bitsequence ORDER CLASSREG bitsequence { AllocSeq($2, $5) }
-  | QUANTREG bit ORDER CLASSREG bit ORDER           { AllocQC($2, $5) }
 
 // Measurement production - to simplify operators
 // M::= Measure bit -> bit

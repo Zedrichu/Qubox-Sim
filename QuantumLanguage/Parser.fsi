@@ -7,7 +7,7 @@ type token =
   | OR
   | NEG
   | EQUAL
-  | EQUALR
+  | ISQ
   | NOTEQ
   | GREATER
   | LESS
@@ -68,7 +68,7 @@ type tokenId =
     | TOKEN_OR
     | TOKEN_NEG
     | TOKEN_EQUAL
-    | TOKEN_EQUALR
+    | TOKEN_ISQ
     | TOKEN_NOTEQ
     | TOKEN_GREATER
     | TOKEN_LESS
@@ -127,6 +127,9 @@ type tokenId =
 type nonTerminalId = 
     | NONTERM__startstart
     | NONTERM_start
+    | NONTERM_allocation
+    | NONTERM_qallocation
+    | NONTERM_callocation
     | NONTERM_expression
     | NONTERM_expression1
     | NONTERM_str
@@ -134,7 +137,6 @@ type nonTerminalId =
     | NONTERM_bit
     | NONTERM_bitsequence
     | NONTERM_boolexpression
-    | NONTERM_allocation
     | NONTERM_measurement
     | NONTERM_operator
 /// This function maps tokens to integer indexes

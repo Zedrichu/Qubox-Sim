@@ -13,7 +13,7 @@ System.Globalization.CultureInfo.CurrentCulture <- new System.Globalization.Cult
 // Define macros for some regular expressions used later
 let digit       = ['0'-'9'] 
 let num         = digit+
-let float       = ['-' '+']? (digit* '.' digit+ | digit+)
+let float       = ['-' '+']? (digit* '.' digit+ )
 let whitespace  = [' ' '\t' '\r' '\n']
 let newline     = "\n\r" | '\n' | '\r'
 let char        = ['a'-'z' 'A'-'Z']
@@ -57,7 +57,7 @@ rule tokenize = parse
 | "&&"          { SAND }
 | "||"          { SOR }
 | "not"         { NEG }
-| '=='          { EQUAL }
+| "=="          { EQUAL }
 | "|>"          { ISQ }
 | "!="          { NOTEQ }
 | '>'           { GREATER }

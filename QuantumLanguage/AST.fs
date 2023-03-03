@@ -12,12 +12,6 @@ Description: Declaration file containing the types required to build the abstrac
 @__Status --> DEV
 *)
 
-/// Type of quantum/classical bit declarations
-type bit =
-  | BitS of string
-  | BitA of (string * int)
-  | BitSeq of (bit * bit)
-
 /// Type of basic arithmetic expressions
 type arithExpr =
   | Num of int
@@ -30,6 +24,12 @@ type arithExpr =
   | MinusExpr of (arithExpr * arithExpr)
   | UPlusExpr of arithExpr
   | UMinusExpr of arithExpr
+  
+/// Type of quantum/classical bit declarations
+type bit =
+  | BitS of string
+  | BitA of (string * int)
+  | BitSeq of (bit * bit)
 
 /// Type of measurement results
 type result =    
@@ -57,9 +57,9 @@ type boolExpr =
 /// Type of quantum gates and operators
 type operator =
   | NOP // No operation
+  // Include line and column of error
   | Error of string // Accumulate grammar error (syntax/semantics/evaluations)
-  | AllocSeq of (bit * bit) // Allocate sequences of qubits and cbits
-  | AllocQC of (bit * bit) // Allocate arrays of qubits and cbits
+  | AllocQC of (bit * bit) // Allocate arrays/sequences of qubits/cbits
   | Measure of (bit * bit) // Computational measurement of qubit on classical bit
   | Assign of (string * arithExpr) // Arithmetic variable declaration
   | Order of (operator * operator) // Operator linker
