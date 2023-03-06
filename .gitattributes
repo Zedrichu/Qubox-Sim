@@ -2,4 +2,4 @@
 *.fsi linguist-language=F#
 *.fsl linguist-language=F#
 
-./GrammarTestCoverage/ linguist-vendored
+GrammarTestCoverage/** linguist-documentation
