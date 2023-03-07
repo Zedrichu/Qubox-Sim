@@ -24,5 +24,9 @@
         <Link>QuantumLanguage.Test\UnitTest1.fs</Link>
       </None>
     </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\QuantumLanguage\QuantumLanguage.fsproj" />
+    </ItemGroup>
   
 </Project>

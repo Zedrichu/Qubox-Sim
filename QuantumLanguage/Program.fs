@@ -1,9 +1,12 @@
-﻿module QuantumLanguage.Handler
+﻿/// <summary>
+/// Interface to library assisting the parsing/compilation process from QuLang user-input
+/// </summary>
+module QuantumLanguage.Handler
 (* F#
  -*- coding: utf-8 -*-
 Quantum Language Handler
 
-Description: Library to assist the parsing/compilation process of QuLang from user-input
+Description: Library to assist the parsing/compilation process from QuLang user-input.
 
 @__Author --> Created by Adrian Zvizdenco aka Zedrichu
 @__Date & Time --> Created on 21/02/2023

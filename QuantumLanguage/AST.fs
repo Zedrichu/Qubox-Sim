@@ -1,9 +1,12 @@
+/// <summary>
+/// Declaration module containing the types required to build the abstract syntax tree of QuLang.
+/// </summary>
 module QuantumLanguage.AST
 (* F#
  -*- coding: utf-8 -*-
 Quantum Abstract Syntax Tree
 
-Description: Declaration file containing the types required to build the abstract syntax tree.
+Description: Declaration module containing the types required to build the abstract syntax tree.
 
 @__Author --> Created by Adrian Zvizdenco aka Zedrichu
 @__Date & Time --> Created on 21/02/2023
@@ -17,11 +20,13 @@ type arithExpr =
   | Pi // Mathematical π=3.141592...
   | Num of int
   | Float of float
-  | StrA of string
+  | VarA of string
   | TimesExpr of (arithExpr * arithExpr)
   | DivExpr of (arithExpr * arithExpr)
   | PlusExpr of (arithExpr * arithExpr)
   | MinusExpr of (arithExpr * arithExpr)
+  | PowExpr of (arithExpr * arithExpr)
+  | ModExpr of (arithExpr * arithExpr)
   | UPlusExpr of arithExpr
   | UMinusExpr of arithExpr
   
@@ -39,6 +44,7 @@ type result =
 /// Type of basic boolean expression
 type boolExpr = 
   | Bool of bool
+  | VarB of string
   | LogAnd of (boolExpr * boolExpr)
   | LogOr of (boolExpr * boolExpr)
   | Neg of boolExpr
@@ -54,7 +60,7 @@ type boolExpr =
 /// Type of quantum gates and operators
 type operator =
   | NOP // No operation
-  // Include line and column of error
+  // Include line and column of error #TODO!
   | Error of string // Accumulate grammar error (syntax/semantics/evaluations)
   | AllocQC of (bit * bit) // Allocate arrays/sequences of qubits/cbits
   | Measure of (bit * bit) // Computational measurement of qubit on classical bit

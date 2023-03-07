@@ -40,6 +40,8 @@ rule tokenize = parse
 | '/'               { DIV }
 | '+'               { PLUS }
 | '-'               { MINUS }
+| '^'               { POW }
+| '%'               { MOD }    
 | "Pi"              { MATHPI }
 | '('               { LPAR }
 | ')'               { RPAR }
@@ -57,6 +59,7 @@ rule tokenize = parse
 | "&&"          { SAND }
 | "||"          { SOR }
 | "not"         { NEG }
+| '~'           { BVAR }      
 | "=="          { EQUAL }
 | "|>"          { ISQ }
 | "!="          { NOTEQ }

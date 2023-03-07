@@ -1,9 +1,9 @@
 module Tests
 
 open NUnit.Framework
+
 open QuantumLanguage
 open AST
-open System
 
 [<SetUp>]
 let Setup () =
@@ -53,13 +53,13 @@ let ``Focus on booleans, or, not, >, SXDG, SWAP`` () =
     
 [<Test>]
 let ``Focus on assigns, arithmetic, RY, RX`` () =
-    let ast = Handler.ParseQuLang "Qalloc x; Calloc a; b:=-Pi/2-(+3); RY (4) z; RX (3-2) k; true && (5<3 || false || 5<=10) =| c;"
+    let ast = Handler.ParseQuLang "Qalloc x; Calloc a; b:=-Pi/2-(+3); RY (4) z; RX (3-2) k; true && (5<3 || false || 5.0^2<=10) =| c;"
     Assert.That(ast, Is.EqualTo (AllocQC (BitS "x", BitS "a"), Order
                                   (Assign ("b", MinusExpr (DivExpr (UMinusExpr Pi, Num 2), UPlusExpr (Num 3))),
                                     Order (RY (Num 4, BitS "z"), Order (RX (MinusExpr (Num 3, Num 2), BitS "k"),
                                     AssignB ("c", LogAnd (Bool true, LogOr
                                     (LogOr (Less (Num 5, Num 3), Bool false),
-                                    LessEqual (Num 5, Num 10)))))))) )    
+                                    LessEqual (PowExpr (Float 5.0, Num 2), Num 10)))))))) )    
 
 [<Test>]
 let ``Focus on U, CNOT, CCX, SDG, TDG, Reset, NoClick`` () =
@@ -81,11 +81,13 @@ let ``Focus on PhaseDisk, Barrier, P, RXX, RZZ`` () =
 
 [<Test>]
 let ``Focus on variable, NotEqual`` () =
-    let ast = Handler.ParseQuLang "Qalloc q[2]; Calloc x; P(a) q[1]; If (b<3 and true) ID q[2]; Measure q[1] -> c;"
+    let ast = Handler.ParseQuLang "Qalloc q[2]; Calloc x; P(a) q[1]; If (b < 3%2 and true or ~c ) ID q[2]; Measure q[1] -> c;"
     Assert.That(ast, Is.EqualTo (AllocQC (BitA ("q", 2), BitS "x"), Order
-                                (P (StrA "a", BitA ("q", 1)), Order
-                                  (Condition (LogAnd (Less (StrA "b", Num 3), Bool true), I (BitA ("q", 2))),
-                                   Measure (BitA ("q", 1), BitS "c")))))
+                                (P (VarA "a", BitA ("q", 1)), Order
+                                  (Condition (LogOr (LogAnd (Less
+                                  (VarA "b", ModExpr (Num 3, Num 2)), Bool true),
+                                    VarB "c"), I (BitA ("q", 2))),
+                                    Measure (BitA ("q", 1), BitS "c")))))
 
 [<Test>]
 let ``Empty program with skipped characters`` () =
