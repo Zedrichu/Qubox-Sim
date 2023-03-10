@@ -15,7 +15,9 @@ Description: Declaration module containing the types required to build the abstr
 @__Status --> DEV
 *)
 
-/// Type of basic arithmetic expressions
+open VisitorPattern
+
+/// Discriminated type of basic arithmetic expressions
 type arithExpr =
   | Pi // Mathematical π=3.141592...
   | Num of int
@@ -29,19 +31,26 @@ type arithExpr =
   | ModExpr of (arithExpr * arithExpr)
   | UPlusExpr of arithExpr
   | UMinusExpr of arithExpr
+  interface IVisitable<arithExpr> with
+    member this.Accept (visitor: IVisitor<arithExpr>) = visitor.Visit this
   
-/// Type of quantum/classical bit declarations
+/// Tagged type of quantum/classical bit declarations
 type bit =
   | BitS of string
   | BitA of (string * int)
   | BitSeq of (bit * bit)
+  interface IVisitable<bit> with
+    member this.Accept (visitor: IVisitor<bit>) = visitor.Visit this
 
-/// Type of measurement results
-type result =    
+/// Tagged type of measurement results
+type result =
   | Click // +1 Eigenspace (spin-up, |0⟩)
   | NoClick // -1 Eigenspace (spin-down, |1⟩)
+  interface IVisitable<result> with
+    member this.Accept (visitor: IVisitor<result>) = visitor.Visit this
   
-/// Type of basic boolean expression
+  
+/// Discriminated type of basic boolean expression
 type boolExpr = 
   | Bool of bool
   | VarB of string
@@ -55,13 +64,19 @@ type boolExpr =
   | GreaterEqual of (arithExpr * arithExpr)
   | Less of (arithExpr * arithExpr)
   | LessEqual of (arithExpr * arithExpr)
+  interface IVisitable<boolExpr> with
+    member this.Accept (visitor: IVisitor<boolExpr>) = visitor.Visit this
   
+///Tagged type of errors in QuLang module (Accumulate grammar error (syntax/semantics/evaluations))
+type error =
+  | Success // No error
+  | SyntaxError of (string * int * int) // Syntax error: invalid token at specific line/column
+  | SemanticError of string // Semantic error: message
+  | EvaluationError of string // Evaluation error: message
   
-/// Type of quantum gates and operators
+/// Discriminated type of quantum gates and operators
 type operator =
   | NOP // No operation
-  // Include line and column of error #TODO!
-  | Error of string // Accumulate grammar error (syntax/semantics/evaluations)
   | AllocQC of (bit * bit) // Allocate arrays/sequences of qubits/cbits
   | Measure of (bit * bit) // Computational measurement of qubit on classical bit
   | AssignB of (string * boolExpr)
@@ -92,3 +107,13 @@ type operator =
   | SWAP of (bit * bit) // SWAP gate
   | RXX of (arithExpr * bit * bit) // Rotation X-X symmetric
   | RZZ of (arithExpr * bit * bit) // Rotation Z-Z symmetric
+  
+/// <summary>
+/// Record type to hold the established memory bindings (arithmetic/boolean/classical/quantum)
+/// </summary>
+type Memory = {
+    Arithmetic: Map<string,arithExpr>;
+    Boolean: Map<string, boolExpr>; 
+    Quantum: Map<string, int>;
+    Classical: Map<string, int>;
+}

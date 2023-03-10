@@ -4,10 +4,12 @@ public class Circuit
 {
     public Register Allocation { get; private set; }
     
+    public List<Tower> GateGrid { get; private set; }
 
-    public Circuit(int qubitNumber, int cbitNumber)
+    public Circuit(Register allocation, List<Tower> gateGrid)
     {
-        Allocation = new Register(qubitNumber, cbitNumber);
+        Allocation = allocation;
+        GateGrid = gateGrid;
     }
 
 }

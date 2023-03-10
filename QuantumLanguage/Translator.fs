@@ -117,6 +117,5 @@ let rec transOperator (operator:operator):string =
     | RZZ(theta, bit1, bit2) -> "RZZ("+transArith theta+") "+transBit bit1+", "+transBit bit2+";"
     | RXX(theta, bit1, bit2) -> "RXX("+transArith theta+") "+transBit bit1+", "+transBit bit2+";"
     | U(exp1, exp2, exp3, bit) -> "U("+transArith exp1+", "+transArith exp2+", "+transArith exp3+") "+transBit bit+";"
-    | Error s -> s
     | NOP -> ""
     
