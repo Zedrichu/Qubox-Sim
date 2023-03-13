@@ -1,7 +1,7 @@
 /// <summary>
 /// Compiler module handling the conversion from AST structure to Q# compiling code
 /// </summary>
-module QuantumLanguage.Compiler
+module public QuantumLanguage.Compiler
 (* F#
  -*- coding: utf-8 -*-
 Q# Compiler from QuLang AST
@@ -16,14 +16,13 @@ Description: Compiler module handling the conversion from AST structure to Q# co
 *)
 
 open AST
-open Interpreter
 
 /// <summary>
 /// Function to compile the quantum results to Q# syntax.
 /// </summary>
 /// <param name="result">Result expression (AST.result)</param>
 /// <returns>Q# string representation</returns>
-let rec compileResult (result:result):string =
+let rec private compileResult (result:result):string =
     match result with
     | Click -> "Zero"
     | NoClick -> "One"
@@ -33,7 +32,7 @@ let rec compileResult (result:result):string =
 /// </summary>
 /// <param name="expr">Bit expression (sequence, array-like or single)</param>
 /// <returns>Q# string representation</returns>
-let rec compileAlloc (expr:bit) (flag:bool):string =
+let rec private compileAlloc (expr:bit) (flag:bool):string =
     match flag with
     | true ->
         match expr with
@@ -46,7 +45,7 @@ let rec compileAlloc (expr:bit) (flag:bool):string =
         | BitS(s) -> $"mutable {s} = new Result;"
         | BitSeq(q,q_seq) -> compileAlloc q false + "\n" + compileAlloc q_seq false
     
-let rec compileBit (bit:bit):string =
+let rec private compileBit (bit:bit):string =
     match bit with
     | BitA(b,i) -> $"{b}[%i{i}]" 
     | BitS b -> b
@@ -58,7 +57,7 @@ let rec compileBit (bit:bit):string =
 /// </summary>
 /// <param name="expr">Arithmetic expression (AST.arithExpr)</param>
 /// <returns>Q# string representation</returns>
-let rec compileArith (expr:arithExpr):string = 
+let rec private compileArith (expr:arithExpr):string = 
     match expr with
     | VarA x -> x
     | Num x -> x.ToString()
@@ -79,7 +78,7 @@ let rec compileArith (expr:arithExpr):string =
 /// </summary>
 /// <param name="expr">Boolean expression (AST.boolExpr)</param>
 /// <returns>Q# string representation</returns>
-let rec compileBool (expr:boolExpr):string = 
+let rec private compileBool (expr:boolExpr):string = 
     match expr with 
     | Bool x -> x.ToString()
     | VarB s -> s
@@ -101,7 +100,7 @@ let rec compileBool (expr:boolExpr):string =
 /// </summary>
 /// <param name="expr">Operator expression (AST.operator)</param>
 /// <returns>Q# string representation</returns>
-let rec compileOperator (expr:operator):string =
+let rec internal compileOperator (expr:operator):string =
     match expr with
     | AllocQC(q_bit, c_bit) -> compileAlloc q_bit true + "\n" + compileAlloc c_bit false + "\n"
     | Measure(q_bit, c_bit) -> "let "+compileBit c_bit+" = M("+compileBit q_bit+");"
@@ -122,14 +121,14 @@ let rec compileOperator (expr:operator):string =
     | T(bit) -> "T("+compileBit bit+");"
     | SX(bit) -> "Rx(PI()/2, "+compileBit bit+");" // Global phase 
     | SXDG(bit) -> "Rx(-PI()/2, "+compileBit bit+");" // Global phase
-    | P(phase, bit) -> "Rz("+(compileArith (evalArith phase)).ToString()+", "+compileBit bit+");" // up to global phase
-    | RZ(angle, bit) -> "Rz("+(compileArith (evalArith angle)).ToString()+", "+compileBit bit+");"
-    | RY(angle, bit) -> "Ry("+(compileArith (evalArith angle)).ToString()+", "+compileBit bit+");"
-    | RX(angle, bit) -> "Rx("+(compileArith (evalArith angle)).ToString()+", "+compileBit bit+");"
+    | P(phase, bit) -> "Rz("+(compileArith phase).ToString()+", "+compileBit bit+");" // up to global phase
+    | RZ(angle, bit) -> "Rz("+(compileArith angle).ToString()+", "+compileBit bit+");"
+    | RY(angle, bit) -> "Ry("+(compileArith angle).ToString()+", "+compileBit bit+");"
+    | RX(angle, bit) -> "Rx("+(compileArith angle).ToString()+", "+compileBit bit+");"
     //| U(exp1, exp2, exp3, bit) ->
     | CNOT(bit1, bit2) -> "CNOT("+compileBit bit1+", "+compileBit bit2+");"
     | CCX(bit1, bit2, bit3) -> "CCNOT("+compileBit bit1+", "+compileBit bit2+", "+compileBit bit3+");"
     | SWAP(bit1, bit2) -> "SWAP("+compileBit bit1+", "+compileBit bit2+");"
-    | RXX(theta, bit1, bit2) -> "Rxx("+(compileArith (evalArith theta)).ToString()+", "+compileBit bit1+", "+compileBit bit2+");"
-    | RZZ(theta, bit1, bit2) -> "Rzz("+(compileArith (evalArith theta)).ToString()+", "+compileBit bit1+", "+compileBit bit2+");"
+    | RXX(theta, bit1, bit2) -> "Rxx("+(compileArith theta).ToString()+", "+compileBit bit1+", "+compileBit bit2+");"
+    | RZZ(theta, bit1, bit2) -> "Rzz("+(compileArith theta).ToString()+", "+compileBit bit1+", "+compileBit bit2+");"
     | _ -> ""

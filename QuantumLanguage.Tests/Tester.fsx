@@ -15,16 +15,7 @@ open QuantumLanguage.Interpreter
 open QuantumLanguage.Compiler
 #load "../QuantumLanguage/Translator.fs"
 open QuantumLanguage.Translator
-#load "../QuantumLanguage/Program.fs"
+#load "../QuantumLanguage/Handler.fs"
 open QuantumLanguage.Handler
-
-
-let printMenu() =
-    printfn "Menu: "
-    printfn "1. AST"
-    printfn "2. Quit"
-    printf "Enter your choice:"
-
-let getInput() = Int32.TryParse(Console.ReadLine())
 
 mainMenu()

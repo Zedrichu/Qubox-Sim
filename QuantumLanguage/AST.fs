@@ -1,7 +1,7 @@
 /// <summary>
 /// Declaration module containing the types required to build the abstract syntax tree of QuLang.
 /// </summary>
-module QuantumLanguage.AST
+module public QuantumLanguage.AST
 (* F#
  -*- coding: utf-8 -*-
 Quantum Abstract Syntax Tree
@@ -73,6 +73,8 @@ type error =
   | SyntaxError of (string * int * int) // Syntax error: invalid token at specific line/column
   | SemanticError of string // Semantic error: message
   | EvaluationError of string // Evaluation error: message
+  interface IVisitable<error> with
+    member this.Accept (visitor: IVisitor<error>) = visitor.Visit this
   
 /// Discriminated type of quantum gates and operators
 type operator =
@@ -107,13 +109,20 @@ type operator =
   | SWAP of (bit * bit) // SWAP gate
   | RXX of (arithExpr * bit * bit) // Rotation X-X symmetric
   | RZZ of (arithExpr * bit * bit) // Rotation Z-Z symmetric
+  interface IVisitable<operator> with
+    member this.Accept (visitor: IVisitor<operator>) = visitor.Visit this
   
 /// <summary>
 /// Record type to hold the established memory bindings (arithmetic/boolean/classical/quantum)
 /// </summary>
-type Memory = {
-    Arithmetic: Map<string,arithExpr>;
-    Boolean: Map<string, boolExpr>; 
-    Quantum: Map<string, int>;
-    Classical: Map<string, int>;
-}
+type Memory =
+   { Arithmetic: Map<string,arithExpr>;
+     Boolean: Map<string, boolExpr>; 
+     Quantum: Map<string, int>;
+     Classical: Map<string, int> }
+   static member empty = { Arithmetic = Map.empty; Boolean = Map.empty;
+                           Quantum = Map.empty; Classical = Map.empty; }
+   
+   member this.setArithmetic map = { this with Arithmetic = map }
+   member this.setBoolean map = { this with Boolean = map }
+   member this.setQuantumClassic qmap cmap = { this with Quantum = qmap; Classical = cmap }

@@ -7,10 +7,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="UnitTests.fs" />
+        <Compile Include="UnitGrammar.fs" />
         <Compile Include="Program.fs" />
         <Content Include="QCode.txt" />
         <None Include="Tester.fsx" />
+        <Compile Include="UnitReduction.fs" />
     </ItemGroup>
 
     <ItemGroup>

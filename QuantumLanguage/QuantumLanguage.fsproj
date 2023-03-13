@@ -13,10 +13,10 @@
         <Compile Include="VisitorPattern.fs" />
         <Compile Include="AST.fs" />
         <FsYacc Include="Parser.fsy">
-            <OtherFlags>--module QuantumLanguage.Parser</OtherFlags>
+            <OtherFlags>--module QuantumLanguage.Parser --internal</OtherFlags>
         </FsYacc>
         <FsLex Include="Lexer.fsl">
-            <OtherFlags>--module QuantumLanguage.Lexer --unicode</OtherFlags>
+            <OtherFlags>--module QuantumLanguage.Lexer --internal --unicode</OtherFlags>
         </FsLex>
         <Compile Include="Parser.fsi" />
         <Compile Include="Parser.fs" />
@@ -24,7 +24,7 @@
         <Compile Include="Interpreter.fs" />
         <Compile Include="Translator.fs" />
         <Compile Include="Compiler.fs" />
-        <Compile Include="Program.fs" />
+        <Compile Include="Handler.fs" />
     </ItemGroup>
 
 </Project>

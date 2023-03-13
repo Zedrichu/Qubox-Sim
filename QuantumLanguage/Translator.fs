@@ -1,7 +1,7 @@
 /// <summary>
 /// Translator module handling the conversion from AST back to QuLang code definition.
 /// </summary>
-module QuantumLanguage.Translator
+module internal QuantumLanguage.Translator
 (* F#
  -*- coding: utf-8 -*-
 AST to QuLang Translator (reverse interpreter)
@@ -22,7 +22,7 @@ open AST
 /// </summary>
 /// <param name="result">Result expression (AST.result)</param>
 /// <returns>QuLang string representation</returns>
-let rec transResult (result:result):string =
+let rec private transResult (result:result):string =
     match result with
     | Click -> "Click"
     | NoClick -> "NoClick"
@@ -32,7 +32,7 @@ let rec transResult (result:result):string =
 /// </summary>
 /// <param name="bit">Bit expression (AST.bit)</param>
 /// <returns>QuLang string representation</returns>
-let rec transBit (bit:bit):string =
+let rec private transBit (bit:bit):string =
     match bit with
     | BitA(s, i) -> s + $"[%i{i}]"
     | BitS s -> s
@@ -44,7 +44,7 @@ let rec transBit (bit:bit):string =
 /// </summary>
 /// <param name="expr">Arithmetic expression (AST.arithExpr)</param>
 /// <returns>QuLang string representation</returns>
-let rec transArith (expr:arithExpr):string =
+let rec private transArith (expr:arithExpr):string =
     match expr with
     | VarA s -> s
     | Num i -> i.ToString()
@@ -65,7 +65,7 @@ let rec transArith (expr:arithExpr):string =
 /// </summary>
 /// <param name="expr">Boolean expression (AST.boolExpr)</param>
 /// <returns>QuLang string representation</returns>
-let rec transBool (expr:boolExpr):string =
+let rec private transBool (expr:boolExpr):string =
     match expr with
     | Bool b -> b.ToString()
     | VarB s -> "~"+s
@@ -85,7 +85,7 @@ let rec transBool (expr:boolExpr):string =
 /// </summary>
 /// <param name="operator">Operator expression (AST.operator)</param>
 /// <returns>QuLang string representation</returns>
-let rec transOperator (operator:operator):string =
+let rec internal transOperator (operator:operator):string =
     match operator with
     | AllocQC(bit1, bit2) -> "Qalloc "+transBit bit1+";\nCalloc "+transBit bit2+";"
     | Measure(q, c) -> "Measure "+transBit q+" -> "+transBit c+";"
@@ -94,7 +94,7 @@ let rec transOperator (operator:operator):string =
     | Assign(var, value) -> var+" := "+transArith value+";"
     | AssignB(var, value) -> transBool value+" =| "+var+";"
     | Order(op1, op2) -> transOperator op1+"\n"+transOperator op2
-    | Condition(b, op) -> "If ( "+transBool b+" ) "+transOperator op+";"
+    | Condition(b, op) -> "If ( "+transBool b+" ) "+transOperator op
     | PhaseDisk -> "PhaseDisk ;"
     | H(q) -> "H "+transBit q+";"
     | I(q) -> "ID "+transBit q+";"

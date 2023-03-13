@@ -1,4 +1,4 @@
-module QuantumLanguage.VisitorPattern
+module public QuantumLanguage.VisitorPattern
 
 type IVisitor<'T> =
     abstract member Visit : 'T -> unit
