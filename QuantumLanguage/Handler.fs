@@ -19,6 +19,11 @@ open System
 open FSharp.Text
 open QuantumLanguage.AST
 
+/// <summary>
+/// Interface method to parse QuLang code to AST based on the grammar rules
+/// </summary>
+/// <param name="code">String in QuLang format awaiting parsing</param>
+/// <returns>Tuple of AST for allocation and operation and error tag</returns>
 let public parseQuLang (code:string):(operator * operator) * error =
     let lexbuffer = Lexing.LexBuffer<_>.FromString code // Create an input stream
     try
@@ -28,21 +33,38 @@ let public parseQuLang (code:string):(operator * operator) * error =
         (ast, Success)
     //Undefined string TOKEN encountered - syntax analyzer 
     with e ->
+              // Collect error triggers and information
               let line = lexbuffer.EndPos.pos_lnum + 1
               let column = lexbuffer.EndPos.pos_cnum - lexbuffer.EndPos.pos_bol
               let token = Lexing.LexBuffer<_>.LexemeString lexbuffer
               printfn $"Parse error in program at : Line %i{line},
                 %i{column}, Unexpected token: %A{token}"
+              // Return an empty AST and the syntax error
               ((NOP, NOP), SyntaxError(token, line, column))
 
+/// <summary>
+/// Interface method to translate generated AST backwards to QuLang code
+/// </summary>
+/// <param name="ast">Generated AST for translation</param>
+/// <returns>String of prettified QuLang code</returns>
 let public translateAST (ast:operator * operator) =
     let reg, ops = ast
     Translator.transOperator (Order(reg, ops))
 
+/// <summary>
+/// Interface method to compile generated AST to Q# code
+/// </summary>
+/// <param name="ast">Generated AST for compilation</param>
+/// <returns>String of Q# code</returns>
 let public compileAST (ast:operator * operator) =
     let reg, ops = ast
     Compiler.compileOperator (Order(reg, ops))
     
+/// <summary>
+/// Interface method to analyze the semantics of the generated AST
+/// </summary>
+/// <param name="ast">Generated AST for analysis</param>
+/// <returns>Tuple of circuit memory and error tag</returns>
 let public analyzeSemantics (ast:operator * operator): Memory * error =
     let reg, ops = ast
     try
@@ -52,6 +74,12 @@ let public analyzeSemantics (ast:operator * operator): Memory * error =
         memory, Success        
     with e -> Memory.empty, SemanticError e.Message
 
+/// <summary>
+/// Interface method to optimize the generated AST with eager evaluation and reduction rules
+/// </summary>
+/// <param name="ast">Generated AST for optimization</param>
+/// <param name="memory">Initialized circuit memory</param>
+/// <returns>Tuple of optimized AST, updated circuit memory and error tag</returns>
 let public optimizeAST (ast:operator) (memory:Memory):(operator * Memory * error) =
     try
         let optimized = Interpreter.optimizeOperator ast Map.empty Map.empty
@@ -60,19 +88,39 @@ let public optimizeAST (ast:operator) (memory:Memory):(operator * Memory * error
         optimAST, updMemory, Success
     with e -> ast, memory, EvaluationError e.Message
     
+
+let rec public collectOperators (ast:operator) (acc:operator list):operator list =
+    match ast with
+    | Order(op1, op2) -> let opList = collectOperators op2 acc
+                         op1::opList
+    | _ ->  ast::acc
+
+/// <summary>
+/// Internal method to get number of choice from user input
+/// </summary>
+/// <returns>Tuple of success bool value and choice value</returns>
 let private getMenuInput() = Int32.TryParse(Console.ReadLine())
 
+/// <summary>
+/// Internal method to get user input as string
+/// </summary>
+/// <returns>String of user input</returns>
 let private getInputCode() = Console.ReadLine()
 
 let private printInnerMenu() =
     printfn "Menu:"
     printfn "1. Semantic Analysis"
     printfn "2. Optimize AST"
-    printfn "3. Compiler Q#"
-    printfn "4. Translator QuLang (Prettify)"
-    printfn "5. Back to main menu"
+    printfn "3. Collect Operators"
+    printfn "4. Compiler Q#"
+    printfn "5. Translator QuLang (Prettify)"
+    printfn "6. Back to main menu"
     printf "Enter your choice:"
 
+/// <summary>
+/// Internal method to execute tools on initial parsed AST
+/// </summary>
+/// <param name="ast">AST</param>
 let rec private execute (ast:operator*operator) =
     printInnerMenu()
     match getMenuInput() with
@@ -87,13 +135,16 @@ let rec private execute (ast:operator*operator) =
                  printfn $"Memory:%A{updMemory}"
                  printfn $"Status:%A{err}"
                  execute(ast)
-    | true, 3 -> let qSharp = compileAST ast
+    | true, 3 -> let _, ops = ast
+                 let opList = collectOperators ops List.Empty
+                 printfn $"Operation List:%A{opList}"
+    | true, 4 -> let qSharp = compileAST ast
                  printfn $"%A{qSharp}"
                  execute(ast)
-    | true, 4 -> let quLang = translateAST ast              
+    | true, 5 -> let quLang = translateAST ast              
                  printfn $"%A{quLang}"
                  execute(ast)
-    | true, 5 -> ()
+    | true, 6 -> ()
     | _ -> execute(ast)
     
 

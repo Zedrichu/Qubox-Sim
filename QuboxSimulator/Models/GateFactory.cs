@@ -1,6 +1,6 @@
 namespace QuboxSimulator.Models;
 
-public class Gate
+public class GateFactory
 {
     
 }

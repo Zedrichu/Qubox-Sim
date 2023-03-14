@@ -4,11 +4,11 @@
         <TargetFramework>net6.0</TargetFramework>
         <IsPackable>false</IsPackable>
         <GenerateProgramFile>false</GenerateProgramFile>
+        <OutputType>Library</OutputType>
     </PropertyGroup>
 
     <ItemGroup>
         <Compile Include="UnitGrammar.fs" />
-        <Compile Include="Program.fs" />
         <Content Include="QCode.txt" />
         <None Include="Tester.fsx" />
         <Compile Include="UnitReduction.fs" />

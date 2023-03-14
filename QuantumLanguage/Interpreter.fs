@@ -309,7 +309,7 @@ let rec private validateRegister (bit:bit) (flag:string) (memory:Map<string, int
     | BitA(s, i) ->
                 try
                     let alloc = Map.find s memory
-                    if alloc < i then failwith "Overflow of register"
+                    if (i<0 && alloc <= i) then failwith "Overflow of register"
                 with _ -> 
                     failwith $"{flag} bit register {s}[{i}] has not been allocated!"
     | BitS s -> if Map.containsKey s memory then ()

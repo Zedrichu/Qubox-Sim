@@ -4,20 +4,26 @@ namespace QuboxSimulator.Models;
 
 public class Register
 {
-    public int QubitNumber { get; private set; } = 0;
-    public int CbitNumber { get; private set; } = 0;
+    private int QubitNumber { get; set; } = 0;
+    private int CbitNumber { get; set; } = 0;
     
-    public Dictionary<string, int> qubits { get; set; } = new();
+    public Dictionary<string, int> Qubits { get; set; } = new();
     
-    public Dictionary<string, int> cbits { get; set; } = new();
+    public Dictionary<string, int> Cbits { get; set; } = new();
     
-    public Dictionary<string, AST.boolExpr> boolVariables { get; set; } = new();
+    public Dictionary<string, AST.boolExpr> BoolVariables { get; set; } = new();
     
-    public Dictionary<string, AST.arithExpr> arithVariables { get; set; } = new();
+    public Dictionary<string, AST.arithExpr> ArithVariables { get; set; } = new();
 
-    public Register(int qubitNumber, int cbitNumber)
+    public Register(AST.Memory memory)
     {
-        QubitNumber = qubitNumber;
-        CbitNumber = cbitNumber;
+        QubitNumber = memory.countQuantum;
+        CbitNumber = memory.countClassical;
+
+        Qubits = new Dictionary<string, int>(memory.Quantum);
+        Cbits = new Dictionary<string, int>(memory.Classical);
+
+        BoolVariables = new Dictionary<string, AST.boolExpr>(memory.Boolean);
+        ArithVariables = new Dictionary<string, AST.arithExpr>(memory.Arithmetic);
     }
 }

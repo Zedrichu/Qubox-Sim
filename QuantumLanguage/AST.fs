@@ -32,7 +32,7 @@ type arithExpr =
   | UPlusExpr of arithExpr
   | UMinusExpr of arithExpr
   interface IVisitable<arithExpr> with
-    member this.Accept (visitor: IVisitor<arithExpr>) = visitor.Visit this
+    member this.Accept (visitor: IVisitor<arithExpr, 'a>) = visitor.Visit this
   
 /// Tagged type of quantum/classical bit declarations
 type bit =
@@ -40,14 +40,14 @@ type bit =
   | BitA of (string * int)
   | BitSeq of (bit * bit)
   interface IVisitable<bit> with
-    member this.Accept (visitor: IVisitor<bit>) = visitor.Visit this
+    member this.Accept (visitor: IVisitor<bit, 'a>) = visitor.Visit this
 
 /// Tagged type of measurement results
 type result =
   | Click // +1 Eigenspace (spin-up, |0⟩)
   | NoClick // -1 Eigenspace (spin-down, |1⟩)
   interface IVisitable<result> with
-    member this.Accept (visitor: IVisitor<result>) = visitor.Visit this
+    member this.Accept (visitor: IVisitor<result, 'a>) = visitor.Visit this
   
   
 /// Discriminated type of basic boolean expression
@@ -65,7 +65,7 @@ type boolExpr =
   | Less of (arithExpr * arithExpr)
   | LessEqual of (arithExpr * arithExpr)
   interface IVisitable<boolExpr> with
-    member this.Accept (visitor: IVisitor<boolExpr>) = visitor.Visit this
+    member this.Accept (visitor: IVisitor<boolExpr, 'a>) = visitor.Visit this
   
 ///Tagged type of errors in QuLang module (Accumulate grammar error (syntax/semantics/evaluations))
 type error =
@@ -74,7 +74,7 @@ type error =
   | SemanticError of string // Semantic error: message
   | EvaluationError of string // Evaluation error: message
   interface IVisitable<error> with
-    member this.Accept (visitor: IVisitor<error>) = visitor.Visit this
+    member this.Accept (visitor: IVisitor<error, 'a>) = visitor.Visit this
   
 /// Discriminated type of quantum gates and operators
 type operator =
@@ -110,7 +110,7 @@ type operator =
   | RXX of (arithExpr * bit * bit) // Rotation X-X symmetric
   | RZZ of (arithExpr * bit * bit) // Rotation Z-Z symmetric
   interface IVisitable<operator> with
-    member this.Accept (visitor: IVisitor<operator>) = visitor.Visit this
+    member this.Accept (visitor: IVisitor<operator, 'a>) = visitor.Visit this
   
 /// <summary>
 /// Record type to hold the established memory bindings (arithmetic/boolean/classical/quantum)
@@ -126,3 +126,5 @@ type Memory =
    member this.setArithmetic map = { this with Arithmetic = map }
    member this.setBoolean map = { this with Boolean = map }
    member this.setQuantumClassic qmap cmap = { this with Quantum = qmap; Classical = cmap }
+   member this.countQuantum = (Map.fold (fun acc key value -> acc+value) 0 this.Quantum)
+   member this.countClassical = (Map.fold (fun acc key value -> acc+value) 0 this.Classical)

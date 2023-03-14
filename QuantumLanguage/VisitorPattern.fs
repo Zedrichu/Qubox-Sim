@@ -1,6 +1,6 @@
 module public QuantumLanguage.VisitorPattern
 
-type IVisitor<'T> =
-    abstract member Visit : 'T -> unit
+type IVisitor<'T, 'S> =
+    abstract member Visit : 'T -> 'S
 and IVisitable<'T> =
-    abstract member Accept : IVisitor<'T> -> unit
+    abstract member Accept : IVisitor<'T, 'S> -> 'S
