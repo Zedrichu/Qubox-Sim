@@ -133,8 +133,12 @@ type tokenId =
     | TOKEN_end_of_input
     | TOKEN_error
 type nonTerminalId = 
+    | NONTERM__startstartBool
+    | NONTERM__startstartArith
     | NONTERM__startstart
     | NONTERM_start
+    | NONTERM_startArith
+    | NONTERM_startBool
     | NONTERM_allocation
     | NONTERM_qallocation
     | NONTERM_callocation
@@ -159,4 +163,6 @@ val prodIdxToNonTerminal: int -> nonTerminalId
 
 /// This function gets the name of a token as a string
 val token_to_string: token -> string
+val startBool : (FSharp.Text.Lexing.LexBuffer<'cty> -> token) -> FSharp.Text.Lexing.LexBuffer<'cty> -> (AST.boolExpr) 
+val startArith : (FSharp.Text.Lexing.LexBuffer<'cty> -> token) -> FSharp.Text.Lexing.LexBuffer<'cty> -> (AST.arithExpr) 
 val start : (FSharp.Text.Lexing.LexBuffer<'cty> -> token) -> FSharp.Text.Lexing.LexBuffer<'cty> -> (AST.operator * AST.operator) 

@@ -35,12 +35,14 @@ module public Map =
 /// <param name="bit">Bit structure (array form/single/sequenced)</param>
 /// <param name="acc">Accumulator map of identifier/number pairs</param>
 /// <returns>Map of identifier/number pairs initialized</returns>
-let rec private unwrapBit (bit:bit) (acc:Map<string,int>): Map<string,int> =
+let rec private unwrapBit (bit:bit) (acc:Map<string,int * int>) (no:int): Map<string,int * int> * int =
     match bit with
-    | BitA(s, i) -> Map.add s i acc
-    | BitS s -> Map.add s 1 acc
-    | BitSeq(bit1, bit2) -> let acc1 = unwrapBit bit1 acc
-                            unwrapBit bit2 acc1
+    | BitA(s, i) -> let map = Map.add s (i, no) acc
+                    (map, no + i)
+    | BitS s -> let map = Map.add s (1, no) acc
+                (map, no + 1)    
+    | BitSeq(bit1, bit2) -> let acc1, newNo = unwrapBit bit1 acc no
+                            unwrapBit bit2 acc1 newNo
 
 /// <summary>
 /// Function to collect allocated Quantum bits and Classical bits in 2 map structures.
@@ -48,18 +50,18 @@ let rec private unwrapBit (bit:bit) (acc:Map<string,int>): Map<string,int> =
 /// <param name="operator">Allocation structure in the AST.operator type</param>
 /// <exception cref="System.Exception">Invalid allocation (identifier already used for quantum)</exception>
 /// <returns>Tuple of quantum bit mapping and classical bit mapping</returns>
-let internal allocateBits (operator:operator):Map<string,int> * Map<string,int> =
+let internal allocateBits (operator:operator):Map<string,int * int> * Map<string,int * int> =
     match operator with
     | AllocQC(qbit, cbit) ->
-        let qlist = unwrapBit qbit Map.empty
-        let clist = unwrapBit cbit Map.empty
+        let qlist, _ = unwrapBit qbit Map.empty 0 
+        let clist, _ = unwrapBit cbit Map.empty 0
         // Check if there are common bits between quantum and classical (semantic error)
         let common = Map.intersect qlist clist
         if not (Map.isEmpty common) then
             let var, _ = List.head (Map.toList common)
             failwith $"Invalid allocation of classical register {var} (already allocated as quantum)."
             else (qlist, clist)
-    | _ -> (Map.empty<string,int>, Map.empty<string,int>)
+    | _ -> (Map.empty<string,int * int>, Map.empty<string,int * int>)
 
 /// <summary>
 /// Function to eager evaluate arithmetic expressions with reduction rules.
@@ -304,11 +306,11 @@ let rec internal optimizeOperator (expr:operator) (memArith:Map<string, arithExp
 /// <param name="flag">Type of register expected</param>
 /// <param name="memory">Memory mapping of corresponding types</param>
 /// <exception cref="System.Exception">Invalid allocation of register</exception>
-let rec private validateRegister (bit:bit) (flag:string) (memory:Map<string, int>):unit =
+let rec private validateRegister (bit:bit) (flag:string) (memory:Map<string, int * int>):unit =
     match bit with
     | BitA(s, i) ->
                 try
-                    let alloc = Map.find s memory
+                    let alloc, _ = Map.find s memory
                     if (i<0 && alloc <= i) then failwith "Overflow of register"
                 with _ -> 
                     failwith $"{flag} bit register {s}[{i}] has not been allocated!"

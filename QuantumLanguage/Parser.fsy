@@ -30,9 +30,13 @@ open AST
 
 // Declare the initial non-terminal symbol
 %start start
+%start startArith
+%start startBool
 
 // Specify the return type of each of then non-terminal symbols
 %type <AST.operator * AST.operator> start
+%type <AST.boolExpr> startBool
+%type <AST.arithExpr> startArith
 %type <operator> allocation
 %type <operator> operator
 %type <operator> measurement
@@ -50,6 +54,14 @@ open AST
 start:
   | allocation statement EOF                  { ($1, $2) }
   | EOF                                       { (NOP, NOP) }
+  
+startArith:
+  | expression EOF                            { $1 }
+  | EOF                                       { Num(0) }
+
+startBool:
+  | boolexpression EOF                        { $1 }
+  | EOF                                       { Bool(false) }
   
 // Note that an End-Of-File (EOF) is inserted
 // The code annotation { $1 } specifies that parsing with this production
@@ -114,8 +126,8 @@ bit:
 
 // Production for producing bit definition sequences  
 bitsequence:
-  | bit                 { $1 } 
-  | bit COMMA bit       { BitSeq($1, $3) }
+  | bit                         { $1 } 
+  | bit COMMA bitsequence       { BitSeq($1, $3) }
 
 // Boolean productions
 //b ::= true | false | b and b | b or b | b && b | b || b | not b |

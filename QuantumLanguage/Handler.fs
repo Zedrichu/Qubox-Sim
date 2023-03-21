@@ -43,6 +43,52 @@ let public parseQuLang (code:string):(operator * operator) * error =
               ((NOP, NOP), SyntaxError(token, line, column))
 
 /// <summary>
+/// Interface method to parse boolean expression from string format to AST
+/// /// </summary>
+/// <param name="expr">String awaiting parsing</param>
+/// <returns>Tuple of boolean AST and error tag</returns>
+let public parseBool (expr:string):(boolExpr * error) =
+    let lexbuffer = Lexing.LexBuffer<_>.FromString expr // Create an input stream
+    try
+        // Create a TOKEN stream using the Lexer rules on the input stream
+        // Pass the TOKEN stream to the Parser to obtain the AST
+        let ast = Parser.startBool Lexer.tokenize lexbuffer
+        (ast, Success)
+    //Undefined string TOKEN encountered - syntax analyzer 
+    with e ->
+              // Collect error triggers and information
+              let line = lexbuffer.EndPos.pos_lnum + 1
+              let column = lexbuffer.EndPos.pos_cnum - lexbuffer.EndPos.pos_bol
+              let token = Lexing.LexBuffer<_>.LexemeString lexbuffer
+              printfn $"Parse error in program at : Line %i{line},
+                %i{column}, Unexpected token: %A{token}"
+              // Return an empty AST and the syntax error
+              (Bool false, SyntaxError(token, line, column))
+              
+/// <summary>
+/// Interface method to parse arithmetic expression from string format to AST
+/// </summary>
+/// <param name="expr">String awaiting parsing</param>
+/// <returns>Tuple of arithmetic AST and error tag</returns>
+let public parseArith (expr:string):(arithExpr * error) =
+    let lexbuffer = Lexing.LexBuffer<_>.FromString expr // Create an input stream
+    try
+        // Create a TOKEN stream using the Lexer rules on the input stream
+        // Pass the TOKEN stream to the Parser to obtain the AST
+        let ast = Parser.startArith Lexer.tokenize lexbuffer
+        (ast, Success)
+    //Undefined string TOKEN encountered - syntax analyzer 
+    with e ->
+              // Collect error triggers and information
+              let line = lexbuffer.EndPos.pos_lnum + 1
+              let column = lexbuffer.EndPos.pos_cnum - lexbuffer.EndPos.pos_bol
+              let token = Lexing.LexBuffer<_>.LexemeString lexbuffer
+              printfn $"Parse error in program at : Line %i{line},
+                %i{column}, Unexpected token: %A{token}"
+              // Return an empty AST and the syntax error
+              (Num 0, SyntaxError(token, line, column))
+
+/// <summary>
 /// Interface method to translate generated AST backwards to QuLang code
 /// </summary>
 /// <param name="ast">Generated AST for translation</param>
@@ -69,7 +115,7 @@ let public analyzeSemantics (ast:operator * operator): Memory * error =
     let reg, ops = ast
     try
         let quantumMap, classicMap = Interpreter.allocateBits reg
-        let memory = Memory.empty.setQuantumClassic quantumMap classicMap
+        let memory = Memory.empty.SetQuantumClassic quantumMap classicMap
         Interpreter.semanticAnalyzer ops memory
         memory, Success        
     with e -> Memory.empty, SemanticError e.Message
@@ -84,7 +130,7 @@ let public optimizeAST (ast:operator) (memory:Memory):(operator * Memory * error
     try
         let optimized = Interpreter.optimizeOperator ast Map.empty Map.empty
         let memA, memB, optimAST = optimized
-        let updMemory = (memory.setArithmetic memA).setBoolean memB
+        let updMemory = (memory.SetArithmetic memA).SetBoolean memB
         optimAST, updMemory, Success
     with e -> ast, memory, EvaluationError e.Message
     
@@ -150,8 +196,10 @@ let rec private execute (ast:operator*operator) =
 
 let private printMainMenu() =
     printfn "Menu: "
-    printfn "1. Parse to AST"
-    printfn "2. Quit"
+    printfn "1. Parse QuLang circuit"
+    printfn "2. Parse boolean expression"
+    printfn "3. Parse arithmetic expression"
+    printfn "4. Quit"
     printf "Enter your choice:"
     
     
@@ -164,7 +212,15 @@ let rec mainMenu () =
                  printfn $"%A{ast} Status:%A{err}"
                  execute(ast)
                  mainMenu()
-    | true, 2 -> ()
+    | true, 2 -> let expr = Console.ReadLine()
+                 let ast, err = parseBool expr
+                 printfn $"%A{ast} Status:%A{err}"
+                 mainMenu()
+    | true, 3 -> let expr = Console.ReadLine()
+                 let ast, err = parseArith expr
+                 printfn $"%A{ast} Status:%A{err}"
+                 mainMenu()
+    | true, 4 -> ()
     | _ -> mainMenu()
 
 [<EntryPoint>]
