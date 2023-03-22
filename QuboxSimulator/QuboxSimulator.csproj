@@ -4,25 +4,13 @@
         <TargetFramework>net6.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <Executable>true</Executable>
     </PropertyGroup>
 
     <ItemGroup>
-      
+      <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
       <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="6.0.14" />
       <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor" Version="2.1.0" />
-      <PackageReference Include="Microsoft.Quantum.Canon" Version="0.5.1904.1302" />
-      <PackageReference Include="Microsoft.Quantum.Runtime.Core" Version="0.27.257618-beta" />
-      <PackageReference Include="Microsoft.Quantum.Sdk" Version="0.27.253010" />
-      <PackageReference Include="Microsoft.Quantum.Simulators" Version="0.27.257618-beta" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Update="QuantumLanguage.Tests\Program.fs">
-        <Link>QuantumLanguage.Test\Program.fs</Link>
-      </None>
-      <None Update="QuantumLanguage.Tests\UnitTest1.fs">
-        <Link>QuantumLanguage.Test\UnitTest1.fs</Link>
-      </None>
     </ItemGroup>
 
     <ItemGroup>

@@ -16,6 +16,7 @@ Description: Declaration module containing the types required to build the abstr
 *)
 
 open System.Text.Json.Serialization.Metadata
+open QuantumLanguage.VisitorPattern
 open VisitorPattern
 
 /// Discriminated type of basic arithmetic expressions
@@ -32,8 +33,10 @@ type arithExpr =
   | ModExpr of (arithExpr * arithExpr)
   | UPlusExpr of arithExpr
   | UMinusExpr of arithExpr
+  member this.Accept (visitor: IVisitor<arithExpr, 'a>) = (this :> IVisitable<arithExpr>).Accept visitor
   interface IVisitable<arithExpr> with
     member this.Accept (visitor: IVisitor<arithExpr, 'a>) = visitor.Visit this
+    
   override this.ToString () =
     match this with
     | Pi -> "π"
@@ -81,8 +84,10 @@ type boolExpr =
   | GreaterEqual of (arithExpr * arithExpr)
   | Less of (arithExpr * arithExpr)
   | LessEqual of (arithExpr * arithExpr)
+  member this.Accept (visitor: IVisitor<boolExpr, 'a>) = (this :> IVisitable<boolExpr>).Accept visitor
   interface IVisitable<boolExpr> with
     member this.Accept (visitor: IVisitor<boolExpr, 'a>) = visitor.Visit this
+    
   override this.ToString () =
     match this with
     | Bool b -> b.ToString()
@@ -105,8 +110,7 @@ type error =
   | SyntaxError of (string * int * int) // Syntax error: invalid token at specific line/column
   | SemanticError of string // Semantic error: message
   | EvaluationError of string // Evaluation error: message
-  interface IVisitable<error> with
-    member this.Accept (visitor: IVisitor<error, 'a>) = visitor.Visit this
+  
   member this.ToString =
     match this with
     | Success -> "Success"
@@ -147,8 +151,10 @@ type operator =
   | SWAP of (bit * bit) // SWAP gate
   | RXX of (arithExpr * bit * bit) // Rotation X-X symmetric
   | RZZ of (arithExpr * bit * bit) // Rotation Z-Z symmetric
+  member this.Accept (visitor: IVisitor<operator, 'a>) = (this :> IVisitable<operator>).Accept visitor
   interface IVisitable<operator> with
     member this.Accept (visitor: IVisitor<operator, 'a>) = visitor.Visit this
+  
   member this.DestructSingle () =
     match this with
     | H bit -> ("H", bit)
@@ -162,7 +168,14 @@ type operator =
     | T bit -> ("T", bit)
     | SX bit -> ("SX", bit)
     | SXDG bit -> ("SXDG", bit)
-    | _ -> "", BitS ""
+    | _ -> null, BitS null
+  member this.DestructParam () =
+    match this with
+    | P (param, bit) -> ("P", param, bit)
+    | RZ (param, bit) -> ("RZ", param, bit)
+    | RY (param, bit) -> ("RY", param, bit)
+    | RX (param, bit) -> ("RX", param, bit)
+    | _ -> null, Num 0, BitS null
     
      
   

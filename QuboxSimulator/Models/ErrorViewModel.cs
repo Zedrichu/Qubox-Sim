@@ -1,4 +1,4 @@
-namespace Qubox_Simulator.Models;
+namespace QuboxSimulator.Models;
 
 public class ErrorViewModel
 {

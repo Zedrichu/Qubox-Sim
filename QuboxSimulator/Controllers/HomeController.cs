@@ -1,9 +1,9 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Qubox_Simulator.Models;
+using QuboxSimulator.Models;
 
-namespace Qubox_Simulator.Controllers;
+namespace QuboxSimulator.Controllers;
 
 public class HomeController : Controller
 {

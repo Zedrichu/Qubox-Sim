@@ -3,6 +3,7 @@
 open FSharp.Text.Lexing
 open System
 #load "../QuantumLanguage/VisitorPattern.fs"
+open QuantumLanguage.VisitorPattern
 #load "../QuantumLanguage/AST.fs"
 open QuantumLanguage.AST
 #load "../QuantumLanguage/Parser.fs"

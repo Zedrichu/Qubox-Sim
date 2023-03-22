@@ -1,3 +1,5 @@
+using QuboxSimulator.Models.Gates;
+
 namespace QuboxSimulator.Models;
 
 public class Tower
@@ -11,7 +13,7 @@ public class Tower
         Gates = new List<IGate>();
         for (int i = 0; i < height; i++)
         {
-            Gates.Add(new NoneGate(i, i));
+            Gates.Add(new NoneGate(i));
         }
     }
     
@@ -49,4 +51,4 @@ public class Tower
 }
 
 //IGate -> ISupportGate , IMatrixGate 
-//IMatrixGate -> SingleQubitGate , MultiQubitGate, ParametricGate
+//IMatrixGate -> SingleQubitGate , DoubleQubitGate, TripleQubitGate, ParametricGate
