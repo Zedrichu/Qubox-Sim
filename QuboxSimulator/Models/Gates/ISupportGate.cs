@@ -13,7 +13,9 @@ Includes the declaration of the concrete support gates, supported by the simulat
 @__Status --> DEV
 */
 
-
+/// <summary>
+/// Interface for generic quantum gates.
+/// </summary>
 public interface IGate
 {
     public abstract Tuple<int, int> TargetRange { get; set; }
@@ -21,77 +23,90 @@ public interface IGate
     public abstract string? Condition { get; set; }
     
     public abstract string Id { get; set; }
+    
+    
+
 }
 
+/// <summary>
+/// Interface for support quantum gates (barrier, reset, measurement)
+/// </summary>
 public interface ISupportGate: IGate
 {
     
 }
 
-public class NoneGate : ISupportGate
+internal abstract class SupportGate : ISupportGate
 {
     public Tuple<int, int> TargetRange { get; set; }
-
-    public string? Condition { get; set; } = null;
-    public string Id { get; set; } = "NONE";
     
+    public string? Condition { get; set; }
+    
+    public string Id { get; set; }
+    
+    public override string ToString()
+    {
+        return $"Gate:{Id} Target: {TargetRange}";
+    }
+}
+
+/// <summary>
+/// Gate placeholder in the circuit grid (no operation)
+/// </summary>
+internal class NoneGate : SupportGate
+{
     public NoneGate(int target)
     {
+        Id = "NONE";
         TargetRange = new Tuple<int, int>(target, target);
     }
+
 }
 
-public class BarrierGate : ISupportGate
+/// <summary>
+/// Barrier for gate optimization triggers
+/// </summary>
+internal class BarrierGate : SupportGate
 {
-    public Tuple<int, int> TargetRange { get; set; }
-
-    public string? Condition { get; set; } = null;
-    public string Id { get; set; } = "BARRIER";
-    
     public BarrierGate(int target)
     {
+        Id = "BARRIER";
         TargetRange = new Tuple<int, int>(target, target);
     }
 }
 
-public class ResetGate : ISupportGate
+/// <summary>
+/// Qubit initializer to computational state |0> = (1,0)
+/// </summary>
+internal class ResetGate : SupportGate
 {
-    public Tuple<int, int> TargetRange { get; set; }
-    
-    public string? Condition { get; set; } = null;
-    
-    public string Id { get; set; } = "RESET";
-    
     public ResetGate(int target)
     {
+        Id = "RESET";
         TargetRange = new Tuple<int, int>(target, target);
     }
 }
 
-public class MeasureGate : ISupportGate
-{
-    public Tuple<int, int> TargetRange { get; set; }
-    
-    public string? Condition { get; set; } = null;
-    
-    public string Id { get; set; } = "MEASURE";
-    
+/// <summary>
+/// Measurement gate from quantum to classical register
+/// </summary>
+internal class MeasureGate : SupportGate
+{ 
     public MeasureGate(int quantum, int classic)
     {
+        Id = "MEASURE";
         TargetRange = new Tuple<int, int>(quantum, classic);
     }
 }
 
-public class PhaseDisk : ISupportGate
+/// <summary>
+/// Visualizer for the phase distribution at any point in the circuit.
+/// </summary>
+internal class PhaseDisk : SupportGate
 {
-    public Tuple<int, int> TargetRange { get; set; }
-    
-    public string? Condition { get; set; } = null;
-    
-    public string Id { get; set; } = "PHASEDISK";
-    
     public PhaseDisk(int qubitNo)
     {
+        Id = "PHASEDISK";
         TargetRange = new Tuple<int, int>(0, qubitNo);
     }
 }

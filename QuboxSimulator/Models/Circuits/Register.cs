@@ -26,4 +26,16 @@ public class Register
         BoolVariables = new Dictionary<string, AST.boolExpr>(memory.Boolean);
         ArithVariables = new Dictionary<string, AST.arithExpr>(memory.Arithmetic);
     }
+
+    private static string StringifyDictionary<T>(Dictionary<string, T> dictionary)
+    {
+        return dictionary.Aggregate("", (current, pair) => current + $"{pair.Key} {pair.Value} \n");
+    }
+    
+    public override string ToString()
+    {
+        return $"Qubits: {QubitNumber} Bits: {CbitNumber} \n" +
+                $"{StringifyDictionary(Qubits)} {StringifyDictionary(Cbits)} \n" +
+                $"{StringifyDictionary(BoolVariables)} {StringifyDictionary(ArithVariables)}";
+    }
 }

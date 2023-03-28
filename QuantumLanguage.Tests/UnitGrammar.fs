@@ -109,3 +109,5 @@ let ``Invalid Program creates AST of Error`` () =
         | _ -> Fail
     Assert.That(testError, Is.EqualTo Pass)
     Assert.That(ast, Is.EqualTo (NOP, NOP) )
+    
+//#TODO! Update unit tests according to new parser architecture

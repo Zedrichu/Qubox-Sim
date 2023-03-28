@@ -9,8 +9,7 @@ public interface IMatrixGate : IGate
     public abstract Matrix<Complex> Matrix { get; set; }
 }
 
-
-public class SingleQubitGate : IMatrixGate
+internal abstract class MatrixGate : IMatrixGate
 {
     public Matrix<Complex> Matrix { get; set; }
     
@@ -19,7 +18,15 @@ public class SingleQubitGate : IMatrixGate
     public string Id { get; set; }
     
     public string? Condition { get; set; }
-    
+
+    public override string ToString()
+    {
+        return $"Gate:{Id} Target: {TargetRange}";
+    }
+}
+
+internal class SingleQubitGate : MatrixGate
+{
     public SingleQubitGate(Matrix<Complex> matrix, int target, string id, string? condition = null)
     {
         Matrix = matrix;
@@ -29,17 +36,9 @@ public class SingleQubitGate : IMatrixGate
     }    
 }
 
-public class CnotGate : IMatrixGate
+internal class CnotGate : MatrixGate
 {
-    public Matrix<Complex> Matrix { get; set; }
-    
-    public Tuple<int, int> TargetRange { get; set; }
-    
-    public string Id { get; set; }
-
     public int Control { get; set; }
-
-    public string? Condition { get; set; }
     
     public CnotGate(int control, int target)
     {
@@ -57,16 +56,9 @@ public class CnotGate : IMatrixGate
     }
 }
 
-public class SwapGate : IMatrixGate
+internal class SwapGate : MatrixGate
 {
-    public Matrix<Complex> Matrix { get; set; }
-    
-    public Tuple<int, int> TargetRange { get; set; }
-    
-    public string Id { get; set; }
-    
-    public string? Condition { get; set; }
-    
+
     public SwapGate(int qubit1, int qubit2)
     {
         Matrix = Matrix<Complex>.Build.DenseOfArray(
@@ -82,7 +74,7 @@ public class SwapGate : IMatrixGate
     }
 }
 
-public class ToffoliGate : IMatrixGate
+internal class ToffoliGate : IMatrixGate
 {
     public Matrix<Complex> Matrix { get; set; }
     

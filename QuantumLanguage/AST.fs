@@ -15,9 +15,7 @@ Description: Declaration module containing the types required to build the abstr
 @__Status --> DEV
 *)
 
-open System.Text.Json.Serialization.Metadata
 open QuantumLanguage.VisitorPattern
-open VisitorPattern
 
 /// Discriminated type of basic arithmetic expressions
 type arithExpr =
@@ -92,9 +90,9 @@ type boolExpr =
     match this with
     | Bool b -> b.ToString()
     | VarB s -> s
-    | LogAnd (b1, b2) -> $"%s{b1.ToString()} && %s{b2.ToString()}"
-    | LogOr (b1, b2) -> $"%s{b1.ToString()} || %s{b2.ToString()}"
-    | Neg b -> $"not (%s{b.ToString()})"
+    | LogAnd (b1, b2) -> $"({b1} && {b2})"
+    | LogOr (b1, b2) -> $"({b1} || {b2})"
+    | Neg b -> $"not ({b})"
     | Check (bit, result) -> $"(%s{bit.ToString()} |> %s{result.ToString()})"
     | Equal (a1, a2) -> $"%s{a1.ToString()} == %s{a2.ToString()}"
     | NotEqual (a1, a2) -> $"%s{a1.ToString()} != %s{a2.ToString()}"
@@ -130,6 +128,7 @@ type operator =
   | Condition of (boolExpr * operator)
   | Barrier of bit // Separate optimizations
   | PhaseDisk // Phase disk operation on all qubits
+  //| UnaryGate of (token * bit)
   | H of bit // Hadamard
   | I of bit // Identity
   | X of bit // Pauli X (NOT)
@@ -176,6 +175,7 @@ type operator =
     | RY (param, bit) -> ("RY", param, bit)
     | RX (param, bit) -> ("RX", param, bit)
     | _ -> null, Num 0, BitS null
+    
     
      
   

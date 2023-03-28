@@ -28,24 +28,37 @@ public class OperatorVisitor: IVisitor<@operator, List<IGate>>
     public OperatorVisitor(Memory memory)
     {
         _memory = memory;
+        // Create arithmetic visitor with arithmetic memory
         _arithVisitor = new ArithmeticVisitor(memory.Arithmetic);
     }
     
+    /// <summary>
+    /// Helper method to get the phase angle and the string representation from arithmetic AST.
+    /// </summary>
+    /// <param name="ast">Converted arithmetic expression</param>
+    /// <returns>Tuple of computed value and formed string</returns>
     private Tuple<double, string> GetPhaseTuple(arithExpr ast)
     {
         var angle = ast.Accept(_arithVisitor);
         var str = ast.ToString();
         return new Tuple<double, string>(angle, str);
     }
-
+    
+    /// <summary>
+    /// Interface method implementation interpreting operators to gate objects.
+    /// </summary>
+    /// <param name="ast">Operator Abstract Syntax Tree</param>
+    /// <returns>List of gates obtained in interpreter</returns>
     public List<IGate> Visit(@operator ast)
     {
         var gateList = new List<IGate>();
         switch (ast)
         {
             case @operator.Order pair:
+                // Recurse on both children of the node
                 var list1 = pair.Item.Item1.Accept(this);
                 var list2 = pair.Item.Item2.Accept(this);
+                // Add found gates to the list
                 gateList.AddRange(list1);
                 gateList.AddRange(list2);
                 break;
@@ -55,12 +68,16 @@ public class OperatorVisitor: IVisitor<@operator, List<IGate>>
             case @operator.TDG: case @operator.SX:
             case @operator.SXDG: case @operator.Y:
             case @operator.Z:
+                // Destruct single operator into gate identifier and target qubit
                 var tokbit = ast.DestructSingle();
+                // Retrieve order of the target qubit in circuit mapping
                 var target= _memory.GetOrder(tokbit.Item2);
+                // Add gate created by factory to list
                 gateList.Add(GateFactory.GetSingleGate(tokbit.Item1, target));
                 break;
             case @operator.RX: case @operator.RY:
             case @operator.RZ: case @operator.P:
+                // Destruct 
                 var tokparbit = ast.DestructParam();
                 target = _memory.GetOrder(tokparbit.Item3);
                 var phase = GetPhaseTuple(tokparbit.Item2);
@@ -141,15 +158,23 @@ public class OperatorVisitor: IVisitor<@operator, List<IGate>>
     }
 }
 
+/// <summary>
+/// Visitor class for arithmetic expressions
+/// </summary>
 public class ArithmeticVisitor : IVisitor<arithExpr, double>
 {
-    private Dictionary<string, arithExpr> _memory;
+    private readonly Dictionary<string, arithExpr> _memory;
     
     public ArithmeticVisitor(IDictionary<string, arithExpr> memory)
     {
         _memory = new Dictionary<string, arithExpr>(memory);
     }
-
+    
+    /// <summary>
+    /// Interface method implementation for visiting arithmetic AST
+    /// </summary>
+    /// <param name="expr">Expression to be computed</param>
+    /// <returns>Result of arithmetic computation</returns>
     public double Visit(arithExpr expr) {
         var value = 0.0;
         switch (expr)

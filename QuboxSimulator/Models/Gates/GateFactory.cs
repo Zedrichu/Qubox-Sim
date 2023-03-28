@@ -156,7 +156,7 @@ public static class GateFactory
         };
     }
     
-    public static IParametricGate GetUnitaryGate(Tuple<double, string>[] args, int target)
+    public static ParametricGate GetUnitaryGate(Tuple<double, string>[] args, int target)
     {
         return new UnitaryGate(args, target);
     }

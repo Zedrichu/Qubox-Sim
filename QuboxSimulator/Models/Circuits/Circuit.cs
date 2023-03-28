@@ -8,20 +8,45 @@ public class Circuit
     
     public List<Tower> GateGrid { get; private set; }
 
-    public Circuit(Register allocation, List<Tower> gateGrid)
+    public Circuit(Register allocation)
     {
         Allocation = allocation;
-        GateGrid = gateGrid;
+        GateGrid = new List<Tower>{new (Allocation.QubitNumber + 1)};
     }
     
     public void AddGate(IGate gate)
-    {
+    {   
+        //#TODO! Model the barrier/CNOT block definition
         var tower = GateGrid.FirstOrDefault(t => t.AcceptGate(gate));
-        if (tower == null)
+        
+        if (tower != null) return;
+            
+        
+        tower = new Tower(Allocation.QubitNumber + 1);
+        tower.AcceptGate(gate);
+        GateGrid.Add(tower);
+        
+        if (gate.Id is "CNOT" or "CCX" or "RZZ" or "RXX" or "SWAP")
         {
-            tower = new Tower(Allocation.QubitNumber + 1);
-            tower.AcceptGate(gate);
-            GateGrid.Add(tower);
+            foreach (var t in GateGrid)
+            {
+                t.Locked = gate.TargetRange;
+                if (t == tower) break;
+            } 
         }
+
+        if (gate.Id is "Barrier")
+        {
+            foreach (var t in GateGrid)
+            {
+                t.Locked = new Tuple<int, int>(0, Allocation.QubitNumber);
+                if (t == tower) break;
+            }
+        }
+    }
+
+    public override string ToString()
+    {
+        return Allocation + GateGrid.Aggregate("", (current, tower) => current + "|" + tower )+" |";
     }
 }
