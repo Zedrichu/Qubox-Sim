@@ -1,0 +1,24 @@
+@page "/form-example"
+@using Microsoft.Extensions.Logging
+@using static QuantumLanguage.Handler;
+@using BlazorApp1.Models
+@inject ILogger<FormExample> Logger;
+
+<EditForm Model="@exampleModel" OnSubmit="@HandleSubmit">
+    <InputText id="code" @bind-Value="exampleModel.Code"/>
+
+    <button type="submit">Submit</button>
+    <p>@ast</p>
+</EditForm>
+
+@code {
+    private ExampleModel exampleModel = new();
+    private AST.@operator ast;
+    
+    private void HandleSubmit()
+    {
+        Logger.LogInformation("Submitted");
+        var tuple = parseQuLang(exampleModel.Code);
+        ast = tuple.Item1.Item2;
+    }
+}

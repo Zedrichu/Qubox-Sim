@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IonQApp", "IonQApp\IonQApp.
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "QuantumLanguage.Tests", "QuantumLanguage.Tests\QuantumLanguage.Tests.fsproj", "{DFB17DBC-2F34-4F20-9ABF-A47AC96A1B71}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuboxBlazor", "QuboxBlazor\QuboxBlazor.csproj", "{1874B8D5-CCBD-4FBD-A906-CDE2B98BE71C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +38,9 @@ Global
 		{DFB17DBC-2F34-4F20-9ABF-A47AC96A1B71}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DFB17DBC-2F34-4F20-9ABF-A47AC96A1B71}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DFB17DBC-2F34-4F20-9ABF-A47AC96A1B71}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1874B8D5-CCBD-4FBD-A906-CDE2B98BE71C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1874B8D5-CCBD-4FBD-A906-CDE2B98BE71C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1874B8D5-CCBD-4FBD-A906-CDE2B98BE71C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1874B8D5-CCBD-4FBD-A906-CDE2B98BE71C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
