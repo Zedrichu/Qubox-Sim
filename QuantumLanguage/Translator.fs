@@ -18,21 +18,11 @@ Description: Translator module handling the conversion from AST back to QuLang c
 open AST
 
 /// <summary>
-/// Function to translate quantum results to QuLang declaration.
-/// </summary>
-/// <param name="result">Result expression (AST.result)</param>
-/// <returns>QuLang string representation</returns>
-let rec private transResult (result:result):string =
-    match result with
-    | Click -> "Click"
-    | NoClick -> "NoClick"
-
-/// <summary>
 /// Function to translate quantum bit to QuLang declaration.
 /// </summary>
 /// <param name="bit">Bit expression (AST.bit)</param>
 /// <returns>QuLang string representation</returns>
-let rec private transBit (bit:bit):string =
+let rec internal transBit (bit:Bit):string =
     match bit with
     | BitA(s, i) -> s + $"[%i{i}]"
     | BitS s -> s
@@ -44,20 +34,14 @@ let rec private transBit (bit:bit):string =
 /// </summary>
 /// <param name="expr">Arithmetic expression (AST.arithExpr)</param>
 /// <returns>QuLang string representation</returns>
-let rec private transArith (expr:arithExpr):string =
+let rec private transArith (expr:ArithExpr):string =
     match expr with
     | VarA s -> s
     | Num i -> i.ToString()
     | Float f -> f.ToString()
     | Pi -> "Pi"
-    | TimesExpr(x, y) -> "("+transArith x + " * " + transArith y+")"
-    | DivExpr(x, y) -> "("+transArith x + " / " + transArith y+")"
-    | PlusExpr(x, y) -> "("+transArith x + " + " + transArith y+")"
-    | MinusExpr(x, y) -> "("+transArith x + " - " + transArith y+")"
-    | PowExpr(x, y) -> "("+transArith x + " ^ " + transArith y+")"
-    | ModExpr(x, y) -> "("+transArith x + " % " + transArith y+")"
-    | UMinusExpr x -> "(- "+ transArith x+")"
-    | UPlusExpr x -> "(+ "+ transArith x+")"
+    | BinaryOp (a1, op, a2) -> $"({a1} {op} {a2})"
+    | UnaryOp (op, a) -> $"{op} ({a})"
 
 /// <summary>
 /// Function to translate boolean expressions to QuLang declaration.
@@ -65,57 +49,42 @@ let rec private transArith (expr:arithExpr):string =
 /// </summary>
 /// <param name="expr">Boolean expression (AST.boolExpr)</param>
 /// <returns>QuLang string representation</returns>
-let rec private transBool (expr:boolExpr):string =
+let rec private transBool (expr:BoolExpr):string =
     match expr with
-    | Bool b -> b.ToString()
+    | B b -> b.ToString()
     | VarB s -> "~"+s
-    | LogAnd(x, y) -> "("+transBool x + " && " + transBool y+")"
-    | LogOr(x, y) -> "("+transBool x + " || " + transBool y+")"
-    | Neg x -> "not ( "+ transBool x+")"
-    | Check(bit, res) -> "("+transBit bit + " |> " + transResult res + ")"
-    | Equal(x, y) -> transArith x + " == " + transArith y
-    | NotEqual(x, y) -> transArith x + " != " + transArith y
-    | Less(x, y) -> transArith x + " < " + transArith y
-    | LessEqual(x, y) -> transArith x + " <= " + transArith y
-    | Greater(x, y) -> transArith x + " > " + transArith y
-    | GreaterEqual(x, y) -> transArith x + " >= " + transArith y
+    | LogicOp (b1, op, b2) -> $"({b1} {op} {b2})"
+    | RelationOp (a1, op, a2) -> $"({a1} {op} {a2})"
+    | Not b -> $"not ({b})"
+    | Check (cb, r) -> $"{cb} |> {r}"
 
 /// <summary>
-/// Function to translate quantum operators to QuLang declaration.
+/// Function to translate quantum statements to QuLang declaration.
 /// </summary>
-/// <param name="operator">Operator expression (AST.operator)</param>
+/// <param name="st">Statement AST to be translated</param>
 /// <returns>QuLang string representation</returns>
-let rec internal transOperator (operator:operator):string =
-    match operator with
-    | AllocQC(bit1, bit2) -> "Qalloc "+transBit bit1+";\nCalloc "+transBit bit2+";"
-    | Measure(q, c) -> "Measure "+transBit q+" -> "+transBit c+";"
-    | Reset(bit) -> "Reset "+transBit bit+";"
-    | Barrier(bit) -> "Barrier "+transBit bit+";"
-    | Assign(var, value) -> var+" := "+transArith value+";"
-    | AssignB(var, value) -> transBool value+" =| "+var+";"
-    | Order(op1, op2) -> transOperator op1+"\n"+transOperator op2
-    | Condition(b, op) -> "If ( "+transBool b+" ) "+transOperator op
-    | PhaseDisk -> "PhaseDisk ;"
-    | H(q) -> "H "+transBit q+";"
-    | I(q) -> "ID "+transBit q+";"
-    | X(q) -> "X "+transBit q+";"
-    | Y(q) -> "Y "+transBit q+";"
-    | Z(q) -> "Z "+transBit q+";"
-    | S(q) -> "S "+transBit q+";"
-    | T(q) -> "T "+transBit q+";"
-    | SDG(q) -> "SDG "+transBit q+";"
-    | TDG(q) -> "TDG "+transBit q+";"
-    | SX q -> "SX "+transBit q+";"
-    | SXDG q -> "SXDG "+transBit q+";"
-    | P(phase, q) -> "P("+transArith phase+") "+transBit q+";"
-    | RZ(angle, bit) -> "RZ("+transArith angle+") "+transBit bit+";"
-    | RX(angle, bit) -> "RX("+transArith angle+") "+transBit bit+";"
-    | RY(angle, bit) -> "RY("+transArith angle+") "+transBit bit+";"
-    | CNOT(bit1, bit2) -> "CNOT "+transBit bit1+", "+transBit bit2+";"
-    | CCX(bit1, bit2, bit3) -> "CCX "+transBit bit1+", "+transBit bit2+", "+transBit bit3+";"
-    | SWAP(bit1, bit2) -> "SWAP "+transBit bit1+", "+transBit bit2+";"
-    | RZZ(theta, bit1, bit2) -> "RZZ("+transArith theta+") "+transBit bit1+", "+transBit bit2+";"
-    | RXX(theta, bit1, bit2) -> "RXX("+transArith theta+") "+transBit bit1+", "+transBit bit2+";"
-    | U(exp1, exp2, exp3, bit) -> "U("+transArith exp1+", "+transArith exp2+", "+transArith exp3+") "+transBit bit+";"
-    | NOP -> ""
+let rec private transStatement (st:Statement):string =
+    match st with
+    | Assign(var, value) -> $"{var} := {transArith value};"
+    | AssignB(var, value) -> $"{transBool value} =| {var};"
+    | Condition(b, op) -> $"If ( {transBool b} ) {transStatement op}"
+    | Measure(q, c) -> $"Measure {transBit q} -> {transBit c};"
+    | Reset(bit) -> $"Reset {transBit bit};"
+    | Barrier(bit) -> $"Barrier {transBit bit};"
+    | PhaseDisk -> "PhaseDisk;"
+    | UnaryGate(uTag, bit) -> $"{uTag} {transBit bit};"
+    | BinaryGate(bTag, bit1, bit2) -> $"{bTag} {transBit bit1}, {transBit bit2};"
+    | ParamGate(pTag, theta, bit) -> $"{pTag} ({transArith theta}) {transBit bit};"
+    | BinaryParamGate(bpTag, theta, bit1, bit2) ->
+                $"{bpTag} ({transArith theta}) {transBit bit1}, {transBit bit2};"
+    | Unitary(theta, phi, lambda, bit) ->
+                $"U ({transArith theta}, {transArith phi}, {transArith lambda}) {transBit bit};"
+    | Toffoli(bit, bit1, bit2) ->
+                $"CCX {transBit bit}, {transBit bit1}, {transBit bit2};"
+
+/// Helper function to aggregate all statements in a flow.    
+let rec internal transFlow (flow:Flow) : string =
+    match flow with
+    | head::tail -> $"{transStatement head}\n{transFlow tail}"          
+    | [] -> ""
     

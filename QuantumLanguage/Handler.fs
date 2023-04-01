@@ -17,14 +17,15 @@ Description: Library to assist the parsing/compilation process from QuLang user-
 
 open System
 open FSharp.Text
+open Microsoft.FSharp.Core
 open QuantumLanguage.AST
 
 /// <summary>
-/// Interface method to parse QuLang code to AST based on the grammar rules
+/// Interface method to parse QuLang code to circuit AST based on the grammar rules
 /// </summary>
 /// <param name="code">String in QuLang format awaiting parsing</param>
 /// <returns>Tuple of AST for allocation and operation and error tag</returns>
-let public parseQuLang (code:string):(operator * operator) * error =
+let public parseQuLang (code:string) : Circuit Option * Error =
     let lexbuffer = Lexing.LexBuffer<_>.FromString code // Create an input stream
     try
         // Create a TOKEN stream using the Lexer rules on the input stream
@@ -40,14 +41,14 @@ let public parseQuLang (code:string):(operator * operator) * error =
               printfn $"Parse error in program at : Line %i{line},
                 %i{column}, Unexpected token: %A{token}"
               // Return an empty AST and the syntax error
-              ((NOP, NOP), SyntaxError(token, line, column))
+              (None, SyntaxError(token, line, column))
 
 /// <summary>
 /// Interface method to parse boolean expression from string format to AST
 /// /// </summary>
 /// <param name="expr">String awaiting parsing</param>
 /// <returns>Tuple of boolean AST and error tag</returns>
-let public parseBool (expr:string):(boolExpr * error) =
+let public parseBool (expr:string):(BoolExpr Option * Error) =
     let lexbuffer = Lexing.LexBuffer<_>.FromString expr // Create an input stream
     try
         // Create a TOKEN stream using the Lexer rules on the input stream
@@ -63,14 +64,14 @@ let public parseBool (expr:string):(boolExpr * error) =
               printfn $"Parse error in program at : Line %i{line},
                 %i{column}, Unexpected token: %A{token}"
               // Return an empty AST and the syntax error
-              (Bool false, SyntaxError(token, line, column))
+              (None, SyntaxError(token, line, column))
               
 /// <summary>
 /// Interface method to parse arithmetic expression from string format to AST
 /// </summary>
 /// <param name="expr">String awaiting parsing</param>
 /// <returns>Tuple of arithmetic AST and error tag</returns>
-let public parseArith (expr:string):(arithExpr * error) =
+let public parseArith (expr:string):(ArithExpr option * Error) =
     let lexbuffer = Lexing.LexBuffer<_>.FromString expr // Create an input stream
     try
         // Create a TOKEN stream using the Lexer rules on the input stream
@@ -86,32 +87,37 @@ let public parseArith (expr:string):(arithExpr * error) =
               printfn $"Parse error in program at : Line %i{line},
                 %i{column}, Unexpected token: %A{token}"
               // Return an empty AST and the syntax error
-              (Num 0, SyntaxError(token, line, column))
+              (None, SyntaxError(token, line, column))
 
 /// <summary>
-/// Interface method to translate generated AST backwards to QuLang code
+/// Interface method to translate generated circuit AST backwards to QuLang code
 /// </summary>
-/// <param name="ast">Generated AST for translation</param>
-/// <returns>String of prettified QuLang code</returns>
-let public translateAST (ast:operator * operator) =
-    let reg, ops = ast
-    Translator.transOperator (Order(reg, ops))
-
+/// <param name="circuit">Generated AST for translation(AST.Circuit)</param>
+/// <returns>QuLang string representation</returns>
+let rec public translateCircuit (circuit:Circuit) : string = 
+    let AllocQC(q, c), flow = circuit
+    $"Qalloc {Translator.transBit q};\nCalloc {Translator.transBit c};
+        \n\n{Translator.transFlow flow}"
+   
+    
 /// <summary>
 /// Interface method to compile generated AST to Q# code
 /// </summary>
-/// <param name="ast">Generated AST for compilation</param>
-/// <returns>String of Q# code</returns>
-let public compileAST (ast:operator * operator) =
-    let reg, ops = ast
-    Compiler.compileOperator (Order(reg, ops))
+/// <param name="circuit">Generated circuit AST for compilation (AST.Circuit)</param>
+/// <returns>Q# string representation</returns>
+let internal compileCircuit (circuit:Circuit):string =
+    let AllocQC(q,c), flow = circuit
+    let str = Compiler.compileAlloc q true + "\n" +
+              Compiler.compileAlloc c false + "\n\n"
+    str + Compiler.compileFlow flow
+    
     
 /// <summary>
-/// Interface method to analyze the semantics of the generated AST
+/// Interface method to analyze the semantics of the generated circuit AST
 /// </summary>
-/// <param name="ast">Generated AST for analysis</param>
+/// <param name="ast">Generated circuit AST for analysis</param>
 /// <returns>Tuple of circuit memory and error tag</returns>
-let public analyzeSemantics (ast:operator * operator): Memory * error =
+let public analyzeSemantics (ast:Circuit): Memory * Error =
     let reg, ops = ast
     try
         let quantumMap, classicMap = Interpreter.allocateBits reg
@@ -126,20 +132,14 @@ let public analyzeSemantics (ast:operator * operator): Memory * error =
 /// <param name="ast">Generated AST for optimization</param>
 /// <param name="memory">Initialized circuit memory</param>
 /// <returns>Tuple of optimized AST, updated circuit memory and error tag</returns>
-let public optimizeAST (ast:operator) (memory:Memory) : operator * Memory * error =
+let public optimizeAST (ast:Flow) (memory:Memory):
+    Statement list * Memory * Error =
     try
-        let optimized = Interpreter.optimizeOperator ast Map.empty Map.empty 0
-        let _, memA, memB, optimAST = optimized
+        let optimized = Interpreter.optimizeCircuit ast Map.empty Map.empty 0
+        let _, memA, memB, optAST = optimized
         let updMemory = (memory.SetArithmetic memA).SetBoolean memB
-        optimAST, updMemory, Success
+        optAST, updMemory, Success
     with e -> ast, memory, EvaluationError e.Message
-    
-
-let rec public collectOperators (ast:operator) (acc:operator list):operator list =
-    match ast with
-    | Order(op1, op2) -> let opList = collectOperators op2 acc
-                         op1::opList
-    | _ ->  ast::acc
 
 /// <summary>
 /// Internal method to get number of choice from user input
@@ -157,17 +157,16 @@ let private printInnerMenu() =
     printfn "Menu:"
     printfn "1. Semantic Analysis"
     printfn "2. Optimize AST"
-    printfn "3. Collect Operators"
-    printfn "4. Compiler Q#"
-    printfn "5. Translator QuLang (Prettify)"
-    printfn "6. Back to main menu"
+    printfn "3. Compiler Q#"
+    printfn "4. Translator QuLang (Prettify)"
+    printfn "5. Back to main menu"
     printf "Enter your choice:"
 
 /// <summary>
 /// Internal method to execute tools on initial parsed AST
 /// </summary>
 /// <param name="ast">AST</param>
-let rec private execute (ast:operator*operator) =
+let rec private execute (ast:Circuit) =
     printInnerMenu()
     match getMenuInput() with
     | true, 1 -> let memory, err = analyzeSemantics ast
@@ -181,16 +180,13 @@ let rec private execute (ast:operator*operator) =
                  printfn $"Memory:%A{updMemory}"
                  printfn $"Status:%A{err}"
                  execute(ast)
-    | true, 3 -> let _, ops = ast
-                 let opList = collectOperators ops List.Empty
-                 printfn $"Operation List:%A{opList}"
-    | true, 4 -> let qSharp = compileAST ast
+    | true, 3 -> let qSharp = compileCircuit ast
                  printfn $"%A{qSharp}"
                  execute(ast)
-    | true, 5 -> let quLang = translateAST ast              
+    | true, 4 -> let quLang = translateCircuit ast              
                  printfn $"%A{quLang}"
                  execute(ast)
-    | true, 6 -> ()
+    | true, 5 -> ()
     | _ -> execute(ast)
     
 
@@ -209,8 +205,10 @@ let rec mainMenu () =
     match getMenuInput() with
     | true, 1 -> let code = Console.ReadLine()
                  let ast, err = parseQuLang code
-                 printfn $"%A{ast} Status:%A{err}"
-                 execute(ast)
+                 match ast with
+                 | None -> printfn $"{err}"
+                 | Some circ -> printfn $"%A{circ} Status:%A{err}"
+                                execute(circ)
                  mainMenu()
     | true, 2 -> let expr = Console.ReadLine()
                  let ast, err = parseBool expr

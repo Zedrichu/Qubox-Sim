@@ -56,6 +56,7 @@ rule tokenize = parse
 // Boolean expression to TOKENs
 | "and"         { AND }
 | "or"          { OR }
+| "xor"         { XOR }
 | "&&"          { SAND }
 | "||"          { SOR }
 | "not"         { NEG }
@@ -73,8 +74,8 @@ rule tokenize = parse
 | "Calloc"whitespace    { CLASSREG }
 | "=|"                  { BASSIGN }
 | ":="                  { ASSIGN }
-| ';'                   { ORDER }
-| ','                   { COMMA }
+| ';'                   { DEL }
+| ','                   { SEP }
 | "Measure"whitespace   { MEASURE }
 | "->"                  { MESHOST }
 | "Reset"whitespace     { RESET }
@@ -100,9 +101,12 @@ rule tokenize = parse
 | "RX"                  { RXGATE }
 | "U"                   { UNITARY }
 | "CNOT"whitespace      { CTRLNOT }
+| "CH"whitespace        { CTRLH }
+| "CS"whitespace        { CTRLS }
 | "CCX"whitespace       { TOFFOLI }
 | "SWAP"whitespace      { SWAP }
 | "RZZ"                 { SYMMRZZ }
+| "RYY"                 { SYMMRYY }
 | "RXX"                 { SYMMRXX }
 
 // String definitions

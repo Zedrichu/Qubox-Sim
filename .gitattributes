@@ -2,4 +2,7 @@
 *.fsi linguist-language=F#
 *.fsl linguist-language=F#
 
+QuantumLanguage/Parser.* linguist-generated
+QuantumLanguage/Lexer.* linguist-generated
+
 GrammarTestCoverage/** linguist-documentation

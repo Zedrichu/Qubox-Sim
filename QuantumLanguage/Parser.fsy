@@ -9,10 +9,10 @@ open AST
 %token <string> VARIABLE
 %token <bool> BOOL
 %token TIMES DIV PLUS MINUS POW MOD LPAR RPAR MATHPI CLICK NOCLICK EOF LBRAK RBRAK
-%token QUANTREG CLASSREG ASSIGN BASSIGN ORDER COMMA MEASURE MESHOST CONDITIONAL RESET PHASEDISK
+%token QUANTREG CLASSREG ASSIGN BASSIGN DEL SEP MEASURE MESHOST CONDITIONAL RESET PHASEDISK
 %token BARRIER HADAMARD IDENTITY PAULIX PAULIY PAULIZ TDAGGER TGATE SGATE SDAGGER PHASE UNITARY
-%token RZGATE RYGATE RXGATE SWAP TOFFOLI CTRLNOT SYMMRXX SYMMRZZ SQRTNOT SQRTXDG
-%token BVAR SAND SOR AND OR NEG EQUAL ISQ NOTEQ GREATER LESS GREATEREQ LESSEQ
+%token RZGATE RYGATE RXGATE SWAP TOFFOLI CTRLH CTRLS CTRLNOT SYMMRXX SYMMRZZ SYMMRYY SQRTNOT SQRTXDG
+%token BVAR SAND SOR AND XOR OR NEG EQUAL ISQ NOTEQ GREATER LESS GREATEREQ LESSEQ
 //Formats of these tokens are defined in the Lexer (.fsl) file as regular expressions
 
 // Specify precedence and associativity of operators
@@ -25,7 +25,7 @@ open AST
 %left AND SAND
 %right NEG
 
-%right ORDER COMMA
+%right SEP
 %nonassoc LPAR RPAR
 
 // Declare the initial non-terminal symbol
@@ -34,34 +34,34 @@ open AST
 %start startBool
 
 // Specify the return type of each of then non-terminal symbols
-%type <AST.operator * AST.operator> start
-%type <AST.boolExpr> startBool
-%type <AST.arithExpr> startArith
-%type <operator> allocation
-%type <operator> operator
-%type <operator> measurement
-%type <bit> bit
-%type <bit> bitsequence
-%type <result> result
-%type <arithExpr> expression
-%type <arithExpr> expression1
-%type <boolExpr> boolexpression
+%type <AST.Circuit option> start
+%type <AST.BoolExpr option> startBool
+%type <AST.ArithExpr option> startArith
+%type <AST.Allocation> allocation
+%type <Statement> operator
+%type <Flow> statements
+%type <Bit> bit
+%type <Bit> bitsequence
+%type <Result> result
+%type <ArithExpr> arithmetic
+%type <ArithExpr> arithmetic1
+%type <BoolExpr> boolean
 
 // Grammar productions
 %%
 
 // The first production in "formal" notation is start -> expression
 start:
-  | allocation statement EOF                  { ($1, $2) }
-  | EOF                                       { (NOP, NOP) }
+  | allocation statements EOF           { Some ($1, $2) }
+  | EOF                                 { None }
   
 startArith:
-  | expression EOF                            { $1 }
-  | EOF                                       { Num(0) }
+  | arithmetic EOF                      { Some $1 }
+  | EOF                                 { None }
 
 startBool:
-  | boolexpression EOF                        { $1 }
-  | EOF                                       { Bool(false) }
+  | boolean EOF                         { Some $1 }
+  | EOF                                 { None }
   
 // Note that an End-Of-File (EOF) is inserted
 // The code annotation { $1 } specifies that parsing with this production
@@ -73,45 +73,45 @@ startBool:
 allocation: qallocation callocation     { AllocQC($1, $2) }
 // QALLC ::= Qalloc bit; | Qalloc bitseq;
 qallocation:
-  | QUANTREG bitsequence ORDER      { $2 }
-  | QUANTREG bit ORDER              { $2 }
+  | QUANTREG bitsequence DEL      { $2 }
+  | QUANTREG bit DEL              { $2 }
 
 // CALLC ::= Calloc bit; | Calloc bitseq;
 callocation:
-  | CLASSREG bitsequence ORDER      { $2 }
-  | CLASSREG bit ORDER              { $2 }
+  | CLASSREG bitsequence DEL      { $2 }
+  | CLASSREG bit DEL              { $2 }
   
   
 // The productions for expressions are grammar written in the yacc format:
 // Arithmetic productions
 //a ::= n | x | a + a | a - a | a * a | a / a | a ^ a | - a | (a)
-expression:
-  | expression TIMES expression     { TimesExpr($1,$3) }
-  | expression DIV expression       { DivExpr($1,$3) }
-  | expression PLUS expression      { PlusExpr($1,$3) }
-  | expression MINUS expression     { MinusExpr($1,$3) }
-  | expression POW expression       { PowExpr($1,$3) }
-  | expression MOD expression       { ModExpr($1,$3) }
-  | expression1                     { $1 }
+arithmetic:
+  | arithmetic TIMES arithmetic     { BinaryOp($1, Mul, $3) }
+  | arithmetic DIV arithmetic       { BinaryOp($1, Div, $3) }
+  | arithmetic PLUS arithmetic      { BinaryOp($1, Add, $3) }
+  | arithmetic MINUS arithmetic     { BinaryOp($1, Sub, $3) }
+  | arithmetic POW arithmetic       { BinaryOp($1, Pow, $3) }
+  | arithmetic MOD arithmetic       { BinaryOp($1, Mod, $3) }
+  | arithmetic1                     { $1 }
 
-expression1:
+arithmetic1:
   | MATHPI                          { Pi }
   | NUM                             { Num($1) }
   | FLOAT                           { Float($1) }
-  | MINUS expression1               { UMinusExpr($2) }
-  | PLUS expression1                { UPlusExpr($2) }
-  | LPAR expression RPAR            { $2 }
+  | MINUS arithmetic1               { UnaryOp(Plus, $2) }
+  | PLUS arithmetic1                { UnaryOp(Minus, $2) }
+  | LPAR arithmetic RPAR            { $2 }
   | str                             { VarA($1) }
 
 // Variable string production
 str:
   | VARIABLE                        { $1 }
   
-// Statement terminator
-statement:
-    | statement statement         { Order($1, $2) }
-    | operator ORDER              { $1 }
-    | /* EMPTY */                 { NOP }
+// Statement terminator & chaining
+statements:
+    | statements statements         { $1 @ $2 }
+    | operator DEL                  { [$1] }
+    | /* EMPTY */                   { [] }
 
 // Result production
 // R ::= Click | NoClick
@@ -127,71 +127,70 @@ bit:
 // Production for producing bit definition sequences  
 bitsequence:
   | bit                         { $1 } 
-  | bit COMMA bitsequence       { BitSeq($1, $3) }
+  | bit SEP bitsequence         { BitSeq($1, $3) }
 
-// Boolean productions
+// Logical productions
 //b ::= true | false | b and b | b or b | b && b | b || b | not b |
 // | bit |> R | a == a | a != a | a > a | a >= a | a < a | a <= a | (b)
-boolexpression:
-  | BOOL                                    { Bool($1) }
-  | boolexpression SAND boolexpression      { LogAnd($1,$3) }
-  | boolexpression SOR boolexpression       { LogOr($1,$3) }
-  | boolexpression AND boolexpression       { LogAnd($1,$3) }
-  | boolexpression OR boolexpression        { LogOr($1,$3) }
-  | NEG boolexpression                      { Neg($2)}
-  | bit ISQ result                          { Check($1,$3) }
-  | expression EQUAL expression             { Equal($1,$3) }
-  | expression NOTEQ expression             { NotEqual($1,$3) }
-  | expression GREATER expression           { Greater($1,$3) }
-  | expression GREATEREQ expression         { GreaterEqual($1,$3) }
-  | expression LESS expression              { Less($1,$3) }
-  | expression LESSEQ expression            { LessEqual($1,$3) }
-  | LPAR boolexpression RPAR                { $2 }
-  | BVAR VARIABLE                           { VarB($2) }
+boolean:
+  | BOOL                                { B ($1) }
+  | boolean SAND boolean                { LogicOp($1, And, $3) }
+  | boolean SOR boolean                 { LogicOp($1, Or, $3) }
+  | boolean AND boolean                 { LogicOp($1, And, $3) }
+  | boolean OR boolean                  { LogicOp($1, Or, $3) }
+  | boolean XOR boolean                 { LogicOp($1, Xor, $3) }
+  | NEG boolean                         { Not($2)}
+  | bit ISQ result                      { Check($1,$3) }
+  | arithmetic EQUAL arithmetic         { RelationOp($1, EQ, $3) }
+  | arithmetic NOTEQ arithmetic         { RelationOp($1, NEQ, $3) }
+  | arithmetic GREATER arithmetic       { RelationOp($1, GT, $3) }
+  | arithmetic GREATEREQ arithmetic     { RelationOp($1, GTE, $3) }
+  | arithmetic LESS arithmetic          { RelationOp($1, LT, $3) }
+  | arithmetic LESSEQ arithmetic        { RelationOp($1, LTE, $3) }
+  | LPAR boolean RPAR                   { $2 }
+  | BVAR VARIABLE                       { VarB($2) }
 
-
-// Measurement production - to simplify operators
-// M::= Measure bit -> bit
-measurement:
-  | MEASURE bit MESHOST bit { Measure($2, $4) }
-
-// Operators productions
-//O ::= x = a | y := b | M | Reset bit | If (b) C | Barrier bit | G bit | G bit, bit | G bit, bit, bit
+// Operator productions
+//O ::= x = a | y := b | Measure bit -> bit | Reset bit | If (b) C | 
+//        Barrier bit | G bit | G bit, bit | G bit, bit, bit
 operator:
-  | measurement                                   { $1 }
-  | RESET bit                                     { Reset($2) }
-  | str ASSIGN expression                         { Assign($1, $3) }
-  | boolexpression BASSIGN str                    { AssignB($3, $1) }
-  | CONDITIONAL boolexpression operator           { Condition($2, $3) }
-  | BARRIER bit                                   { Barrier($2) }
-  | PHASEDISK                                     { PhaseDisk }
-// Quantum Gate productions ---- part of operators
+  | str ASSIGN arithmetic                       { Assign($1, $3) }
+  | boolean BASSIGN str                         { AssignB($3, $1) }
+  | CONDITIONAL boolean operator                { Condition($2, $3) }
+  | MEASURE bit MESHOST bit                     { Measure($2, $4) }
+  | RESET bit                                   { Reset($2) }
+  | BARRIER bit                                 { Barrier($2) }
+  | PHASEDISK                                   { PhaseDisk }
+// Quantum Gate productions ---- part of operators 
 // G::= H | ID | X | Z | TDG | T | S | SDG | P | RZ | RY | RX
 // ::= U | SWAP | CCX | CNOT | RXX | RZZ | SX | SXDG
-  | HADAMARD bit            { H($2) }
-  | IDENTITY bit            { I($2) }
-  | PAULIX bit              { X($2) }
-  | PAULIY bit              { Y($2) }
-  | PAULIZ bit              { Z($2) }
-  | TDAGGER bit             { TDG($2) }
-  | TGATE bit               { T($2) }
-  | SGATE bit               { S($2) }
-  | SDAGGER bit             { SDG($2) }
-  | SQRTNOT bit             { SX($2) } 
-  | SQRTXDG bit             { SXDG($2) }
+  | HADAMARD bit            { UnaryGate(H, $2) }
+  | IDENTITY bit            { UnaryGate(ID, $2) }
+  | PAULIX bit              { UnaryGate(X, $2) }
+  | PAULIY bit              { UnaryGate(Y, $2) }
+  | PAULIZ bit              { UnaryGate(Z, $2) }
+  | TDAGGER bit             { UnaryGate(TDG, $2) }
+  | TGATE bit               { UnaryGate(T, $2) }
+  | SGATE bit               { UnaryGate(S, $2) }
+  | SDAGGER bit             { UnaryGate(SDG, $2) }
+  | SQRTNOT bit             { UnaryGate(SX, $2) } 
+  | SQRTXDG bit             { UnaryGate(SXDG, $2) }
 // Parametric gates on one qubit
-  | PHASE LPAR expression RPAR bit     { P($3, $5) }
-  | RZGATE LPAR expression RPAR bit    { RZ($3, $5) }
-  | RYGATE LPAR expression RPAR bit    { RY($3, $5) }
-  | RXGATE LPAR expression RPAR bit    { RX($3, $5) }
-  | UNITARY LPAR expression COMMA expression COMMA expression RPAR bit { U($3, $5, $7, $9) }
+  | PHASE LPAR arithmetic RPAR bit     { ParamGate(P, $3, $5) }
+  | RZGATE LPAR arithmetic RPAR bit    { ParamGate(RX, $3, $5) }
+  | RYGATE LPAR arithmetic RPAR bit    { ParamGate(RY, $3, $5) }
+  | RXGATE LPAR arithmetic RPAR bit    { ParamGate(RZ, $3, $5) }
+  | UNITARY LPAR arithmetic SEP arithmetic SEP arithmetic RPAR bit { Unitary($3, $5, $7, $9) }
 // Gates on multiple qubits
-  | CTRLNOT bit COMMA bit              { CNOT($2, $4) }
-  | TOFFOLI bit COMMA bit COMMA bit    { CCX($2, $4, $6) }
-  | SWAP bit COMMA bit                 { AST.SWAP($2, $4) } // Conflict with some swap function
+  | CTRLH bit SEP bit                   { BinaryGate(CH, $2, $4) }
+  | CTRLS bit SEP bit                   { BinaryGate(CS, $2, $4) }
+  | CTRLNOT bit SEP bit                 { BinaryGate(CNOT, $2, $4) }
+  | TOFFOLI bit SEP bit SEP bit         { Toffoli($2, $4, $6) }
+  | SWAP bit SEP bit                    { BinaryGate(AST.SWAP, $2, $4) } // Conflict with some swap function
 // Parametric gates on multiple qubits
-  | SYMMRXX LPAR expression RPAR bit COMMA bit      { RXX($3, $5, $7) } 
-  | SYMMRZZ LPAR expression RPAR bit COMMA bit      { RZZ($3, $5, $7) } 
+  | SYMMRXX LPAR arithmetic RPAR bit SEP bit      { BinaryParamGate(RXX, $3, $5, $7) } 
+  | SYMMRYY LPAR arithmetic RPAR bit SEP bit      { BinaryParamGate(RYY, $3, $5, $7) } 
+  | SYMMRZZ LPAR arithmetic RPAR bit SEP bit      { BinaryParamGate(RZZ, $3, $5, $7) } 
    
 // Again, the code annotation specifies the result of parsing
 // For example { TimesExpr($1,$3) } specifies that parsing with the production

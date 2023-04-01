@@ -15,25 +15,36 @@ Description: Declaration module containing the types required to build the abstr
 @__Status --> DEV
 *)
 
+open System
 open QuantumLanguage.VisitorPattern
 
+/// Disjoint union type of arithmetic operators
+type AOp = // Arithmetic operators
+  | Add | Sub | Mul
+  | Div | Pow | Mod
+  | Plus | Minus
+  override this.ToString ()=
+    match this with
+    | Add -> "+"
+    | Sub -> "-"
+    | Mul -> "*"
+    | Div -> "/"
+    | Pow -> "^"
+    | Mod -> "%%"
+    | Plus -> ""
+    | Minus -> "-"
+
 /// Discriminated type of basic arithmetic expressions
-type arithExpr =
+type ArithExpr =
   | Pi // Mathematical π=3.141592...
   | Num of int
   | Float of float
   | VarA of string
-  | TimesExpr of (arithExpr * arithExpr)
-  | DivExpr of (arithExpr * arithExpr)
-  | PlusExpr of (arithExpr * arithExpr)
-  | MinusExpr of (arithExpr * arithExpr)
-  | PowExpr of (arithExpr * arithExpr)
-  | ModExpr of (arithExpr * arithExpr)
-  | UPlusExpr of arithExpr
-  | UMinusExpr of arithExpr
-  member this.Accept (visitor: IVisitor<arithExpr, 'a>) = (this :> IVisitable<arithExpr>).Accept visitor
-  interface IVisitable<arithExpr> with
-    member this.Accept (visitor: IVisitor<arithExpr, 'a>) = visitor.Visit this
+  | BinaryOp of (ArithExpr * AOp * ArithExpr)
+  | UnaryOp of (AOp * ArithExpr)
+  member this.Accept (visitor: IVisitor<ArithExpr, 'a>) = (this :> IVisitable<ArithExpr>).Accept visitor
+  interface IVisitable<ArithExpr> with
+    member this.Accept (visitor: IVisitor<ArithExpr, 'a>) = visitor.Visit this
     
   override this.ToString () =
     match this with
@@ -41,20 +52,14 @@ type arithExpr =
     | Num i -> i.ToString()
     | Float f -> f.ToString()
     | VarA s -> s
-    | TimesExpr (a1, a2) -> $"{a1} * {a2}"
-    | DivExpr (a1, a2) -> $"{a1} / {a2}"
-    | PlusExpr (a1, a2) -> $"({a1} + {a2})"
-    | MinusExpr (a1, a2) -> $"({a1} - {a2})"
-    | PowExpr (a1, a2) -> $"({a1} ^ {a2})"
-    | ModExpr (a1, a2) -> $"({a1} %% {a2})"
-    | UPlusExpr a -> $"+({a})"
-    | UMinusExpr a -> $"-({a})"
+    | BinaryOp (a1, op, a2) -> $"({a1} {op} {a2})"
+    | UnaryOp (op, a) -> $"{op} ({a})"
   
 /// Tagged type of quantum/classical bit declarations
-type bit =
+type Bit =
   | BitS of string
   | BitA of (string * int)
-  | BitSeq of (bit * bit)
+  | BitSeq of (Bit * Bit)
   override this.ToString () =
     match this with
     | BitS s -> s
@@ -63,128 +68,139 @@ type bit =
   
   
 /// Tagged type of measurement results
-type result =
+type Result =
   | Click // +1 Eigenspace (spin-up, |0⟩)
   | NoClick // -1 Eigenspace (spin-down, |1⟩)
-  
-  
-/// Discriminated type of basic boolean expression
-type boolExpr = 
-  | Bool of bool
-  | VarB of string
-  | LogAnd of (boolExpr * boolExpr)
-  | LogOr of (boolExpr * boolExpr)
-  | Neg of boolExpr
-  | Check of (bit * result) // check measurement result
-  | Equal of (arithExpr * arithExpr)
-  | NotEqual of (arithExpr * arithExpr)
-  | Greater of (arithExpr * arithExpr)
-  | GreaterEqual of (arithExpr * arithExpr)
-  | Less of (arithExpr * arithExpr)
-  | LessEqual of (arithExpr * arithExpr)
-  member this.Accept (visitor: IVisitor<boolExpr, 'a>) = (this :> IVisitable<boolExpr>).Accept visitor
-  interface IVisitable<boolExpr> with
-    member this.Accept (visitor: IVisitor<boolExpr, 'a>) = visitor.Visit this
-    
   override this.ToString () =
     match this with
-    | Bool b -> b.ToString()
-    | VarB s -> s
-    | LogAnd (b1, b2) -> $"({b1} && {b2})"
-    | LogOr (b1, b2) -> $"({b1} || {b2})"
-    | Neg b -> $"not ({b})"
-    | Check (bit, result) -> $"(%s{bit.ToString()} |> %s{result.ToString()})"
-    | Equal (a1, a2) -> $"%s{a1.ToString()} == %s{a2.ToString()}"
-    | NotEqual (a1, a2) -> $"%s{a1.ToString()} != %s{a2.ToString()}"
-    | Greater (a1, a2) -> $"%s{a1.ToString()} > %s{a2.ToString()}"
-    | GreaterEqual (a1, a2) -> $"%s{a1.ToString()} >= %s{a2.ToString()}"
-    | Less (a1, a2) -> $"%s{a1.ToString()} < %s{a2.ToString()}"
-    | LessEqual (a1, a2) -> $"%s{a1.ToString()} <= %s{a2.ToString()}"
+    | Click -> "Click"
+    | NoClick -> "NoClick"
+  
+/// Disjoint union type of logical operators
+type BOp = // Boolean operators
+  | And | Or | Xor
+  override this.ToString ()=
+    match this with
+    | And -> "and"
+    | Or -> "or"
+    | Xor -> "xor"
+    
+/// Disjoint union type of relational operators
+type ROp = // Relational operators
+  | EQ | NEQ
+  | GT | GTE
+  | LT | LTE
+  override this.ToString ()=
+    match this with
+    | EQ -> "=="
+    | NEQ -> "!="
+    | GT -> ">"
+    | GTE -> ">="
+    | LT -> "<"
+    | LTE -> "<="
+  
+/// Discriminated type of basic logical expression
+type BoolExpr = 
+  | B of bool
+  | VarB of string
+  | LogicOp of (BoolExpr * BOp * BoolExpr)
+  | RelationOp of (ArithExpr * ROp * ArithExpr)
+  | Not of BoolExpr
+  | Check of (Bit * Result) // check measurement result
+  member this.Accept (visitor: IVisitor<BoolExpr, 'a>) = (this :> IVisitable<BoolExpr>).Accept visitor
+  interface IVisitable<BoolExpr> with
+    member this.Accept (visitor: IVisitor<BoolExpr, 'a>) = visitor.Visit this
+  override this.ToString () =
+    match this with
+    | B b -> b.ToString()
+    | VarB s -> "~"+s
+    | LogicOp (b1, op, b2) -> $"({b1} {op} {b2})"
+    | RelationOp (a1, op, a2) -> $"({a1} {op} {a2})"
+    | Not b -> $"not ({b})"
+    | Check (cb, r) -> $"{cb} |> {r}"
     
   
 ///Tagged type of errors in QuLang module (Accumulate grammar error (syntax/semantics/evaluations))
-type error =
-  | Success // No error
-  | SyntaxError of (string * int * int) // Syntax error: invalid token at specific line/column
-  | SemanticError of string // Semantic error: message
-  | EvaluationError of string // Evaluation error: message
-  
+type Error =
+  /// Signals successful language processing
+  | Success
+  //| Warning of string // Warning: message
+  /// Signals a syntax error in the input - invalid token at specific line/column
+  | SyntaxError of (string * int * int)
+  /// Signals a semantic error with message
+  | SemanticError of string
+  /// Signals an evaluation error with message
+  | EvaluationError of string
   member this.ToString =
     match this with
     | Success -> "Success"
     | SyntaxError (msg, line, col) -> $"Syntax error: %s{msg} at line %d{line}, column %d{col}"
     | SemanticError msg -> $"Semantic error: %s{msg}"
     | EvaluationError msg -> $"Evaluation error: %s{msg}"
+
+/// Disjoint union type of unary gates
+type UTag =
+  | H | ID | X | Y | Z
+  | TDG | SDG | S | T
+  | SX | SXDG 
+
+/// Disjoint union type of binary gates
+type BTag =
+  | SWAP | CNOT | CH | CS 
+
+/// Disjoint union type of binary-parametric gates
+type BPTag =
+  | RXX | RYY | RZZ
   
+/// Disjoint union type of unary-parametric gates
+type PTag =
+  | RX | RY | RZ | P 
+
 /// Discriminated type of quantum gates and operators
-type operator =
-  | NOP // No operation
-  | AllocQC of (bit * bit) // Allocate arrays/sequences of qubits/cbits
-  | Measure of (bit * bit) // Computational measurement of qubit on classical bit
-  | AssignB of (string * boolExpr)
-  | Assign of (string * arithExpr) // Arithmetic variable declaration
-  | Order of (operator * operator) // Operator linker
-  | Reset of bit // Reset bit to |0⟩
-  | Condition of (boolExpr * operator)
-  | Barrier of bit // Separate optimizations
-  | PhaseDisk // Phase disk operation on all qubits
-  //| UnaryGate of (token * bit)
-  | H of bit // Hadamard
-  | I of bit // Identity
-  | X of bit // Pauli X (NOT)
-  | Y of bit // Pauli Y
-  | Z of bit // Pauli Z
-  | TDG of bit // T-dagger
-  | SDG of bit // S-dagger
-  | S of bit // S gate
-  | T of bit // T gate
-  | SX of bit // Square root X (square NOT)
-  | SXDG of bit // Square root X - dagger
-  | P of (arithExpr * bit) // Phase gate
-  | RZ of (arithExpr * bit) // Rotation Z
-  | RY of (arithExpr * bit) // Rotation Y
-  | RX of (arithExpr * bit) // Rotation X
-  | U of (arithExpr * arithExpr * arithExpr * bit) // Unitary parametric
-  | CNOT of (bit * bit) // Control-NOT gate (entangler)
-  | CCX of (bit * bit * bit) // Control-control-NOT gate (3-way entangler)
-  | SWAP of (bit * bit) // SWAP gate
-  | RXX of (arithExpr * bit * bit) // Rotation X-X symmetric
-  | RZZ of (arithExpr * bit * bit) // Rotation Z-Z symmetric
-  member this.Accept (visitor: IVisitor<operator, 'a>) = (this :> IVisitable<operator>).Accept visitor
-  interface IVisitable<operator> with
-    member this.Accept (visitor: IVisitor<operator, 'a>) = visitor.Visit this
-  
-  member this.DestructSingle () =
-    match this with
-    | H bit -> ("H", bit)
-    | I bit -> ("I", bit)
-    | X bit -> ("X", bit)
-    | Y bit -> ("Y", bit)
-    | Z bit -> ("Z", bit)
-    | TDG bit -> ("TDG", bit)
-    | SDG bit -> ("SDG", bit)
-    | S bit -> ("S", bit)
-    | T bit -> ("T", bit)
-    | SX bit -> ("SX", bit)
-    | SXDG bit -> ("SXDG", bit)
-    | _ -> null, BitS null
-  member this.DestructParam () =
-    match this with
-    | P (param, bit) -> ("P", param, bit)
-    | RZ (param, bit) -> ("RZ", param, bit)
-    | RY (param, bit) -> ("RY", param, bit)
-    | RX (param, bit) -> ("RX", param, bit)
-    | _ -> null, Num 0, BitS null
-    
-    
-     
+type Statement =
+  /// Arithmetic variable assignment
+  | Assign of (string * ArithExpr)
+  /// Logical variable declaration
+  | AssignB of (string * BoolExpr)
+  /// Conditional quantum gate application
+  | Condition of (BoolExpr * Statement)
+  /// Measurement of qubit on classical bit (Z-basis)
+  | Measure of (Bit * Bit)
+  /// Reset of qubit to |0⟩ - computational basis
+  | Reset of Bit // Reset bit to |0⟩
+  /// Circuit barrier (isolate gates & optimizations)
+  | Barrier of Bit
+  /// Phase disk computation on all qubits
+  | PhaseDisk
+  /// Unary quantum gates
+  | UnaryGate of (UTag * Bit)
+  /// Binary quantum gates
+  | BinaryGate of (BTag * Bit * Bit) 
+  /// Unary parametric quantum gates
+  | ParamGate of (PTag * ArithExpr * Bit)
+  /// Binary parametric quantum gates
+  | BinaryParamGate of (BPTag * ArithExpr *  Bit * Bit)
+  /// Unitary triple-parametric quantum gate
+  | Unitary of (ArithExpr * ArithExpr * ArithExpr * Bit)
+  /// Control-control-NOT gate (3-way entangler)
+  | Toffoli of (Bit * Bit * Bit)
+  member this.Accept (visitor: IVisitor<Statement, 'a>) = (this :> IVisitable<Statement>).Accept visitor
+  interface IVisitable<Statement> with
+    member this.Accept (visitor: IVisitor<Statement, 'a>) = visitor.Visit this
+
+/// Type of quantum/classical register allocation
+type Allocation = AllocQC of (Bit * Bit)
+/// Type of quantum circuit AST as list of Statements
+type Flow = Statement list
+/// Type of program as unified allocation and circuit AST
+type Circuit = Allocation * Flow
   
 /// <summary>
 /// Record type to hold the established memory bindings (arithmetic/boolean/classical/quantum)
 /// </summary>
 type Memory =
-   { Arithmetic: Map<string,arithExpr * int>;
-     Boolean: Map<string, boolExpr * int>; 
+   { Arithmetic: Map<string, ArithExpr * int>;
+     Boolean: Map<string, BoolExpr * int>; 
      Quantum: Map<string, int * int>;
      Classical: Map<string, int * int> }
    static member empty = { Arithmetic = Map.empty; Boolean = Map.empty;
@@ -195,7 +211,7 @@ type Memory =
    member this.SetQuantumClassic qmap cmap = { this with Quantum = qmap; Classical = cmap }
    member this.CountQuantum = (Map.fold (fun acc _ (value, _) -> acc+value) 0 this.Quantum)
    member this.CountClassical = (Map.fold (fun acc _ (value, _) -> acc+value) 0 this.Classical)
-   member this.GetOrder (bit:bit) =
+   member this.GetOrder (bit:Bit) =
      match bit with
      | BitA(s, i) -> let _, order = Map.find s this.Quantum in order + i
      | BitS s -> let _, order = Map.find s this.Quantum in order

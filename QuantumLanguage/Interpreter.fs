@@ -34,8 +34,9 @@ module public Map =
 /// </summary>
 /// <param name="bit">Bit structure (array form/single/sequenced)</param>
 /// <param name="acc">Accumulator map of identifier/number pairs</param>
+/// <param name="no">Current bit number</param>
 /// <returns>Map of identifier/number pairs initialized</returns>
-let rec private unwrapBit (bit:bit) (acc:Map<string,int * int>) (no:int): Map<string,int * int> * int =
+let rec private unwrapBit (bit:Bit) (acc:Map<string,int * int>) (no:int): Map<string,int * int> * int =
     match bit with
     | BitA(s, i) -> let map = Map.add s (i, no) acc
                     (map, no + i)
@@ -47,21 +48,19 @@ let rec private unwrapBit (bit:bit) (acc:Map<string,int * int>) (no:int): Map<st
 /// <summary>
 /// Function to collect allocated Quantum bits and Classical bits in 2 map structures.
 /// </summary>
-/// <param name="operator">Allocation structure in the AST.operator type</param>
+/// <param name="alloc">Allocation structure in the AST.operator type</param>
 /// <exception cref="System.Exception">Invalid allocation (identifier already used for quantum)</exception>
 /// <returns>Tuple of quantum bit mapping and classical bit mapping</returns>
-let internal allocateBits (operator:operator):Map<string,int * int> * Map<string,int * int> =
-    match operator with
-    | AllocQC(qbit, cbit) ->
-        let qlist, _ = unwrapBit qbit Map.empty 0 
-        let clist, _ = unwrapBit cbit Map.empty 0
-        // Check if there are common bits between quantum and classical (semantic error)
-        let common = Map.intersect qlist clist
-        if not (Map.isEmpty common) then
-            let var, _ = List.head (Map.toList common)
-            failwith $"Invalid allocation of classical register {var} (already allocated as quantum)."
-            else (qlist, clist)
-    | _ -> (Map.empty<string,int * int>, Map.empty<string,int * int>)
+let internal allocateBits (alloc:Allocation):Map<string,int * int> * Map<string,int * int> =
+    let (AllocQC (qbit, cbit)) = alloc
+    let qlist, _ = unwrapBit qbit Map.empty 0 
+    let clist, _ = unwrapBit cbit Map.empty 0
+    // Check if there are common bits between quantum and classical (semantic error)
+    let common = Map.intersect qlist clist
+    if not (Map.isEmpty common) then
+        let var, _ = List.head (Map.toList common)
+        failwith $"Invalid allocation of classical register {var} (already allocated as quantum)."
+        else (qlist, clist)
 
 /// <summary>
 /// Function to eager evaluate arithmetic expressions with reduction rules.
@@ -70,117 +69,122 @@ let internal allocateBits (operator:operator):Map<string,int * int> * Map<string
 /// <param name="memory">Mapping of arithmetic variables to expressions</param>
 /// <exception cref="System.Exception">Arithmetic invalid variable access, division by zero</exception>
 /// <returns>Reduced evaluation of AST arithmetic expression</returns>
-let rec private evalArith (expr:arithExpr) (memory:Map<string, arithExpr * int>):arithExpr =
+let rec private evalArith (expr:ArithExpr) (memory:Map<string, ArithExpr * int>):ArithExpr =
     match expr with
     | Pi | Num _ | Float _ -> expr
     | VarA s -> try
                     let (a, _) = Map.find s memory
                     evalArith a memory
                 with _ -> failwith $"Unknown variable in expression - {s} has not been declared!"    
-    | TimesExpr(x, y) -> let x1 = evalArith x memory
-                         let y1 = evalArith y memory
-                         match x1, y1 with
-                         | Num a, Num b -> Num (a * b)
-                         | Num 0, _ | _, Num 0 -> Num 0
-                         | Float 0.0, _ | _, Float 0.0 -> Float 0.0
-                         | Num 1, _ | Float 1.0, _ -> y1
-                         | _, Num 1 | _, Float 1.0 -> x1
-                         | Float a, Num b -> Float (a * float b)
-                         | Num a, Float b -> Float (float a * b)
-                         | Float a, Float b -> Float (a * b)
-                         | DivExpr(a, c), DivExpr(b, d) -> evalArith (DivExpr(TimesExpr(a, b), TimesExpr(c, d))) memory
-                         | DivExpr(a, c), b | b, DivExpr(a,c) when b=c -> a
-                         | PlusExpr(c, d), Num b -> evalArith (PlusExpr(TimesExpr(c, Num b), TimesExpr(d, Num b))) memory
-                         | PlusExpr(c, d), Float b -> evalArith (PlusExpr(TimesExpr(c, Float b), TimesExpr(d, Float b))) memory
-                         | Num a, PlusExpr(c, d) -> evalArith (PlusExpr(TimesExpr(c, Num a), TimesExpr(d, Num a))) memory
-                         | Float a, PlusExpr(c, d) -> evalArith (PlusExpr(TimesExpr(c, Float a), TimesExpr(d, Float a))) memory
-                         | UMinusExpr a, _ -> evalArith (UMinusExpr(TimesExpr(a, y1))) memory
-                         | _, UMinusExpr a -> evalArith (UMinusExpr(TimesExpr(x1, a))) memory
-                         | _ -> TimesExpr(x1, y1)
-    | DivExpr(x, y) -> let x1 = evalArith x memory
-                       let y1 = evalArith y memory
-                       match x1, y1 with
-                       | Num a, Num b -> Num (a / b)
-                       | Num 0, _ -> Num 0
-                       | _, Num 0 -> failwith $"Invalid division by zero - undefined!"
-                       | Float 0.0, _ -> Float 0.0
-                       | _, Float 0.0 -> failwith $"Invalid division by zero - undefined!"
-                       | Num 1, _ -> y1
-                       | _, Num 1 -> x1
-                       | c, d when c=d -> Num 1
-                       | Float 1.0, _ -> y1
-                       | _, Float 1.0 -> x1
-                       | Float a, Num b -> Float (a / float b)
-                       | Num a, Float b -> Float (float a / b)
-                       | Float a, Float b -> Float (a / b)
-                       | UMinusExpr a, _ -> evalArith (UMinusExpr(DivExpr(a, y1))) memory
-                       | _, UMinusExpr a -> evalArith (UMinusExpr(DivExpr(x1, a))) memory
-                       | _ -> DivExpr(x1, y1)
-    | PlusExpr(x, y) -> let x1 = evalArith x memory
-                        let y1 = evalArith y memory
-                        match x1, y1 with
-                        | Num a, Num b -> Num (a + b)
-                        | Num 0, _ -> y1
-                        | c, d when c=d -> evalArith (TimesExpr(Num 2, x1)) memory
-                        | _, Num 0 -> x1
-                        | Float 0.0, _ -> y1
-                        | _, Float 0.0 -> x1
-                        | Float a, Num b -> Float (a + float b)
-                        | Num a, Float b -> Float (float a + b)
-                        | Float a, Float b -> Float (a + b)
-                        | UMinusExpr a, _ -> evalArith (MinusExpr(a, y1)) memory
-                        | _, UMinusExpr a -> evalArith (MinusExpr(x1, a)) memory
-                        | _ -> PlusExpr(x1, y1)    
-    | MinusExpr(x, y) -> let x1 = evalArith x memory
-                         let y1 = evalArith y memory
-                         match x1, y1 with
-                         | Num a, Num b -> Num (a - b)
-                         | c , d when c=d -> Num 0
-                         | Num 0, _ -> evalArith (UMinusExpr(y1)) memory
-                         | _, Num 0 -> x1
-                         | Float 0.0, _ -> evalArith (UMinusExpr(y1)) memory
-                         | _, Float 0.0 -> x1
-                         | Float a, Num b -> Float (a - float b)
-                         | Num a, Float b -> Float (float a - b)
-                         | Float a, Float b -> Float (a - b)
-                         | UMinusExpr a, _ -> evalArith (UMinusExpr(PlusExpr(a, y1))) memory
-                         | _, UMinusExpr a -> evalArith (PlusExpr(x1, a)) memory
-                         | _ -> MinusExpr(x1, y1)
-    | UMinusExpr x -> let x1 = evalArith x memory
-                      match x1 with
-                      | Num a -> Num (-a)
-                      | Float a -> Float (-a)
-                      | UMinusExpr a -> a
-                      | _ -> UMinusExpr(x1)
-    | UPlusExpr x -> evalArith x memory
-    | PowExpr(x, y) -> let x1 = evalArith x memory
-                       let y1 = evalArith y memory
-                       match x1, y1 with
-                       | Num a, Num b -> Num (int (float a ** float b))
-                       | Num 0, _ -> Num 0
-                       | _, Num 0 -> Num 1
-                       | Float 0.0, _ -> Float 0.0
-                       | _, Float 0.0 -> Float 1.0
-                       | Num 1, _ -> Num 1
-                       | _, Num 1 -> x1
-                       | Float 1.0, _ -> Float 1.0
-                       | _, Float 1.0 -> x1
-                       | Float a, Num b -> Float (a ** float b)
-                       | Num a, Float b -> Float (float a ** b)
-                       | Float a, Float b -> Float (a ** b)
-                       | _ -> PowExpr(x1, y1)
-    | ModExpr(x, y) -> let x1 = evalArith x memory
-                       let y1 = evalArith y memory
-                       match x1, y1 with
-                       | Num a, Num b -> Num (a % b)
-                       | Num 0, _ -> Num 0
-                       | _, Num 0 -> failwith $"Invalid modulo by zero - undefined!"
-                       | Float 0.0, _ -> Float 0.0
-                       | _, Float 0.0 -> failwith $"Invalid modulo by zero - undefined!"
-                       | Float a, Num b -> Float (a % float b)
-                       | Num a, Float b -> Float (float a % b)
-                       | Float a, Float b -> Float (a % b)
-                       | _ -> ModExpr(x1, y1)
+    | BinaryOp(x,Mul, y) ->  let x1 = evalArith x memory
+                             let y1 = evalArith y memory
+                             match x1, y1 with
+                             | Num a, Num b -> Num (a * b)
+                             | Num 0, _ | _, Num 0 -> Num 0
+                             | Float 0.0, _ | _, Float 0.0 -> Float 0.0
+                             | Num 1, _ | Float 1.0, _ -> y1
+                             | _, Num 1 | _, Float 1.0 -> x1
+                             | Float a, Num b -> Float (a * float b)
+                             | Num a, Float b -> Float (float a * b)
+                             | Float a, Float b -> Float (a * b)
+                             | BinaryOp(a, Div, c), BinaryOp(b, Div, d) ->
+                                 evalArith (BinaryOp(BinaryOp(a, Mul, b), Div, BinaryOp(c, Mul, d))) memory
+                             | BinaryOp(a, Div, c), b | b, BinaryOp(a, Div, c) when b=c -> a
+                             | BinaryOp(c, Add, d), Num b ->
+                                 evalArith (BinaryOp(BinaryOp(c, Mul, Num b), Add, BinaryOp(d, Mul, Num b))) memory
+                             | BinaryOp(c, Add, d), Float b ->
+                                 evalArith (BinaryOp(BinaryOp(c, Mul, Float b), Add, BinaryOp(d, Mul, Float b))) memory
+                             | Num a, BinaryOp(c, Add, d) ->
+                                 evalArith (BinaryOp(BinaryOp(c, Mul, Num a), Add, BinaryOp(d, Mul, Num a))) memory
+                             | Float a, BinaryOp(c, Add, d) ->
+                                 evalArith (BinaryOp(BinaryOp(c, Mul, Float a), Add, BinaryOp(d, Mul, Float a))) memory
+                             | UnaryOp (Minus, a), _ -> evalArith (UnaryOp(Minus, BinaryOp(a, Mul, y1))) memory
+                             | _, UnaryOp (Minus, a) -> evalArith (UnaryOp(Minus, BinaryOp(x1, Mul, a))) memory
+                             | _ -> BinaryOp(x1, Mul, y1)
+    | BinaryOp(x,Div,y) -> let x1 = evalArith x memory
+                           let y1 = evalArith y memory
+                           match x1, y1 with
+                           | Num a, Num b -> Num (a / b)
+                           | Num 0, _ -> Num 0
+                           | _, Num 0 -> failwith $"Invalid division by zero - undefined!"
+                           | Float 0.0, _ -> Float 0.0
+                           | _, Float 0.0 -> failwith $"Invalid division by zero - undefined!"
+                           | Num 1, _ -> y1
+                           | _, Num 1 -> x1
+                           | c, d when c=d -> Num 1
+                           | Float 1.0, _ -> y1
+                           | _, Float 1.0 -> x1
+                           | Float a, Num b -> Float (a / float b)
+                           | Num a, Float b -> Float (float a / b)
+                           | Float a, Float b -> Float (a / b)
+                           | UnaryOp (Minus, a), _ -> evalArith (UnaryOp (Minus,BinaryOp(a,Div,y1))) memory
+                           | _, UnaryOp (Minus, a) -> evalArith (UnaryOp (Minus,BinaryOp(x1,Div,a))) memory
+                           | _ -> BinaryOp(x1,Div,y1)
+    | BinaryOp(x,Add, y) -> let x1 = evalArith x memory
+                            let y1 = evalArith y memory
+                            match x1, y1 with
+                            | Num a, Num b -> Num (a + b)
+                            | Num 0, _ -> y1
+                            | c, d when c=d -> evalArith (BinaryOp(Num 2, Mul, x1)) memory
+                            | _, Num 0 -> x1
+                            | Float 0.0, _ -> y1
+                            | _, Float 0.0 -> x1
+                            | Float a, Num b -> Float (a + float b)
+                            | Num a, Float b -> Float (float a + b)
+                            | Float a, Float b -> Float (a + b)
+                            | UnaryOp (Minus, a), _ -> evalArith (BinaryOp(a, Sub, y1)) memory
+                            | _, UnaryOp (Minus, a) -> evalArith (BinaryOp(x1, Sub, a)) memory
+                            | _ -> BinaryOp(x1, Add, y1)    
+    | BinaryOp(x,Sub, y) ->  let x1 = evalArith x memory
+                             let y1 = evalArith y memory
+                             match x1, y1 with
+                             | Num a, Num b -> Num (a - b)
+                             | c , d when c=d -> Num 0
+                             | Num 0, _ -> evalArith (UnaryOp (Minus, y1)) memory
+                             | _, Num 0 -> x1
+                             | Float 0.0, _ -> evalArith (UnaryOp (Minus, y1)) memory
+                             | _, Float 0.0 -> x1
+                             | Float a, Num b -> Float (a - float b)
+                             | Num a, Float b -> Float (float a - b)
+                             | Float a, Float b -> Float (a - b)
+                             | UnaryOp (Minus, a), _ -> evalArith (UnaryOp (Minus,BinaryOp(a, Add, y1))) memory
+                             | _, UnaryOp (Minus, a) -> evalArith (BinaryOp(x1, Add, a)) memory
+                             | _ -> BinaryOp(x1, Sub, y1)
+    | UnaryOp(Minus,x) -> let x1 = evalArith x memory
+                          match x1 with
+                          | Num a -> Num (-a)
+                          | Float a -> Float (-a)
+                          | UnaryOp (Minus, a) -> a
+                          | _ -> UnaryOp(Minus,x1)
+    | UnaryOp (Plus, x) -> evalArith x memory
+    | BinaryOp(x,Pow,y) -> let x1 = evalArith x memory
+                           let y1 = evalArith y memory
+                           match x1, y1 with
+                           | Num a, Num b -> Num (int (float a ** float b))
+                           | Num 0, _ -> Num 0
+                           | _, Num 0 -> Num 1
+                           | Float 0.0, _ -> Float 0.0
+                           | _, Float 0.0 -> Float 1.0
+                           | Num 1, _ -> Num 1
+                           | _, Num 1 -> x1
+                           | Float 1.0, _ -> Float 1.0
+                           | _, Float 1.0 -> x1
+                           | Float a, Num b -> Float (a ** float b)
+                           | Num a, Float b -> Float (float a ** b)
+                           | Float a, Float b -> Float (a ** b)
+                           | _ -> BinaryOp(x1, Pow, y1)
+    | BinaryOp(x,Mod,y) -> let x1 = evalArith x memory
+                           let y1 = evalArith y memory
+                           match x1, y1 with
+                           | Num a, Num b -> Num (a % b)
+                           | Num 0, _ -> Num 0
+                           | _, Num 0 -> failwith $"Invalid modulo by zero - undefined!"
+                           | Float 0.0, _ -> Float 0.0
+                           | _, Float 0.0 -> failwith $"Invalid modulo by zero - undefined!"
+                           | Float a, Num b -> Float (a % float b)
+                           | Num a, Float b -> Float (float a % b)
+                           | Float a, Float b -> Float (a % b)
+                           | _ -> BinaryOp(x1, Mod, y1)
 
 /// <summary>
 /// Function to eager evaluate boolean expressions with reduction rules
@@ -190,117 +194,130 @@ let rec private evalArith (expr:arithExpr) (memory:Map<string, arithExpr * int>)
 /// <param name="memarith">Arithmetic mapping of identifiers</param>
 /// <exception cref="System.Exception">Boolean invalid variable access</exception>
 /// <returns>Reduced evaluation of AST boolean expression</returns>
-let rec private evalBool (expr:boolExpr) (memory:Map<string,boolExpr * int>)
-    (memarith:Map<string, arithExpr * int>) : boolExpr =
+let rec private evalBool (expr:BoolExpr) (memory:Map<string, BoolExpr * int>)
+    (memarith:Map<string, ArithExpr * int>) : BoolExpr =
     match expr with 
-    | Bool _ -> expr
+    | B _ -> expr
     | VarB s -> try
                     let b, _ = Map.find s memory
                     evalBool b memory memarith
                 with _ -> failwith $"Unknown variable in expression - {s} has not been declared!"    
-    | LogAnd(x,y) -> let x1 = evalBool x memory memarith
-                     let y1 = evalBool y memory memarith
-                     match x1, y1 with
-                     | Bool a, Bool b -> Bool (a && b)
-                     | Bool true, _ -> y1
-                     | _, Bool true -> x1
-                     | Bool false, _ -> Bool false
-                     | _, Bool false -> Bool false
-                     | c,d when c=d -> x1
-                     | c, Neg(d) | Neg(d), c when c=d -> Bool false
-                     | _ -> LogAnd(x1, y1)
-    | LogOr(x, y) -> let x1 = evalBool x memory memarith
-                     let y1 = evalBool y memory memarith
-                     match x1, y1 with
-                     | Bool a, Bool b -> Bool (a || b)
-                     | Bool true, _ -> Bool true
-                     | _, Bool true -> Bool true
-                     | Bool false, _ -> y1
-                     | _, Bool false -> x1
-                     | c,d when c=d -> x1
-                     | c, Neg(d) | Neg(d), c when c=d -> Bool true
-                     | _ -> LogOr(x1, y1)
-    | Neg x ->  let x1 = evalBool x memory memarith
-                match x1 with
-                | Bool a -> Bool (not a)
-                | Neg a -> a
-                | _ -> Neg(x)
-    | Equal(x, y) -> let x1 = evalArith x memarith
-                     let y1 = evalArith y memarith
-                     match x1, y1 with
-                     | Num a, Num b -> Bool (a = b)
-                     | Num a, Float b -> Bool (float a = b)
-                     | Float a, Num b -> Bool (a = float b)
-                     | Float a, Float b -> Bool (a = b)
-                     | c, d when c=d -> Bool true
-                     | _ -> Equal(x1, y1)
-    | NotEqual(x, y) -> let x1 = evalArith x memarith
-                        let y1 = evalArith y memarith
-                        match x1, y1 with
-                        | Num a, Num b -> Bool (a <> b)
-                        | Num a, Float b -> Bool (float a <> b)
-                        | Float a, Num b -> Bool (a <> float b)
-                        | Float a, Float b -> Bool (a <> b)
-                        | c, d when c=d -> Bool false
-                        | _ -> Neg(Equal(x1, y1))
-    | Less(x, y) -> let x1 = evalArith x memarith
-                    let y1 = evalArith y memarith
-                    match x1, y1 with
-                    | Num a, Num b -> Bool (a < b)
-                    | Num a, Float b -> Bool (float a < b)
-                    | Float a, Num b -> Bool (a < float b)
-                    | Float a, Float b -> Bool (a < b)
-                    | _ -> Less(x1, y1)
-    | LessEqual(x, y) -> let x1 = evalArith x memarith
-                         let y1 = evalArith y memarith
+    | LogicOp(x, And, y) ->  let x1 = evalBool x memory memarith
+                             let y1 = evalBool y memory memarith
+                             match x1, y1 with
+                             | B x, B y -> B (x && y)
+                             | c,d when c=d -> x1
+                             | c, Not(d) | Not(d), c when c=d -> B false
+                             | _ -> LogicOp(x1, And, y1)
+    | LogicOp(x,Or,y) -> let x1 = evalBool x memory memarith
+                         let y1 = evalBool y memory memarith
                          match x1, y1 with
-                         | Num a, Num b -> Bool (a <= b)
-                         | Num a, Float b -> Bool (float a <= b)
-                         | Float a, Num b -> Bool (a <= float b)
-                         | Float a, Float b -> Bool (a <= b)
-                         // a <= b = not (b < a)
-                         | _ -> evalBool (Neg (Less(y1, x1))) memory memarith
-    | Greater(x, y) -> let x1 = evalArith x memarith
-                       let y1 = evalArith y memarith
-                       match x1, y1 with
-                       | Num a, Num b -> Bool (a > b)
-                       | Num a, Float b -> Bool (float a > b)
-                       | Float a, Num b -> Bool (a > float b)
-                       | Float a, Float b -> Bool (a > b)
-                       // a > b = b < a
-                       | _ -> evalBool (Less(y1, x1)) memory memarith
-    | GreaterEqual(x,y) -> let x1 = evalArith x memarith
-                           let y1 = evalArith y memarith
-                           match x1, y1 with
-                           | Num a, Num b -> Bool (a >= b)
-                           | Num a, Float b -> Bool (float a >= b)
-                           | Float a, Num b -> Bool (a >= float b)
-                           | Float a, Float b -> Bool (a >= b)
-                           // a >= b = not (a < b)
-                           | _ -> evalBool (Neg (Less(x1, y1))) memory memarith
+                         | B a, B b -> B (a || b)
+                         | c,d when c=d -> x1
+                         | c, Not(d) | Not(d), c when c=d -> B true
+                         | _ -> LogicOp(x1, Or, y1)
+    | LogicOp(x,Xor,y) -> let x1 = evalBool x memory memarith
+                          let y1 = evalBool y memory memarith
+                          match x1, y1 with
+                          | B a, B b -> B (a <> b)
+                          | c,d when c=d -> B false
+                          | c, Not(d) | Not(d), c when c=d -> B true
+                          | _ -> LogicOp(x1, Xor, y1)
+    | Not x ->  let x1 = evalBool x memory memarith
+                match x1 with
+                | B a -> B (not a)
+                | Not a -> a
+                | _ -> Not(x)
+    | RelationOp(x,EQ,y) -> let x1 = evalArith x memarith
+                            let y1 = evalArith y memarith
+                            match x1, y1 with
+                            | Num a, Num b -> B (a = b)
+                            | Num a, Float b -> B (float a = b)
+                            | Float a, Num b -> B (a = float b)
+                            | Float a, Float b -> B (a = b)
+                            | c, d when c=d -> B true
+                            | _ -> RelationOp(x1, EQ, y1)
+    | RelationOp(x,NEQ,y)-> let x1 = evalArith x memarith
+                            let y1 = evalArith y memarith
+                            match x1, y1 with
+                            | Num a, Num b -> B (a <> b)
+                            | Num a, Float b -> B (float a <> b)
+                            | Float a, Num b -> B (a <> float b)
+                            | Float a, Float b -> B (a <> b)
+                            | c, d when c=d -> B false
+                            | _ -> Not(RelationOp(x1, EQ, y1))
+    | RelationOp(x,LT,y) -> let x1 = evalArith x memarith
+                            let y1 = evalArith y memarith
+                            match x1, y1 with
+                            | Num a, Num b -> B (a < b)
+                            | Num a, Float b -> B (float a < b)
+                            | Float a, Num b -> B (a < float b)
+                            | Float a, Float b -> B (a < b)
+                            | _ -> RelationOp(x1, LT, y1)
+    | RelationOp(x,LTE,y) -> let x1 = evalArith x memarith
+                             let y1 = evalArith y memarith
+                             match x1, y1 with
+                             | Num a, Num b -> B (a <= b)
+                             | Num a, Float b -> B (float a <= b)
+                             | Float a, Num b -> B (a <= float b)
+                             | Float a, Float b -> B (a <= b)
+                             // a <= b = not (b < a)
+                             | _ -> evalBool (Not (RelationOp(y1, LT, x1))) memory memarith
+    | RelationOp(x,GT,y) -> let x1 = evalArith x memarith
+                            let y1 = evalArith y memarith
+                            match x1, y1 with
+                            | Num a, Num b -> B (a > b)
+                            | Num a, Float b -> B (float a > b)
+                            | Float a, Num b -> B (a > float b)
+                            | Float a, Float b -> B (a > b)
+                            // a > b = b < a
+                            | _ -> evalBool (RelationOp(y1, LT, x1)) memory memarith
+    | RelationOp(x,GTE,y) -> let x1 = evalArith x memarith
+                             let y1 = evalArith y memarith
+                             match x1, y1 with
+                             | Num a, Num b -> B (a >= b)
+                             | Num a, Float b -> B (float a >= b)
+                             | Float a, Num b -> B (a >= float b)
+                             | Float a, Float b -> B (a >= b)
+                             // a >= b = not (a < b)
+                             | _ -> evalBool (Not (RelationOp(x1, LT, y1))) memory memarith
     | Check _ -> expr
-    
+
 /// <summary>
-/// Function to optimize the AST by reducing expressions and building memory
+/// Function to optimize statement AST by reducing expressions and building memory
 /// </summary>
-/// <param name="expr">Abstract Syntax Tree expression for optimization</param>
+/// <param name="st">Abstract Syntax Tree of Statement for optimization (AST.Statement)</param>
 /// <param name="memArith">Initial arithmetic variable memory</param>
 /// <param name="memBool">Initial boolean variable memory</param>
-/// <returns>Tuple of arithmetic and boolean variable memories and optimized AST</returns>
-let rec internal optimizeOperator (expr:operator) (memArith:Map<string, arithExpr * int>)
-    (memBool:Map<string, boolExpr * int>) (no:int) : int * Map<string, arithExpr * int>
-    * Map<string, boolExpr * int> * operator =     
-    match expr with
+/// <returns>Tuple of arithmetic and boolean variable memories and optimized Statement</returns>    
+let rec private optimizeStatement (st:Statement) (memArith:Map<string, ArithExpr * int>)
+    (memBool:Map<string, BoolExpr * int>) (no:int) : int * Map<string, ArithExpr * int>
+    * Map<string, BoolExpr * int> * Statement =
+    match st with
     | Assign(s, value) -> let value1 = evalArith value memArith
                           (no+1), memArith.Add(s, (value1, no)), memBool, Assign(s, value1)
     | AssignB(s, value) -> let value1 = evalBool value memBool memArith
                            (no+1), memArith, memBool.Add(s, (value1, no)), AssignB(s, value1)
-    | Condition(b, op) -> let b1 = evalBool b memBool memArith
-                          no, memArith, memBool, Condition(b1, op)
-    | Order(opx, opy) -> let n1, memArith1, memBool1, opx1 = optimizeOperator opx memArith memBool no
-                         let n2, memArith2, memBool2, opy1 = optimizeOperator opy memArith1 memBool1 n1
-                         n2, memArith2, memBool2, Order(opx1, opy1)
-    | _ -> no, memArith, memBool, expr
+    | Condition(b, statement) -> let b1 = evalBool b memBool memArith
+                                 let no1, memArith1, memBool1, statement1 = optimizeStatement statement memArith memBool no
+                                 no1, memArith1, memBool1, Condition(b1, statement1)
+    | _ -> no, memArith, memBool, st
+    
+/// <summary>
+/// Function to optimize the flow AST by reducing each statement in the list
+/// </summary>
+/// <param name="expr">Abstract Syntax Tree of circuit flow for optimization (AST.Elements)</param>
+/// <param name="memArith">Initial arithmetic variable memory</param>
+/// <param name="memBool">Initial boolean variable memory</param>
+/// <returns>Tuple of arithmetic and boolean variable memories and optimized Flow</returns>
+let rec internal optimizeCircuit (expr:Flow) (memArith:Map<string, ArithExpr * int>)
+    (memBool:Map<string, BoolExpr * int>) (no:int) : int * Map<string, ArithExpr * int>
+    * Map<string, BoolExpr * int> * Flow =     
+    match expr with
+    | head::tail -> let no1, memArith1, memBool1, head1 = optimizeStatement head memArith memBool no
+                    let no2, memArith2, memBool2, tail1 = optimizeCircuit tail memArith1 memBool1 no1
+                    no2, memArith2, memBool2, head1::tail1
+    | [] -> no, memArith, memBool, []
     
     
 /// <summary>
@@ -310,7 +327,7 @@ let rec internal optimizeOperator (expr:operator) (memArith:Map<string, arithExp
 /// <param name="flag">Type of register expected</param>
 /// <param name="memory">Memory mapping of corresponding types</param>
 /// <exception cref="System.Exception">Invalid allocation of register</exception>
-let rec private validateRegister (bit:bit) (flag:string) (memory:Map<string, int * int>):unit =
+let rec private validateRegister (bit:Bit) (flag:string) (memory:Map<string, int * int>):unit =
     match bit with
     | BitA(s, i) ->
                 try
@@ -327,52 +344,63 @@ let rec private validateRegister (bit:bit) (flag:string) (memory:Map<string, int
 /// </summary>
 /// <param name="b">Boolean expression</param>
 /// <param name="acc">Accumulator set of bits</param>
-let rec private peekRegister (b:boolExpr) (acc:Set<bit>):Set<bit> =
+let rec private peekRegister (b:BoolExpr) (acc:Set<Bit>):Set<Bit> =
     match b with
-    | LogAnd(b1, b2) | LogOr(b1, b2) ->
+    | LogicOp(b1, _, b2) ->
                         let acc2 = peekRegister b1 acc
                         peekRegister b2 acc2
-    | Neg b -> peekRegister b acc
+    | Not b -> peekRegister b acc
     | Check(bit, _) -> Set.add bit acc
     | _ -> Set.empty 
 
 /// <summary>
-/// Function to analyze the semantics of the defined circuit AST. Operators have to
+/// Function to analyze the semantics of a Statement AST. Operators have to
 /// be applied on quantum registers only, the measurement result is stored on classical register.
 /// </summary>
-/// <param name="ast">AST structure to be analyzed semantically</param>
+/// <param name="st">Statement to be analyzed semantically (AST.Statement)</param>
 /// <param name="memory">Record mappings of defined identifiers</param>
 /// <exception cref="System.Exception">Invalid register definition (semantic)</exception>
-let rec internal semanticAnalyzer (ast:operator) (memory:Memory):unit =
-    match ast with
-    | Order(op1, op2) ->
-                        // Analyze the first operator
-                        semanticAnalyzer op1 memory
-                        // Analyze the second operator
-                        semanticAnalyzer op2 memory
-    | Condition(b, op) ->
+let rec analyseStatement (st:Statement) (memory:Memory):unit =
+    match st with
+    | Condition(b, st) ->
               // Find used classical registers
               let c_set = peekRegister b Set.empty
               // Validate the found set of registers
               Set.iter (fun x ->
                     validateRegister x "Classical" memory.Classical) c_set
-              // Analyze the following operator
-              semanticAnalyzer op memory
-    | Measure(q, c) -> 
-                       validateRegister q "Quantum" memory.Quantum
-                       validateRegister c "Classical" memory.Classical
-    | Reset q | Barrier q -> validateRegister q "Quantum" memory.Quantum
-    | H q | X q | Y q | Z q | T q | S q | I q -> validateRegister q "Quantum" memory.Quantum
-    | TDG q | SDG q | SX q | SXDG q -> validateRegister q "Quantum" memory.Quantum
-    | RZ(_,q) | RX(_, q) | RY(_, q) | U(_,_,_,q) -> validateRegister q "Quantum" memory.Quantum
-    | CNOT(q1, q2) | SWAP(q1, q2)
-        | RXX(_,q1, q2)| RZZ(_, q1, q2) ->
-                         validateRegister q1 "Quantum" memory.Quantum
-                         validateRegister q2 "Quantum" memory.Quantum
-    | CCX(q1, q2, q3) -> validateRegister q1 "Quantum" memory.Quantum
-                         validateRegister q2 "Quantum" memory.Quantum
-                         validateRegister q3 "Quantum" memory.Quantum
-    | _ -> ()
+              // Analyze the following statement
+              analyseStatement st memory
+    | Measure(q, s) ->
+                validateRegister q "Quantum" memory.Quantum
+                validateRegister s "Classical" memory.Classical
+    | Reset q | Barrier q | Unitary(_, _, _, q)-> validateRegister q "Quantum" memory.Quantum
+    | UnaryGate(_, q) -> validateRegister q "Quantum" memory.Quantum
+    | ParamGate(_, _, q) -> validateRegister q "Quantum" memory.Quantum
+    | BinaryGate(_, q1, q2) -> validateRegister q1 "Quantum" memory.Quantum
+                               validateRegister q2 "Quantum" memory.Quantum
+    | BinaryParamGate(_, _, q1, q2) ->
+                validateRegister q1 "Quantum" memory.Quantum
+                validateRegister q2 "Quantum" memory.Quantum
+    | Toffoli(q1, q2, q3) ->
+                validateRegister q1 "Quantum" memory.Quantum
+                validateRegister q2 "Quantum" memory.Quantum
+                validateRegister q3 "Quantum" memory.Quantum
+    | _ -> ()     
+
+/// <summary>
+/// Function to analyze the semantics of the defined flow AST (iterating statements)
+/// </summary>
+/// <param name="ast">Flow AST to be analyzed semantically</param>
+/// <param name="memory">Record mappings of defined identifiers</param>
+/// <exception cref="System.Exception">Invalid register definition (semantic)</exception>
+let rec internal semanticAnalyzer (ast:Flow) (memory:Memory):unit =
+    match ast with
+    | head::tail ->
+                // Analyze the first operator
+                analyseStatement head memory
+                // Analyze the rest of the list
+                semanticAnalyzer tail memory
+    | [] -> ()
             
             
     

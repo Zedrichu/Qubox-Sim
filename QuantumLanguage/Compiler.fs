@@ -16,13 +16,14 @@ Description: Compiler module handling the conversion from AST structure to Q# co
 *)
 
 open AST
+open QuantumLanguage.AST
 
 /// <summary>
 /// Function to compile the quantum results to Q# syntax.
 /// </summary>
-/// <param name="result">Result expression (AST.result)</param>
+/// <param name="result">Result expression (AST.Result)</param>
 /// <returns>Q# string representation</returns>
-let rec private compileResult (result:result):string =
+let rec private compileResult (result:Result):string =
     match result with
     | Click -> "Zero"
     | NoClick -> "One"
@@ -32,7 +33,7 @@ let rec private compileResult (result:result):string =
 /// </summary>
 /// <param name="expr">Bit expression (sequence, array-like or single)</param>
 /// <returns>Q# string representation</returns>
-let rec private compileAlloc (expr:bit) (flag:bool):string =
+let rec internal compileAlloc (expr:Bit) (flag:bool):string =
     match flag with
     | true ->
         match expr with
@@ -44,8 +45,12 @@ let rec private compileAlloc (expr:bit) (flag:bool):string =
         | BitA(s, i) -> $"mutable {s}[%i{i}] = new Result[%i{i}];"
         | BitS(s) -> $"mutable {s} = new Result;"
         | BitSeq(q,q_seq) -> compileAlloc q false + "\n" + compileAlloc q_seq false
-    
-let rec private compileBit (bit:bit):string =
+
+/// <summary>
+/// Function to compile a single bit to Q# syntax.
+/// </summary>
+/// <param name="bit">Q# bit representation</param>
+let rec private compileBit (bit:Bit) : string =
     match bit with
     | BitA(b,i) -> $"{b}[%i{i}]" 
     | BitS b -> b
@@ -55,80 +60,72 @@ let rec private compileBit (bit:bit):string =
 /// Function to compile arithmetic expressions to Q# syntax.
 /// Recursive on the structure of type arithExpr.
 /// </summary>
-/// <param name="expr">Arithmetic expression (AST.arithExpr)</param>
+/// <param name="expr">Arithmetic expression (AST.ArithExpr)</param>
 /// <returns>Q# string representation</returns>
-let rec private compileArith (expr:arithExpr):string = 
+let rec private compileArith (expr:ArithExpr):string = 
     match expr with
     | VarA x -> x
     | Num x -> x.ToString()
     | Float x -> x.ToString()
     | Pi -> "PI ()"
-    | TimesExpr(x,y) -> "("+(compileArith x)+" * "+(compileArith y)+")"
-    | DivExpr(x,y) -> "("+(compileArith x)+" / "+(compileArith y)+")"
-    | PlusExpr(x,y) -> "("+compileArith x+" + "+(compileArith y)+")"
-    | MinusExpr(x,y) -> "("+(compileArith x)+" - "+(compileArith y)+")"
-    | PowExpr(x, y) -> "("+(compileArith x)+" ^ "+(compileArith y)+")"
-    | ModExpr(x, y) -> "("+(compileArith x)+" % "+(compileArith y)+")"
-    | UPlusExpr(x) -> "(+ "+(compileArith x)+")"
-    | UMinusExpr(x) -> "(- "+(compileArith x)+")"
-
+    | UnaryOp(op, x) -> "("+op.ToString()+(compileArith x)+")"
+    | BinaryOp(x, op, y) -> "("+(compileArith x)+op.ToString()+(compileArith y)+")"
+   
 /// <summary>
 /// Function to compile boolean expressions to Q# syntax.
 /// Recursive on the structure of type boolExpr
 /// </summary>
 /// <param name="expr">Boolean expression (AST.boolExpr)</param>
 /// <returns>Q# string representation</returns>
-let rec private compileBool (expr:boolExpr):string = 
+let rec private compileBool (expr:BoolExpr):string = 
     match expr with 
-    | Bool x -> x.ToString()
+    | B x -> x.ToString()
     | VarB s -> s
-    | LogAnd(x,y) -> ""+(compileBool x)+" and "+(compileBool y)+""
-    | LogOr(x,y) -> ""+(compileBool x)+" or "+(compileBool y)+""
-    | Neg x -> "not ("+(compileBool x)+")"
+    | LogicOp(x,And,y) -> ""+(compileBool x)+" and "+(compileBool y)+""
+    | LogicOp(x,Or,y) -> ""+(compileBool x)+" or "+(compileBool y)+""
+    | LogicOp(x,Xor,y) -> "("+(compileBool x)+" and not "+(compileBool y)+") or ("
+                             + (compileBool y)+" and not "+(compileBool x)+")"    
+    | Not x -> $"(not {compileBool x})"
     | Check(bit, res) -> "("+compileBit bit+" == "+(compileResult res)+")"
-    | Equal(x,y) -> (compileArith x)+"=="+(compileArith y)
-    | NotEqual(x,y) -> (compileArith x)+"!="+(compileArith y)
-    | Greater(x,y) -> (compileArith x)+">"+(compileArith y)
-    | GreaterEqual(x,y) -> (compileArith x)+">="+(compileArith y)
-    | Less(x,y) -> (compileArith x)+"<"+(compileArith y)
-    | LessEqual(x,y) -> (compileArith x)+"<="+(compileArith y)
+    | RelationOp(x,op,y) -> $"{compileArith x} {op} {compileArith y}"
 
 
 /// <summary>
-/// Function to compile the quantum operators to Q# syntax.
-/// Recursive on the structure of type operator.
+/// Function to compile statement to Q# syntax.
+/// Recursive on the Flow structure.
 /// </summary>
-/// <param name="expr">Operator expression (AST.operator)</param>
+/// <param name="expr">Statement expression (AST.Statement)</param>
 /// <returns>Q# string representation</returns>
-let rec internal compileOperator (expr:operator):string =
+let rec private compileStatement (expr:Statement):string =
     match expr with
-    | AllocQC(q_bit, c_bit) -> compileAlloc q_bit true + "\n" + compileAlloc c_bit false + "\n"
-    | Measure(q_bit, c_bit) -> "let "+compileBit c_bit+" = M("+compileBit q_bit+");"
     | Assign(var, value) -> "let "+var+" = "+compileArith value
     | AssignB(var, value) -> "let "+var+" = "+compileBool value
-    | Order(op1, op2) -> compileOperator op1 + "\n" + compileOperator op2
+    | Condition(b, st) -> "if ("+compileBool b+") {"+compileStatement st+"}"
+    | Measure(q_bit, c_bit) -> "let "+compileBit c_bit+" = M("+compileBit q_bit+");"
     | Reset(BitS(q)) -> "Reset("+q+");"
     | Reset(BitA(q, _)) -> "ResetAll("+q+");"
-    | Condition(b, operator) -> "if ("+compileBool b+") {"+compileOperator operator+"}"
-    | H(bit) -> "H("+compileBit bit+");"
-    | I(bit) -> "I("+compileBit bit+");"
-    | X(bit) -> "X("+compileBit bit+");"
-    | Y(bit) -> "Y("+compileBit bit+");"
-    | Z(bit) -> "Z("+compileBit bit+");"
-    | TDG(bit) -> "Rz(-PI()/4, "+compileBit bit+");" // T†
-    | SDG(bit) -> "Rz(-PI()/2, "+compileBit bit+");" // S†
-    | S(bit) -> "S("+compileBit bit+");"
-    | T(bit) -> "T("+compileBit bit+");"
-    | SX(bit) -> "Rx(PI()/2, "+compileBit bit+");" // Global phase 
-    | SXDG(bit) -> "Rx(-PI()/2, "+compileBit bit+");" // Global phase
-    | P(phase, bit) -> "Rz("+(compileArith phase).ToString()+", "+compileBit bit+");" // up to global phase
-    | RZ(angle, bit) -> "Rz("+(compileArith angle).ToString()+", "+compileBit bit+");"
-    | RY(angle, bit) -> "Ry("+(compileArith angle).ToString()+", "+compileBit bit+");"
-    | RX(angle, bit) -> "Rx("+(compileArith angle).ToString()+", "+compileBit bit+");"
-    //| U(exp1, exp2, exp3, bit) ->
-    | CNOT(bit1, bit2) -> "CNOT("+compileBit bit1+", "+compileBit bit2+");"
-    | CCX(bit1, bit2, bit3) -> "CCNOT("+compileBit bit1+", "+compileBit bit2+", "+compileBit bit3+");"
-    | SWAP(bit1, bit2) -> "SWAP("+compileBit bit1+", "+compileBit bit2+");"
-    | RXX(theta, bit1, bit2) -> "Rxx("+(compileArith theta).ToString()+", "+compileBit bit1+", "+compileBit bit2+");"
-    | RZZ(theta, bit1, bit2) -> "Rzz("+(compileArith theta).ToString()+", "+compileBit bit1+", "+compileBit bit2+");"
+    | UnaryGate(TDG, bit) -> "Rz(-PI()/4, "+compileBit bit+");" // T†
+    | UnaryGate(SDG, bit) -> "Rz(-PI()/2, "+compileBit bit+");" // S†
+    | UnaryGate(SX, bit) -> "Rx(PI()/2, "+compileBit bit+");" // Global phase 
+    | UnaryGate(SXDG, bit) -> "Rx(-PI()/2, "+compileBit bit+");" // Global phase
+    | UnaryGate(tag, bit) -> "{tag}("+compileBit bit+");"
+    | ParamGate(P, phase, bit) -> "Rz("+(compileArith phase).ToString()+", "+compileBit bit+");" // up to global phase
+    | ParamGate(RZ, angle, bit) -> "Rz("+(compileArith angle).ToString()+", "+compileBit bit+");"
+    | ParamGate(RY, angle, bit) -> "Ry("+(compileArith angle).ToString()+", "+compileBit bit+");"
+    | ParamGate(RX, angle, bit) -> "Rx("+(compileArith angle).ToString()+", "+compileBit bit+");"
+    //| U(exp1, exp2, exp3, bit) -> #TODO! Find equivalent of unitary in Q# syntax
+    | BinaryGate(CNOT, bit1, bit2) -> "CNOT("+compileBit bit1+", "+compileBit bit2+");"
+    | BinaryGate(SWAP,bit1, bit2) -> "SWAP("+compileBit bit1+", "+compileBit bit2+");"
+    //| BinaryGate(CH, bit1, bit2) -> #TODO! Find equivalent Q#
+    //| BinaryGate(CS, bit1, bit2) -> #TODO! Find equivalent Q#
+    | BinaryParamGate(RXX, theta, bit1, bit2) -> "Rxx("+(compileArith theta).ToString()+", "+compileBit bit1+", "+compileBit bit2+");"
+    | BinaryParamGate(RYY, theta, bit1, bit2) -> "Ryy("+(compileArith theta).ToString()+", "+compileBit bit1+", "+compileBit bit2+");"
+    | BinaryParamGate(RZZ, theta, bit1, bit2) -> "Rzz("+(compileArith theta).ToString()+", "+compileBit bit1+", "+compileBit bit2+");"
+    | Toffoli(bit1, bit2, bit3) -> "CCNOT("+compileBit bit1+", "+compileBit bit2+", "+compileBit bit3+");"
     | _ -> ""
+
+/// Helper to aggregate statements in a flow    
+let rec internal compileFlow (flow:Flow):string =
+    match flow with
+    | head::tail -> compileStatement head + "\n" + compileFlow tail
+    | [] -> ""

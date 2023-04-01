@@ -5,6 +5,7 @@ type token =
   | SAND
   | SOR
   | AND
+  | XOR
   | OR
   | NEG
   | EQUAL
@@ -19,9 +20,12 @@ type token =
   | RXGATE
   | SWAP
   | TOFFOLI
+  | CTRLH
+  | CTRLS
   | CTRLNOT
   | SYMMRXX
   | SYMMRZZ
+  | SYMMRYY
   | SQRTNOT
   | SQRTXDG
   | BARRIER
@@ -40,8 +44,8 @@ type token =
   | CLASSREG
   | ASSIGN
   | BASSIGN
-  | ORDER
-  | COMMA
+  | DEL
+  | SEP
   | MEASURE
   | MESHOST
   | CONDITIONAL
@@ -70,6 +74,7 @@ type tokenId =
     | TOKEN_SAND
     | TOKEN_SOR
     | TOKEN_AND
+    | TOKEN_XOR
     | TOKEN_OR
     | TOKEN_NEG
     | TOKEN_EQUAL
@@ -84,9 +89,12 @@ type tokenId =
     | TOKEN_RXGATE
     | TOKEN_SWAP
     | TOKEN_TOFFOLI
+    | TOKEN_CTRLH
+    | TOKEN_CTRLS
     | TOKEN_CTRLNOT
     | TOKEN_SYMMRXX
     | TOKEN_SYMMRZZ
+    | TOKEN_SYMMRYY
     | TOKEN_SQRTNOT
     | TOKEN_SQRTXDG
     | TOKEN_BARRIER
@@ -105,8 +113,8 @@ type tokenId =
     | TOKEN_CLASSREG
     | TOKEN_ASSIGN
     | TOKEN_BASSIGN
-    | TOKEN_ORDER
-    | TOKEN_COMMA
+    | TOKEN_DEL
+    | TOKEN_SEP
     | TOKEN_MEASURE
     | TOKEN_MESHOST
     | TOKEN_CONDITIONAL
@@ -142,15 +150,14 @@ type nonTerminalId =
     | NONTERM_allocation
     | NONTERM_qallocation
     | NONTERM_callocation
-    | NONTERM_expression
-    | NONTERM_expression1
+    | NONTERM_arithmetic
+    | NONTERM_arithmetic1
     | NONTERM_str
-    | NONTERM_statement
+    | NONTERM_statements
     | NONTERM_result
     | NONTERM_bit
     | NONTERM_bitsequence
-    | NONTERM_boolexpression
-    | NONTERM_measurement
+    | NONTERM_boolean
     | NONTERM_operator
 /// This function maps tokens to integer indexes
 val tagOfToken: token -> int
@@ -163,6 +170,6 @@ val prodIdxToNonTerminal: int -> nonTerminalId
 
 /// This function gets the name of a token as a string
 val token_to_string: token -> string
-val startBool : (FSharp.Text.Lexing.LexBuffer<'cty> -> token) -> FSharp.Text.Lexing.LexBuffer<'cty> -> (AST.boolExpr) 
-val startArith : (FSharp.Text.Lexing.LexBuffer<'cty> -> token) -> FSharp.Text.Lexing.LexBuffer<'cty> -> (AST.arithExpr) 
-val start : (FSharp.Text.Lexing.LexBuffer<'cty> -> token) -> FSharp.Text.Lexing.LexBuffer<'cty> -> (AST.operator * AST.operator) 
+val startBool : (FSharp.Text.Lexing.LexBuffer<'cty> -> token) -> FSharp.Text.Lexing.LexBuffer<'cty> -> (AST.BoolExpr option) 
+val startArith : (FSharp.Text.Lexing.LexBuffer<'cty> -> token) -> FSharp.Text.Lexing.LexBuffer<'cty> -> (AST.ArithExpr option) 
+val start : (FSharp.Text.Lexing.LexBuffer<'cty> -> token) -> FSharp.Text.Lexing.LexBuffer<'cty> -> (AST.Circuit option) 
