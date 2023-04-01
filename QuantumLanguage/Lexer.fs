@@ -356,7 +356,7 @@ let actions : uint16[] = [|65535us;0us;0us;0us;65535us;3us;7us;8us;69us;69us;5us
 let _fslex_tables = FSharp.Text.Lexing.UnicodeTables.Create(trans,actions)
 let rec _fslex_dummy () = _fslex_dummy() 
 // Rule tokenize
-and tokenize  lexbuf =
+and tokenize lexbuf =
   match _fslex_tables.Interpret(0,lexbuf) with
   | 0 -> ( 
 # 31 "Lexer.fsl"

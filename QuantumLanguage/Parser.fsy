@@ -98,8 +98,8 @@ arithmetic1:
   | MATHPI                          { Pi }
   | NUM                             { Num($1) }
   | FLOAT                           { Float($1) }
-  | MINUS arithmetic1               { UnaryOp(Plus, $2) }
-  | PLUS arithmetic1                { UnaryOp(Minus, $2) }
+  | MINUS arithmetic1               { UnaryOp(Minus, $2) }
+  | PLUS arithmetic1                { UnaryOp(Plus, $2) }
   | LPAR arithmetic RPAR            { $2 }
   | str                             { VarA($1) }
 

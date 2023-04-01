@@ -185,6 +185,7 @@ let rec private evalArith (expr:ArithExpr) (memory:Map<string, ArithExpr * int>)
                            | Num a, Float b -> Float (float a % b)
                            | Float a, Float b -> Float (a % b)
                            | _ -> BinaryOp(x1, Mod, y1)
+    | _ -> expr
 
 /// <summary>
 /// Function to eager evaluate boolean expressions with reduction rules

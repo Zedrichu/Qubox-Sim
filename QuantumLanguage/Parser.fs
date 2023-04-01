@@ -834,7 +834,7 @@ let _fsyacc_reductions = lazy [|
                 (
                    (
 # 101 "Parser.fsy"
-                                                           UnaryOp(Plus, _2) 
+                                                           UnaryOp(Minus, _2) 
                    )
 # 101 "Parser.fsy"
                  : ArithExpr));
@@ -845,7 +845,7 @@ let _fsyacc_reductions = lazy [|
                 (
                    (
 # 102 "Parser.fsy"
-                                                           UnaryOp(Minus, _2) 
+                                                           UnaryOp(Plus, _2) 
                    )
 # 102 "Parser.fsy"
                  : ArithExpr));
