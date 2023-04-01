@@ -1,6 +1,6 @@
-using QuboxSimulator.Models.Gates;
+using QuboxSimulator.Gates;
 
-namespace QuboxSimulator.Models.Circuits;
+namespace QuboxSimulator.Circuits;
 
 public class Circuit
 {
@@ -22,7 +22,7 @@ public class Circuit
         if (tower != null) return;
             
         
-        tower = new Tower(Allocation.QubitNumber + 1);
+        tower = new Tower(Allocation.QubitNumber + Allocation.CbitNumber);
         tower.AcceptGate(gate);
         GateGrid.Add(tower);
         
@@ -39,7 +39,7 @@ public class Circuit
         {
             foreach (var t in GateGrid)
             {
-                t.Locked = new Tuple<int, int>(0, Allocation.QubitNumber);
+                t.Locked = new Tuple<int, int>(0, Allocation.QubitNumber + Allocation.CbitNumber-1);
                 if (t == tower) break;
             }
         }

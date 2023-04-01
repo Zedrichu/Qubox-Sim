@@ -1,6 +1,6 @@
 using QuantumLanguage;
 
-namespace QuboxSimulator.Models;
+namespace QuboxSimulator.Circuits;
 
 public class Register
 {
@@ -11,9 +11,9 @@ public class Register
     
     public Dictionary<string, Tuple<int, int>> Cbits { get; set; } = new();
     
-    public Dictionary<string, AST.boolExpr> BoolVariables { get; set; } = new();
+    public Dictionary<string, Tuple<AST.boolExpr, int>> BoolVariables { get; set; } = new();
     
-    public Dictionary<string, AST.arithExpr> ArithVariables { get; set; } = new();
+    public Dictionary<string, Tuple<AST.arithExpr, int>> ArithVariables { get; set; } = new();
 
     public Register(AST.Memory memory)
     {
@@ -23,8 +23,8 @@ public class Register
         Qubits = new Dictionary<string, Tuple<int, int>>(memory.Quantum);
         Cbits = new Dictionary<string, Tuple<int, int>>(memory.Classical);
 
-        BoolVariables = new Dictionary<string, AST.boolExpr>(memory.Boolean);
-        ArithVariables = new Dictionary<string, AST.arithExpr>(memory.Arithmetic);
+        BoolVariables = new Dictionary<string, Tuple<AST.boolExpr, int>>(memory.Boolean);
+        ArithVariables = new Dictionary<string, Tuple<AST.arithExpr, int>>(memory.Arithmetic);
     }
 
     private static string StringifyDictionary<T>(Dictionary<string, T> dictionary)

@@ -70,11 +70,12 @@ let internal allocateBits (operator:operator):Map<string,int * int> * Map<string
 /// <param name="memory">Mapping of arithmetic variables to expressions</param>
 /// <exception cref="System.Exception">Arithmetic invalid variable access, division by zero</exception>
 /// <returns>Reduced evaluation of AST arithmetic expression</returns>
-let rec private evalArith (expr:arithExpr) (memory:Map<string, arithExpr>):arithExpr =
+let rec private evalArith (expr:arithExpr) (memory:Map<string, arithExpr * int>):arithExpr =
     match expr with
     | Pi | Num _ | Float _ -> expr
     | VarA s -> try
-                    evalArith (Map.find s memory) memory
+                    let (a, _) = Map.find s memory
+                    evalArith a memory
                 with _ -> failwith $"Unknown variable in expression - {s} has not been declared!"    
     | TimesExpr(x, y) -> let x1 = evalArith x memory
                          let y1 = evalArith y memory
@@ -189,11 +190,13 @@ let rec private evalArith (expr:arithExpr) (memory:Map<string, arithExpr>):arith
 /// <param name="memarith">Arithmetic mapping of identifiers</param>
 /// <exception cref="System.Exception">Boolean invalid variable access</exception>
 /// <returns>Reduced evaluation of AST boolean expression</returns>
-let rec private evalBool (expr:boolExpr) (memory:Map<string,boolExpr>) (memarith:Map<string, arithExpr>):boolExpr =
+let rec private evalBool (expr:boolExpr) (memory:Map<string,boolExpr * int>)
+    (memarith:Map<string, arithExpr * int>) : boolExpr =
     match expr with 
     | Bool _ -> expr
     | VarB s -> try
-                    evalBool (Map.find s memory) memory memarith
+                    let b, _ = Map.find s memory
+                    evalBool b memory memarith
                 with _ -> failwith $"Unknown variable in expression - {s} has not been declared!"    
     | LogAnd(x,y) -> let x1 = evalBool x memory memarith
                      let y1 = evalBool y memory memarith
@@ -284,19 +287,20 @@ let rec private evalBool (expr:boolExpr) (memory:Map<string,boolExpr>) (memarith
 /// <param name="memArith">Initial arithmetic variable memory</param>
 /// <param name="memBool">Initial boolean variable memory</param>
 /// <returns>Tuple of arithmetic and boolean variable memories and optimized AST</returns>
-let rec internal optimizeOperator (expr:operator) (memArith:Map<string, arithExpr>)
-    (memBool:Map<string, boolExpr>):Map<string, arithExpr> * Map<string, boolExpr> * operator =     
+let rec internal optimizeOperator (expr:operator) (memArith:Map<string, arithExpr * int>)
+    (memBool:Map<string, boolExpr * int>) (no:int) : int * Map<string, arithExpr * int>
+    * Map<string, boolExpr * int> * operator =     
     match expr with
     | Assign(s, value) -> let value1 = evalArith value memArith
-                          memArith.Add(s, value1), memBool, Assign(s, value1)
+                          (no+1), memArith.Add(s, (value1, no)), memBool, Assign(s, value1)
     | AssignB(s, value) -> let value1 = evalBool value memBool memArith
-                           memArith, memBool.Add(s, value1), AssignB(s, value1)
+                           (no+1), memArith, memBool.Add(s, (value1, no)), AssignB(s, value1)
     | Condition(b, op) -> let b1 = evalBool b memBool memArith
-                          memArith, memBool, Condition(b1, op)
-    | Order(opx, opy) -> let memArith1, memBool1, opx1 = optimizeOperator opx memArith memBool
-                         let memArith2, memBool2, opy1 = optimizeOperator opy memArith1 memBool1
-                         memArith2, memBool2, Order(opx1, opy1)
-    | _ -> memArith, memBool, expr
+                          no, memArith, memBool, Condition(b1, op)
+    | Order(opx, opy) -> let n1, memArith1, memBool1, opx1 = optimizeOperator opx memArith memBool no
+                         let n2, memArith2, memBool2, opy1 = optimizeOperator opy memArith1 memBool1 n1
+                         n2, memArith2, memBool2, Order(opx1, opy1)
+    | _ -> no, memArith, memBool, expr
     
     
 /// <summary>

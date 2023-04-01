@@ -1,4 +1,4 @@
-namespace QuboxSimulator.Models.Gates;
+namespace QuboxSimulator.Gates;
 /* C#
  -*- coding: utf-8 -*-
 Gate Interface Hierarchy
@@ -24,8 +24,7 @@ public interface IGate
     
     public abstract string Id { get; set; }
     
-    
-
+    public abstract GateType Type { get; set; }
 }
 
 /// <summary>
@@ -44,6 +43,8 @@ internal abstract class SupportGate : ISupportGate
     
     public string Id { get; set; }
     
+    public GateType Type { get; set; }
+    
     public override string ToString()
     {
         return $"Gate:{Id} Target: {TargetRange}";
@@ -58,6 +59,7 @@ internal class NoneGate : SupportGate
     public NoneGate(int target)
     {
         Id = "NONE";
+        Type = GateType.NONE;
         TargetRange = new Tuple<int, int>(target, target);
     }
 
@@ -71,6 +73,7 @@ internal class BarrierGate : SupportGate
     public BarrierGate(int target)
     {
         Id = "BARRIER";
+        Type = GateType.BARRIER;
         TargetRange = new Tuple<int, int>(target, target);
     }
 }
@@ -83,6 +86,7 @@ internal class ResetGate : SupportGate
     public ResetGate(int target)
     {
         Id = "RESET";
+        Type = GateType.RESET;
         TargetRange = new Tuple<int, int>(target, target);
     }
 }
@@ -95,6 +99,7 @@ internal class MeasureGate : SupportGate
     public MeasureGate(int quantum, int classic)
     {
         Id = "MEASURE";
+        Type = GateType.MEASURE;
         TargetRange = new Tuple<int, int>(quantum, classic);
     }
 }
@@ -107,6 +112,7 @@ internal class PhaseDisk : SupportGate
     public PhaseDisk(int qubitNo)
     {
         Id = "PHASEDISK";
+        Type = GateType.PHASEDISK;
         TargetRange = new Tuple<int, int>(0, qubitNo);
     }
 }

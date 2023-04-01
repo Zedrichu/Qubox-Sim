@@ -126,10 +126,10 @@ let public analyzeSemantics (ast:operator * operator): Memory * error =
 /// <param name="ast">Generated AST for optimization</param>
 /// <param name="memory">Initialized circuit memory</param>
 /// <returns>Tuple of optimized AST, updated circuit memory and error tag</returns>
-let public optimizeAST (ast:operator) (memory:Memory):(operator * Memory * error) =
+let public optimizeAST (ast:operator) (memory:Memory) : operator * Memory * error =
     try
-        let optimized = Interpreter.optimizeOperator ast Map.empty Map.empty
-        let memA, memB, optimAST = optimized
+        let optimized = Interpreter.optimizeOperator ast Map.empty Map.empty 0
+        let _, memA, memB, optimAST = optimized
         let updMemory = (memory.SetArithmetic memA).SetBoolean memB
         optimAST, updMemory, Success
     with e -> ast, memory, EvaluationError e.Message
@@ -223,7 +223,7 @@ let rec mainMenu () =
     | true, 4 -> ()
     | _ -> mainMenu()
 
-[<EntryPoint>]
-    let main argv =
-        mainMenu()
-        0 // return an integer exit code
+// [<EntryPoint>]
+//     let main argv =
+//         mainMenu()
+//         0 // return an integer exit code

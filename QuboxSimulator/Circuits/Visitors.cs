@@ -1,8 +1,8 @@
+using QuboxSimulator.Gates;
 using static QuantumLanguage.VisitorPattern;
 using static QuantumLanguage.AST;
-using QuboxSimulator.Models.Gates;
 
-namespace QuboxSimulator.Models;
+namespace QuboxSimulator.Circuits;
 /* C#
  -*- coding: utf-8 -*-
 AST Structure Visitors
@@ -163,11 +163,11 @@ public class OperatorVisitor: IVisitor<@operator, List<IGate>>
 /// </summary>
 public class ArithmeticVisitor : IVisitor<arithExpr, double>
 {
-    private readonly Dictionary<string, arithExpr> _memory;
+    private readonly Dictionary<string,Tuple<arithExpr, int>> _memory;
     
-    public ArithmeticVisitor(IDictionary<string, arithExpr> memory)
+    public ArithmeticVisitor(IDictionary<string, Tuple<arithExpr, int>> memory)
     {
-        _memory = new Dictionary<string, arithExpr>(memory);
+        _memory = new Dictionary<string, Tuple<arithExpr, int>>(memory);
     }
     
     /// <summary>
@@ -206,7 +206,7 @@ public class ArithmeticVisitor : IVisitor<arithExpr, double>
                 value = left * right;
                 break;
             case arithExpr.VarA x:
-                value = _memory[x.Item].Accept(this);
+                value = _memory[x.Item].Item1.Accept(this);
                 break;
             case var _ when expr.Equals(arithExpr.Pi):
                 value = Math.PI;

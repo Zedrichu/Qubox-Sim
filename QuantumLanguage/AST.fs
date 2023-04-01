@@ -37,18 +37,18 @@ type arithExpr =
     
   override this.ToString () =
     match this with
-    | Pi -> "π"
+    | Pi -> "Pi"
     | Num i -> i.ToString()
     | Float f -> f.ToString()
     | VarA s -> s
-    | TimesExpr (a1, a2) -> $"{a1.ToString()} * {a2.ToString}"
-    | DivExpr (a1, a2) -> $"%s{a1.ToString()} / %s{a2.ToString()}"
-    | PlusExpr (a1, a2) -> $"%s{a1.ToString()} + %s{a2.ToString()}"
-    | MinusExpr (a1, a2) -> $"%s{a1.ToString()} - %s{a2.ToString()}"
-    | PowExpr (a1, a2) -> $"%s{a1.ToString()} ^ %s{a2.ToString()}"
-    | ModExpr (a1, a2) -> $"%s{a1.ToString()} % %s{a2.ToString()}"
-    | UPlusExpr a -> $"+%s{a.ToString()}"
-    | UMinusExpr a -> $"-%s{a.ToString()}"
+    | TimesExpr (a1, a2) -> $"{a1} * {a2}"
+    | DivExpr (a1, a2) -> $"{a1} / {a2}"
+    | PlusExpr (a1, a2) -> $"({a1} + {a2})"
+    | MinusExpr (a1, a2) -> $"({a1} - {a2})"
+    | PowExpr (a1, a2) -> $"({a1} ^ {a2})"
+    | ModExpr (a1, a2) -> $"({a1} %% {a2})"
+    | UPlusExpr a -> $"+({a})"
+    | UMinusExpr a -> $"-({a})"
   
 /// Tagged type of quantum/classical bit declarations
 type bit =
@@ -183,8 +183,8 @@ type operator =
 /// Record type to hold the established memory bindings (arithmetic/boolean/classical/quantum)
 /// </summary>
 type Memory =
-   { Arithmetic: Map<string,arithExpr>;
-     Boolean: Map<string, boolExpr>; 
+   { Arithmetic: Map<string,arithExpr * int>;
+     Boolean: Map<string, boolExpr * int>; 
      Quantum: Map<string, int * int>;
      Classical: Map<string, int * int> }
    static member empty = { Arithmetic = Map.empty; Boolean = Map.empty;
@@ -193,8 +193,8 @@ type Memory =
    member this.SetArithmetic map = { this with Arithmetic = map }
    member this.SetBoolean map = { this with Boolean = map }
    member this.SetQuantumClassic qmap cmap = { this with Quantum = qmap; Classical = cmap }
-   member this.CountQuantum = (Map.fold (fun acc key (value, _) -> acc+value) 0 this.Quantum)
-   member this.CountClassical = (Map.fold (fun acc key (value, _) -> acc+value) 0 this.Classical)
+   member this.CountQuantum = (Map.fold (fun acc _ (value, _) -> acc+value) 0 this.Quantum)
+   member this.CountClassical = (Map.fold (fun acc _ (value, _) -> acc+value) 0 this.Classical)
    member this.GetOrder (bit:bit) =
      match bit with
      | BitA(s, i) -> let _, order = Map.find s this.Quantum in order + i

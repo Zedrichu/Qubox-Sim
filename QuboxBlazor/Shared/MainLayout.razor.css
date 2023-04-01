@@ -9,26 +9,31 @@ main {
 }
 
 .sidebar {
-    background-image: linear-gradient(180deg, 
-    rgb(5, 39, 103) 0%, 
-    #3a0647 70%);
+    background-image: linear-gradient(225deg,
+    rgb(15,24,88) 35%,
+    rgb(141,11,61) 100%);
 }
 
 .ab:link {
-    color: #ff8000;
+    color: rgb(213,83,77);
 }
 
 .ab:visited {
-    color: #ebfdc7;
+    color: rgb(255,236,69);
 }
 
 .ab:hover {
-    color: #5effab;
+    color: rgb(141,11,61);
+}
+
+.content {
+    background-color: rgb(15,24,88);
+    color: rgb(255,236,69);
 }
 
 .top-row {
-    background-color: #f7f7f7;
-    border-bottom: 1px solid #d6d5d5;
+    background-color: rgb(15,24,88);
+    border-bottom: 1px solid rgb(255,236,69);
     justify-content: flex-end;
     height: 3.5rem;
     display: flex;

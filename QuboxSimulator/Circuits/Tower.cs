@@ -1,7 +1,6 @@
-using QuantumLanguage;
-using QuboxSimulator.Models.Gates;
+using QuboxSimulator.Gates;
 
-namespace QuboxSimulator.Models;
+namespace QuboxSimulator.Circuits;
 
 public class Tower
 {

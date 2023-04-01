@@ -1,6 +1,6 @@
 using System.Numerics;
 using MathNet.Numerics.LinearAlgebra;
-namespace QuboxSimulator.Models.Gates;
+namespace QuboxSimulator.Gates;
 
 public abstract class ParametricGate: IMatrixGate
 {
@@ -10,17 +10,20 @@ public abstract class ParametricGate: IMatrixGate
     
     public string Id { get; set; }
     
+    public GateType Type { get; set; }
+    
     public string? Condition { get; set; }
     
-    protected Tuple<double, string>[] Phase { get; set; }
+    public Tuple<double, string>[] Phase { get; protected set; }
 }
 
 
 public class ParamSingleGate : ParametricGate
 {
-    public ParamSingleGate(Matrix<Complex> matrix, int target, string id, Tuple<double, string> phase, string? condition = null)
+    public ParamSingleGate(Tuple<GateType, Matrix<Complex>> type, int target, string id, Tuple<double, string> phase, string? condition = null)
     {
-        Matrix = matrix;
+        Type = type.Item1;
+        Matrix = type.Item2;
         TargetRange = new Tuple<int, int>(target, target);
         Id = id;
         Condition = condition;
@@ -33,6 +36,7 @@ public class UnitaryGate : ParametricGate
     public UnitaryGate(Tuple<double, string>[] args, int target)
     {
         Phase = args;
+        Type = GateType.U;
         Id = "U";
         var theta = args[0].Item1;
         var phi = args[1].Item1;
@@ -48,13 +52,16 @@ public class UnitaryGate : ParametricGate
 
 public class RxxGate : ParametricGate
 {
-
+    public Tuple<int, int> Control { get; set; }
+    
     public RxxGate(int target1, int target2, Tuple<double, string> phase)
     {
         var min = Math.Min(target1, target2);
         var max = Math.Max(target1, target2);
         TargetRange = new Tuple<int, int>(min, max);
+        Control = new(target1, target2);
         Id = "RXX";
+        Type = GateType.RXX;
         Phase = new [] {phase};
         Matrix = Matrix<Complex>.Build.DenseOfArray(new [,]
         {
@@ -68,12 +75,15 @@ public class RxxGate : ParametricGate
 
 public class RzzGate : ParametricGate
 {
+    public Tuple<int, int> Control { get; set; }
     public RzzGate(int target1, int target2, Tuple<double, string> phase)
     {
         var min = Math.Min(target1, target2);
         var max = Math.Max(target1, target2);
         TargetRange = new Tuple<int, int>(min, max);
+        Control = new(target1, target2);
         Id = "RZZ";
+        Type = GateType.RZZ;
         Phase = new [] {phase};
         Matrix = Matrix<Complex>.Build.DenseOfArray(new [,]
         {

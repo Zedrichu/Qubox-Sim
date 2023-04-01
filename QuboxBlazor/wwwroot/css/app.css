@@ -62,8 +62,8 @@ a, .btn-link {
 .monaco-editor-background, .monaco-editor {
     background-image:  repeating-linear-gradient(85deg,
     rgba(67, 0, 65, 0.73) 20px,
-    rgb(35,15,151) 70px,
-    rgb(35,15,151) 77px,
+    rgb(15,24,88) 70px,
+    rgb(15,24,88) 77px,
     rgba(0, 0, 0, 0.66) 200px,
     rgba(0, 0, 0, 0.66) 400px,
     rgba(35, 0, 31, 0.82) 450px,
@@ -75,9 +75,9 @@ a, .btn-link {
 
 .monaco-editor .margin {
     background-image: linear-gradient(85deg,
-        rgb(35,15,151),
-        rgb(35,15,151) 25%,
-        rgba(0, 0, 0, 0.66));
+    rgb(15,24,88),
+    rgb(15,24,88) 25%,
+    rgba(0, 0, 0, 0.66));
 }
     
 .blazor-error-boundary {

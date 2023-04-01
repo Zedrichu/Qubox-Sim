@@ -101,6 +101,24 @@ let ``Empty program with skipped characters`` () =
     Assert.That(error, Is.EqualTo Success)
     
 [<Test>]
+let ``Test boolean expression solely`` () =
+    let (ast, error) = Handler.parseBool "true && (5<3 || false || 5.0 ^ 2 <=10) or (not (c |> Click))"
+    Assert.That(error, Is.EqualTo Success)
+    Assert.That(ast, Is.EqualTo (LogOr (LogAnd (Bool true, LogOr
+        (LogOr (Less (Num 5, Num 3), Bool false),
+         LessEqual (PowExpr (Float 5.0, Num 2), Num 10))),
+         Neg (Check (BitS "c", Click)))))
+
+[<Test>]    
+let ``Test arithmetic expression solely`` () =
+    let (ast, error) = Handler.parseArith "5^3 % 3 + 7-3/3 + Pi/2*3 - 5.023"
+    Assert.That(error, Is.EqualTo Success)
+    Assert.That(ast, Is.EqualTo (MinusExpr( PlusExpr (MinusExpr (PlusExpr
+         (ModExpr (PowExpr (Num 5, Num 3), Num 3), Num 7),
+         DivExpr (Num 3, Num 3)), TimesExpr (DivExpr (Pi, Num 2),
+         Num 3)), Float 5.023)))   
+    
+[<Test>]
 let ``Invalid Program creates AST of Error`` () =
     let ast,error = Handler.parseQuLang "Some error program!"
     let testError =

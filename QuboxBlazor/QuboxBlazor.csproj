@@ -16,8 +16,4 @@
         <ProjectReference Include="..\QuantumLanguage\QuantumLanguage.fsproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <_ContentIncludedByDefault Remove="wwwroot\javascript\monaco.js" />
-    </ItemGroup>
-
 </Project>

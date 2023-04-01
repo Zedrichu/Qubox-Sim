@@ -1,4 +1,4 @@
-#r "/Users/adrianzvizdenco/F#Setup/FsLexYacc.Runtime.dll"
+#r "FsLexYacc.Runtime.dll"
 
 open FSharp.Text.Lexing
 open System

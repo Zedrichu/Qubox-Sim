@@ -1,120 +1,119 @@
 using MathNet.Numerics.LinearAlgebra;
 using Complex = System.Numerics.Complex;
-
-namespace QuboxSimulator.Models.Gates;
+namespace QuboxSimulator.Gates;
 
 
 public static class GateFactory
 {
-    private static readonly Dictionary<string, Matrix<Complex>> SingleGates = new()
+    private static readonly Dictionary<string, Tuple<GateType, Matrix<Complex>>> SingleGates = new()
     {
         {
-            "H", Matrix<Complex>.Build.DenseOfArray(
+            "H", new (GateType.H, Matrix<Complex>.Build.DenseOfArray(
                 new Complex[,]
                 {
                     { 1, 1 },
                     { 1, -1 }
-                }) / Math.Sqrt(2)
+                }) / Math.Sqrt(2))
         },
-        { "I", Matrix<Complex>.Build.DenseIdentity(2, 2) },
+        { "I", new (GateType.ID, Matrix<Complex>.Build.DenseIdentity(2, 2)) },
         {
-            "X", Matrix<Complex>.Build.DenseOfArray(
+            "X", new (GateType.X, Matrix<Complex>.Build.DenseOfArray(
                 new Complex[,]
                 {
                     { 0, 1 },
                     { 1, 0 }
-                })
+                }))
         },
         {
-            "Y", Matrix<Complex>.Build.DenseOfArray(
+            "Y", new (GateType.Y, Matrix<Complex>.Build.DenseOfArray(
                 new[,]
                 {
                     { 0, -Complex.ImaginaryOne },
                     { Complex.ImaginaryOne, 0 }
-                })
+                }))
         },
         {
-            "Z", Matrix<Complex>.Build.DenseOfArray(
+            "Z", new (GateType.Z, Matrix<Complex>.Build.DenseOfArray(
                 new Complex[,]
                 {
                     { 1, 0 },
                     { 0, -1 }
-                })
+                }))
         },
         {
-            "S", Matrix<Complex>.Build.DenseOfArray(
+            "S", new (GateType.S, Matrix<Complex>.Build.DenseOfArray(
                 new[,]
                 {
                     { 1, 0 },
                     { 0, Complex.ImaginaryOne }
-                })
+                }))
         },
         {
-            "SDG", Matrix<Complex>.Build.DenseOfArray(
+            "SDG", new (GateType.SDG, Matrix<Complex>.Build.DenseOfArray(
                 new[,]
                 {
                     { 1, 0 },
                     { 0, -Complex.ImaginaryOne }
-                })
+                }))
         },
         {
-            "T", Matrix<Complex>.Build.DenseOfArray(
+            "T", new (GateType.T, Matrix<Complex>.Build.DenseOfArray(
                 new[,]
                 {
                     { 1, 0 },
                     { 0, Complex.Pow(Math.E, Complex.ImaginaryOne * Math.PI / 4) }
-                })
+                }))
         },
         {
-            "TDG", Matrix<Complex>.Build.DenseOfArray(
+            "TDG", new (GateType.TDG, Matrix<Complex>.Build.DenseOfArray(
                 new[,]
                 {
                     { 1, 0 },
                     { 0, Complex.Pow(Math.E, Complex.ImaginaryOne * -Math.PI / 4) }
-                })
+                }))
         },
         {
-            "SX", Matrix<Complex>.Build.DenseOfArray(
+            "SX", new (GateType.SX, Matrix<Complex>.Build.DenseOfArray(
                 new[,]
                 {
                     { 1 + Complex.ImaginaryOne, 1 - Complex.ImaginaryOne },
                     { 1 - Complex.ImaginaryOne, 1 + Complex.ImaginaryOne }
-                }) / 2
+                }) / 2)
         },
         {
-            "SXDG", Matrix<Complex>.Build.DenseOfArray(
+            "SXDG", new(GateType.SXDG, Matrix<Complex>.Build.DenseOfArray(
                 new[,]
                 {
                     { 1 - Complex.ImaginaryOne, 1 + Complex.ImaginaryOne },
                     { 1 + Complex.ImaginaryOne, 1 - Complex.ImaginaryOne }
-                }) / 2
+                }) / 2)
         },
     };
 
-    private static Dictionary<string, Matrix<Complex>> ParamGates(double phase)
+    private static Dictionary<string, Tuple<GateType, Matrix<Complex>>> ParamGates(double phase)
     {
-        return new Dictionary<string, Matrix<Complex>>
+        return new Dictionary<string, Tuple<GateType, Matrix<Complex>>>
         {
-            { "P", Matrix<Complex>.Build.DenseOfArray(new[,]
+            { "P", new (GateType.P, Matrix<Complex>.Build.DenseOfArray(new[,]
             {
                 {1,0},
                 {0, Complex.Exp(Complex.ImaginaryOne * phase)}
-            }) },
-            {"RX", Matrix<Complex>.Build.DenseOfArray(new[,]
+            })) },
+            {"RX", new (GateType.RX, Matrix<Complex>.Build.DenseOfArray(new[,]
             {
                 {Complex.Cos(phase / 2), -Complex.ImaginaryOne * Complex.Sin(phase / 2)},
                 {-Complex.ImaginaryOne * Complex.Sin(phase / 2), Complex.Cos(phase / 2)}
-            }) },
-            {"RY", Matrix<Complex>.Build.DenseOfArray(new[,]
+            })) },
+            {"RY", new (GateType.RY, Matrix<Complex>.Build.DenseOfArray(new[,]
             {
                 {Complex.Cos(phase / 2), -Complex.Sin(phase / 2)},
                 {Complex.Sin(phase / 2), Complex.Cos(phase / 2)}
-            }) },
-            {"RZ", Matrix<Complex>.Build.DenseOfArray(new[,]
+            })) },
+            {"RZ", new(GateType.RZ, Matrix<Complex>.Build.DenseOfArray(new[,]
             {
                 {Complex.Exp(-Complex.ImaginaryOne * phase / 2), 0},
                 {0, Complex.Exp(Complex.ImaginaryOne * phase / 2)}
-            }) }
+            })) }
             
         };
     }

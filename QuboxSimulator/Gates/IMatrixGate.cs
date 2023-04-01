@@ -2,7 +2,7 @@ using System.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Complex32;
 
-namespace QuboxSimulator.Models.Gates;
+namespace QuboxSimulator.Gates;
 
 public interface IMatrixGate : IGate
 {
@@ -17,6 +17,8 @@ internal abstract class MatrixGate : IMatrixGate
     
     public string Id { get; set; }
     
+    public GateType Type { get; set; }
+    
     public string? Condition { get; set; }
 
     public override string ToString()
@@ -27,9 +29,10 @@ internal abstract class MatrixGate : IMatrixGate
 
 internal class SingleQubitGate : MatrixGate
 {
-    public SingleQubitGate(Matrix<Complex> matrix, int target, string id, string? condition = null)
+    public SingleQubitGate(Tuple<GateType, Matrix<Complex>> type, int target, string id, string? condition = null)
     {
-        Matrix = matrix;
+        Type = type.Item1;
+        Matrix = type.Item2;
         TargetRange = new Tuple<int, int>(target, target);
         Id = id;
         Condition = condition;
@@ -38,7 +41,7 @@ internal class SingleQubitGate : MatrixGate
 
 internal class CnotGate : MatrixGate
 {
-    public int Control { get; set; }
+    public Tuple<int,int> Control { get; set; }
     
     public CnotGate(int control, int target)
     {
@@ -51,8 +54,9 @@ internal class CnotGate : MatrixGate
             });
         TargetRange = new Tuple<int, int>(control < target? control : target, 
                                             control < target? target : control);
-        Control = control;
+        Control =  new Tuple<int, int>(control, target);
         Id = "CNOT";
+        Type = GateType.CNOT;
     }
 }
 
@@ -71,6 +75,7 @@ internal class SwapGate : MatrixGate
         TargetRange = new Tuple<int, int>(qubit1 < qubit2? qubit1:qubit2, 
                                             qubit1 < qubit2? qubit2:qubit1);
         Id = "SWAP";
+        Type = GateType.SWAP;
     }
 }
 
@@ -82,7 +87,9 @@ internal class ToffoliGate : IMatrixGate
     
     public string Id { get; set; }
     
-    public Tuple<int, int> Control { get; set; }
+    public GateType Type { get; set; }
+    
+    public Tuple<int, int, int> Control { get; set; }
 
     public string? Condition { get; set; }
     
@@ -101,8 +108,9 @@ internal class ToffoliGate : IMatrixGate
             });
         var min = Math.Min(control1, Math.Min(control2, target));
         var max = Math.Max(control1, Math.Max(control2, target));
-        Control = new Tuple<int, int>(control1, control2);
+        Control = new Tuple<int, int, int>(control1, control2, target);
         TargetRange = new Tuple<int, int>(min, max);
         Id = "CCX";
+        Type = GateType.CCX;
     }
 }

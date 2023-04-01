@@ -1,14 +1,14 @@
 using QuantumLanguage;
 using static QuantumLanguage.Handler;
-using QuboxSimulator.Models.Circuits;
+using QuboxSimulator.Circuits;
 
-namespace QuboxSimulator.Models;
+namespace QuboxSimulator;
 
 public static class Interpreter
 {
     private static AST.Memory _memory = AST.Memory.empty;
     private static AST.@operator _operator = AST.@operator.NOP;
-    public static AST.error Error { get; private set; } = AST.error.Success;
+    private static AST.error Error { get; set; } = AST.error.Success;
     
     public static void HandleLang(string? quLangCode)
     {
