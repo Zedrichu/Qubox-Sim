@@ -20,13 +20,14 @@ Description: Implementation of the Visitor Pattern for the AST structure.
 /// <summary>
 /// Visitor class for the base operator type of the AST.
 /// </summary>
-public class OperatorVisitor: IVisitor<@operator, List<IGate>>
+public class StatementVisitor: IVisitor<Statement, IGate>
 {
     private readonly Memory _memory; 
     private readonly ArithmeticVisitor _arithVisitor;
   
-    public OperatorVisitor(Memory memory)
+    public StatementVisitor(Memory memory)
     {
+        // Establish the contextual memory
         _memory = memory;
         // Create arithmetic visitor with arithmetic memory
         _arithVisitor = new ArithmeticVisitor(memory.Arithmetic);
@@ -37,7 +38,7 @@ public class OperatorVisitor: IVisitor<@operator, List<IGate>>
     /// </summary>
     /// <param name="ast">Converted arithmetic expression</param>
     /// <returns>Tuple of computed value and formed string</returns>
-    private Tuple<double, string> GetPhaseTuple(arithExpr ast)
+    private Tuple<double, string> GetPhaseTuple(ArithExpr ast)
     {
         var angle = ast.Accept(_arithVisitor);
         var str = ast.ToString();
@@ -49,125 +50,77 @@ public class OperatorVisitor: IVisitor<@operator, List<IGate>>
     /// </summary>
     /// <param name="ast">Operator Abstract Syntax Tree</param>
     /// <returns>List of gates obtained in interpreter</returns>
-    public List<IGate> Visit(@operator ast)
+    public IGate Visit(Statement ast)
     {
-        var gateList = new List<IGate>();
         switch (ast)
         {
-            case @operator.Order pair:
-                // Recurse on both children of the node
-                var list1 = pair.Item.Item1.Accept(this);
-                var list2 = pair.Item.Item2.Accept(this);
-                // Add found gates to the list
-                gateList.AddRange(list1);
-                gateList.AddRange(list2);
-                break;
-            case @operator.H: case @operator.X:
-            case @operator.I: case @operator.S:
-            case @operator.SDG: case @operator.T:
-            case @operator.TDG: case @operator.SX:
-            case @operator.SXDG: case @operator.Y:
-            case @operator.Z:
-                // Destruct single operator into gate identifier and target qubit
-                var tokbit = ast.DestructSingle();
+            case Statement.UnaryGate pair:
                 // Retrieve order of the target qubit in circuit mapping
-                var target= _memory.GetOrder(tokbit.Item2);
+                var target1= _memory.GetOrder(pair.Item.Item2);
                 // Add gate created by factory to list
-                gateList.Add(GateFactory.GetSingleGate(tokbit.Item1, target));
-                break;
-            case @operator.RX: case @operator.RY:
-            case @operator.RZ: case @operator.P:
-                // Destruct 
-                var tokparbit = ast.DestructParam();
-                target = _memory.GetOrder(tokparbit.Item3);
-                var phase = GetPhaseTuple(tokparbit.Item2);
-                var gate = GateFactory.GetParamGate(tokparbit.Item1, target, phase);
-                gateList.Add(gate);
-                break;
-            case @operator.Condition pair:
+                return GateFactory.CreateGate(pair.Item.Item1, target1);
+            case Statement.ParamGate triple:
+                // Retrieve order of the target qubit in circuit mapping
+                target1 = _memory.GetOrder(triple.Item.Item3);
+                // Get phase angle and string representation
+                var phase = GetPhaseTuple(triple.Item.Item2);
+                // Add gate created by factory to list
+                return GateFactory.CreateGate(triple.Item.Item1, target1, phase);
+            case Statement.BinaryGate pair:
+                target1 = _memory.GetOrder(pair.Item.Item2);
+                var target2 = _memory.GetOrder(pair.Item.Item3);
+                return GateFactory.CreateGate(pair.Item.Item1, target1, target2);
+            case Statement.Condition pair:
                 var condition = pair.Item.Item1.ToString();
-                var list = pair.Item.Item2.Accept(this);
-                list.ForEach(g => g.Condition = condition);
-                gateList.AddRange(list); 
-                break;
-            case @operator.CCX triplet:
-                target = _memory.GetOrder(triplet.Item.Item1);
-                var target2 = _memory.GetOrder(triplet.Item.Item2);
+                var gate = pair.Item.Item2.Accept(this);
+                gate.Condition = condition;
+                return gate;
+            case Statement.Toffoli triplet:
+                target1 = _memory.GetOrder(triplet.Item.Item1);
+                target2 = _memory.GetOrder(triplet.Item.Item2);
                 var target3 = _memory.GetOrder(triplet.Item.Item3);
-                gate = GateFactory.GetMultipleGate("CCX", target, target2, target3);
-                if (gate != null) gateList.Add(gate);
-                break;
-            case @operator.U quadruplet:
+                return GateFactory.CreateGate(target1, target2, target3);
+            case Statement.Unitary quadruplet:
                 var lambda = GetPhaseTuple(quadruplet.Item.Item1);
                 var phi = GetPhaseTuple(quadruplet.Item.Item2);
                 var theta = GetPhaseTuple(quadruplet.Item.Item3);
-                target = _memory.GetOrder(quadruplet.Item.Item4);
-                gateList.Add(GateFactory.GetUnitaryGate(
-                    new[] { lambda, phi, theta }, target));
-                break;
-            case @operator.Reset op:
-                target = _memory.GetOrder(op.Item);
-                var supp = GateFactory.GetSupportGate("RESET", target);
-                if (supp != null) gateList.Add(supp);
-                break;
-            case @operator.Barrier bar:
-                target = _memory.GetOrder(bar.Item);
-                supp = GateFactory.GetSupportGate("BARRIER", target);
-                if (supp != null) gateList.Add(supp);
-                break;
-            case @operator.Measure pair:
-                target = _memory.GetOrder(pair.Item.Item1);
+                target1 = _memory.GetOrder(quadruplet.Item.Item4);
+                return GateFactory.CreateGate(
+                    new[] { lambda, phi, theta }, target1);
+            case Statement.Reset op:
+                target1 = _memory.GetOrder(op.Item);
+                return GateFactory.CreateGate("RESET", target1);
+            case Statement.Barrier bar:
+                target1 = _memory.GetOrder(bar.Item);
+                return GateFactory.CreateGate("BARRIER", target1);
+            case Statement.Measure pair:
+                target1 = _memory.GetOrder(pair.Item.Item1);
                 var reg = _memory.CountQuantum;
-                supp = GateFactory.GetSupportGate("MEASURE", target, reg);
-                if (supp != null) gateList.Add(supp);
-                break;
-            case @operator.SWAP pair:
-                target = _memory.GetOrder(pair.Item.Item1);
-                target2 = _memory.GetOrder(pair.Item.Item2);
-                gate = GateFactory.GetMultipleGate("SWAP", target, target2);
-                if (gate != null) gateList.Add(gate);
-                break;
-            case @operator.CNOT pair:
-                target = _memory.GetOrder(pair.Item.Item1);
-                target2 = _memory.GetOrder(pair.Item.Item2);
-                gate = GateFactory.GetMultipleGate("CNOT", target, target2);
-                if (gate != null) gateList.Add(gate);
-                break;
-            case @operator.RZZ triplet:
-                phase = GetPhaseTuple(triplet.Item.Item1);
-                target = _memory.GetOrder(triplet.Item.Item2);
-                target2 = _memory.GetOrder(triplet.Item.Item3);
-                gate = GateFactory.GetMultipleGate("RZZ", target, target2, -1, phase);
-                if (gate != null) gateList.Add(gate);
-                break;
-            case @operator.RXX triplet:
-                phase = GetPhaseTuple(triplet.Item.Item1);
-                target = _memory.GetOrder(triplet.Item.Item2);
-                target2 = _memory.GetOrder(triplet.Item.Item3);
-                gate = GateFactory.GetMultipleGate("RXX", target, target2, -1, phase);
-                if (gate != null) gateList.Add(gate);
-                break;
-            case var _ when ast.Equals(@operator.PhaseDisk):
-                target = _memory.CountQuantum;
-                supp = GateFactory.GetSupportGate("PHASEDISK", target-1);
-                if (supp != null) gateList.Add(supp);
-                break;
+                return GateFactory.CreateGate("MEASURE", target1, reg);
+            case Statement.BinaryParamGate quadruplet:
+                phase = GetPhaseTuple(quadruplet.Item.Item2);
+                target1 = _memory.GetOrder(quadruplet.Item.Item3);
+                target2 = _memory.GetOrder(quadruplet.Item.Item4);
+                return GateFactory.CreateGate(quadruplet.Item.Item1, target1, target2, phase);
+            case var _ when ast.Equals(Statement.PhaseDisk):
+                target1 = _memory.CountQuantum;
+                return GateFactory.CreateGate("PHASEDISK", target1-1);
+            default:
+                return GateFactory.CreatePlaceholder();
         }
-
-        return gateList;
     }
 }
 
 /// <summary>
 /// Visitor class for arithmetic expressions
 /// </summary>
-public class ArithmeticVisitor : IVisitor<arithExpr, double>
+public class ArithmeticVisitor : IVisitor<ArithExpr, double>
 {
-    private readonly Dictionary<string,Tuple<arithExpr, int>> _memory;
+    private readonly Dictionary<string, Tuple<ArithExpr, int>> _memory;
     
-    public ArithmeticVisitor(IDictionary<string, Tuple<arithExpr, int>> memory)
+    public ArithmeticVisitor(IDictionary<string, Tuple<ArithExpr, int>> memory)
     {
-        _memory = new Dictionary<string, Tuple<arithExpr, int>>(memory);
+        _memory = new Dictionary<string, Tuple<ArithExpr, int>>(memory);
     }
     
     /// <summary>
@@ -175,57 +128,40 @@ public class ArithmeticVisitor : IVisitor<arithExpr, double>
     /// </summary>
     /// <param name="expr">Expression to be computed</param>
     /// <returns>Result of arithmetic computation</returns>
-    public double Visit(arithExpr expr) {
+    public double Visit(ArithExpr expr) {
         var value = 0.0;
         switch (expr)
         {
-            case arithExpr.Num x:
+            case ArithExpr.Num x:
                 value = Convert.ToDouble(x.Item);
                 break;
-            case arithExpr.Float x:
+            case ArithExpr.Float x:
                 value = x.Item;
                 break;
-            case arithExpr.DivExpr pair:
+            case ArithExpr.BinaryOp pair:
                 var left = pair.Item.Item1.Accept(this);
-                var right = pair.Item.Item2.Accept(this);
-                value = left / right;
+                var right = pair.Item.Item3.Accept(this);
+                value = pair.Item.Item2 switch
+                {
+                    var x when x.Equals(AOp.Add) => left + right,
+                    var x when x.Equals(AOp.Sub) => left - right,
+                    var x when x.Equals(AOp.Mul) => left * right,
+                    var x when x.Equals(AOp.Div) => left / right,
+                    var x when x.Equals(AOp.Pow) => Math.Pow(left, right),
+                    var x when x.Equals(AOp.Mod) => left % right,
+                    _ => value
+                };
                 break;
-            case arithExpr.MinusExpr pair:
-                left = pair.Item.Item1.Accept(this);
-                right = pair.Item.Item2.Accept(this);
-                value = left - right;
-                break;
-            case arithExpr.PlusExpr pair:
-                left = pair.Item.Item1.Accept(this);
-                right = pair.Item.Item2.Accept(this);
-                value = left + right;
-                break;
-            case arithExpr.TimesExpr pair:
-                left = pair.Item.Item1.Accept(this);
-                right = pair.Item.Item2.Accept(this);
-                value = left * right;
-                break;
-            case arithExpr.VarA x:
+            case ArithExpr.VarA x:
                 value = _memory[x.Item].Item1.Accept(this);
                 break;
-            case var _ when expr.Equals(arithExpr.Pi):
+            case var _ when expr.Equals(ArithExpr.Pi):
                 value = Math.PI;
                 break;
-            case arithExpr.PowExpr pair:
-                left = pair.Item.Item1.Accept(this);
-                right = pair.Item.Item2.Accept(this);
-                value = Math.Pow(left, right);
-                break;
-            case arithExpr.ModExpr pair:
-                left = pair.Item.Item1.Accept(this);
-                right = pair.Item.Item2.Accept(this);
-                value = left % right;
-                break;
-            case arithExpr.UMinusExpr x:
-                value = -x.Item.Accept(this);
-                break;
-            case arithExpr.UPlusExpr x:
-                value = x.Item.Accept(this);
+            case ArithExpr.UnaryOp x:
+                value = x.Item.Item2.Accept(this);
+                if (x.Item.Item1.Equals(AOp.Minus))
+                    value = -value;
                 break;
         }
         return value;

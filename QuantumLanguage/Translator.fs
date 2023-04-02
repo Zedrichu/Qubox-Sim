@@ -16,6 +16,7 @@ Description: Translator module handling the conversion from AST back to QuLang c
 *)
 
 open AST
+open QuantumLanguage.AST
 
 /// <summary>
 /// Function to translate quantum bit to QuLang declaration.
@@ -83,7 +84,7 @@ let rec private transStatement (st:Statement):string =
                 $"CCX {transBit bit}, {transBit bit1}, {transBit bit2};"
 
 /// Helper function to aggregate all statements in a flow.    
-let rec internal transFlow (flow:Flow) : string =
+let rec internal transFlow (flow:Statement list) : string =
     match flow with
     | head::tail -> $"{transStatement head}\n{transFlow tail}"          
     | [] -> ""

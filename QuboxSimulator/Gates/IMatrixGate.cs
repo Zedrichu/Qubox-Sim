@@ -1,12 +1,12 @@
 using System.Numerics;
 using MathNet.Numerics.LinearAlgebra;
-using MathNet.Numerics.LinearAlgebra.Complex32;
+using static QuantumLanguage.Tags;
 
 namespace QuboxSimulator.Gates;
 
 public interface IMatrixGate : IGate
 {
-    public abstract Matrix<Complex> Matrix { get; set; }
+    public Matrix<Complex> Matrix { get; set; }
 }
 
 internal abstract class MatrixGate : IMatrixGate
@@ -18,8 +18,8 @@ internal abstract class MatrixGate : IMatrixGate
     public string Id { get; set; }
     
     public GateType Type { get; set; }
-    
-    public string? Condition { get; set; }
+
+    public string Condition { get; set; } = "";
 
     public override string ToString()
     {
@@ -29,69 +29,39 @@ internal abstract class MatrixGate : IMatrixGate
 
 internal class SingleQubitGate : MatrixGate
 {
-    public SingleQubitGate(Tuple<GateType, Matrix<Complex>> type, int target, string id, string? condition = null)
+    public UTag Tag { get; private set; }
+    
+    public SingleQubitGate(Matrix<Complex> matrix, UTag tag, int target, string? condition = null)
     {
-        Type = type.Item1;
-        Matrix = type.Item2;
+        Type = GateType.Single;
+        Matrix = matrix;
+        Id = tag.ToString();
+        Tag = tag;
         TargetRange = new Tuple<int, int>(target, target);
-        Id = id;
-        Condition = condition;
+        Condition = condition ?? "";
     }    
 }
 
-internal class CnotGate : MatrixGate
+internal class DoubleQubitGate : MatrixGate
 {
+    public BTag Tag { get; }
     public Tuple<int,int> Control { get; set; }
     
-    public CnotGate(int control, int target)
+    public DoubleQubitGate(Matrix<Complex> matrix, BTag tag, int control, int target)
     {
-        Matrix = Matrix<Complex>.Build.DenseOfArray(
-            new Complex[,]{
-                { 1, 0, 0, 0 },
-                { 0, 1, 0, 0 },
-                { 0, 0, 0, 1 },
-                { 0, 0, 1, 0 }
-            });
+        Matrix = matrix;
         TargetRange = new Tuple<int, int>(control < target? control : target, 
                                             control < target? target : control);
         Control =  new Tuple<int, int>(control, target);
-        Id = "CNOT";
-        Type = GateType.CNOT;
+        Tag = tag;
+        Id = tag.ToString();
+        Type = GateType.Double;
     }
 }
 
-internal class SwapGate : MatrixGate
+internal class ToffoliGate : MatrixGate
 {
-
-    public SwapGate(int qubit1, int qubit2)
-    {
-        Matrix = Matrix<Complex>.Build.DenseOfArray(
-            new Complex[,]{
-                { 1, 0, 0, 0 },
-                { 0, 0, 1, 0 },
-                { 0, 1, 0, 0 },
-                { 0, 0, 0, 1 }
-            });
-        TargetRange = new Tuple<int, int>(qubit1 < qubit2? qubit1:qubit2, 
-                                            qubit1 < qubit2? qubit2:qubit1);
-        Id = "SWAP";
-        Type = GateType.SWAP;
-    }
-}
-
-internal class ToffoliGate : IMatrixGate
-{
-    public Matrix<Complex> Matrix { get; set; }
-    
-    public Tuple<int, int> TargetRange { get; set; }
-    
-    public string Id { get; set; }
-    
-    public GateType Type { get; set; }
-    
     public Tuple<int, int, int> Control { get; set; }
-
-    public string? Condition { get; set; }
     
     public ToffoliGate(int control1, int control2, int target)
     {
@@ -111,6 +81,6 @@ internal class ToffoliGate : IMatrixGate
         Control = new Tuple<int, int, int>(control1, control2, target);
         TargetRange = new Tuple<int, int>(min, max);
         Id = "CCX";
-        Type = GateType.CCX;
+        Type = GateType.Toffoli;
     }
 }

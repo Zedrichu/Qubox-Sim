@@ -1,34 +1,38 @@
-using MathNet.Numerics;
+using Microsoft.FSharp.Collections;
+using Microsoft.FSharp.Core;
 using QuantumLanguage;
 using QuboxSimulator.Gates;
 using static QuantumLanguage.AST;
+using static QuantumLanguage.Tags;
 
 namespace QuboxSimulator.Circuits;
 
 public class Generator
 {
-    public static Register? Reg { private get; set; }
-    public @operator ast = @operator.NOP;
-
-    private static bit FormBit(KeyValuePair<string, Tuple<int, int>> triplet)
+    public static Register Reg { private get; set; } = new (Memory.empty);
+    public static List<Tower> Towers { private get; set; } = new();
+    public Tuple<Allocation, FSharpList<Statement>>? Ast { get; private set; }
+    public Generator(Circuit circuit)
+    {
+        Reg = circuit.Allocation;
+        Towers = circuit.GateGrid;
+    }
+    private static Bit FormBit(KeyValuePair<string, Tuple<int, int>> triplet)
     {
         var id = triplet.Key;
         var num = triplet.Value.Item1;
-        return num == 1 ? bit.NewBitS(id) : 
-            bit.NewBitA(new Tuple<string, int>(id,num));
+        return num == 1 ? Bit.NewBitS(id) : 
+            Bit.NewBitA(new Tuple<string, int>(id,num));
     }
-
-    private static @operator FormAssign(string s, arithExpr exp)
+    private static Statement FormAssign(string s, ArithExpr exp)
     {
-        return @operator.NewAssign(new Tuple<string, arithExpr>(s, exp));
+        return Statement.NewAssign(new Tuple<string, ArithExpr>(s, exp));
     }
-
-    private static @operator FormAssign(string s, boolExpr exp)
+    private static Statement FormAssign(string s, BoolExpr exp)
     {
-        return @operator.NewAssignB(new Tuple<string, boolExpr>(s, exp));
+        return Statement.NewAssignB(new Tuple<string, BoolExpr>(s, exp));
     }
-
-    private static bit DestructBitRegister(Dictionary<string, Tuple<int, int>> dict)
+    private static Bit DestructBitRegister(Dictionary<string, Tuple<int, int>> dict)
     {
         var list = dict.ToList();
         list.Sort((kvp1, kvp2) => 
@@ -38,13 +42,13 @@ public class Generator
         if (bitList.Count() > 1)
         {
             return bitList.Aggregate((current, next) =>
-                bit.NewBitSeq(new Tuple<bit, bit>(next, current)));
+                Bit.NewBitSeq(new Tuple<Bit, Bit>(next, current)));
         }
         return bitList.First();
     }
-    
-    private static List<@operator> DestructArithmetic(Dictionary<string, Tuple<arithExpr, int>> dict)
+    private static IEnumerable<Statement> DestructArithmetic()
     {
+        var dict = Reg.ArithVariables;
         var list = dict.ToList();
         list.Sort((kvp1, kvp2) => 
             kvp2.Value.Item2.CompareTo(kvp1.Value.Item2));
@@ -52,9 +56,9 @@ public class Generator
             kvp => FormAssign(kvp.Key, kvp.Value.Item1)
             ).ToList();
     }
-
-    private static List<@operator> DestructBoolean(Dictionary<string, Tuple<boolExpr, int>> dict)
+    private static IEnumerable<Statement> DestructBoolean()
     {
+        var dict = Reg.BoolVariables;
         var list = dict.ToList();
         list.Sort((kvp1, kvp2) => 
             kvp2.Value.Item2.CompareTo(kvp1.Value.Item2));
@@ -62,220 +66,145 @@ public class Generator
             kvp => FormAssign(kvp.Key, kvp.Value.Item1)
         ).ToList();
     }
+    public static Tuple<Allocation, List<Statement>> DestructRegister() {
+        var qalloc = DestructBitRegister(Reg.Qubits);
+        var calloc = DestructBitRegister(Reg.Cbits);
+        var alloc = Allocation.NewAllocQC(new Tuple<Bit, Bit>(qalloc, calloc));
 
-    public static @operator DestructRegister(Register register)
-    {
-        Reg = register;
-        var qalloc = DestructBitRegister(register.Qubits);
-        var calloc = DestructBitRegister(register.Cbits);
-        var alloc = @operator.NewAllocQC(new Tuple<bit, bit>(qalloc, calloc));
-
-        var list = DestructArithmetic(register.ArithVariables);
-        list.AddRange(DestructBoolean(register.BoolVariables));
-
-        list.Reverse();
-        if (list.Count == 0)
-        {
-            return alloc;
-        }
-
-        return list.Aggregate(alloc, (current, next) =>
-            @operator.NewOrder(new Tuple<@operator, @operator>(next, current)));
+        var list = DestructArithmetic().ToList();
+        list.AddRange(DestructBoolean());
+        return new Tuple<Allocation, List<Statement>>(alloc, list);
     }
-
-    private static bit RecoverBit(Register? register, int index)
-    {
-        KeyValuePair<string, Tuple<int, int>> goal = new KeyValuePair<string, Tuple<int, int>>();
-        if (index < register.QubitNumber)
+    private static Bit RecoverBit(int index) {
+        KeyValuePair<string, Tuple<int, int>> goal;
+        if (index < Reg.QubitNumber)
         {
-            goal = register.Qubits.FirstOrDefault(kvp =>
+            goal = Reg.Qubits.FirstOrDefault(kvp =>
                 index < kvp.Value.Item1 + kvp.Value.Item2);
         }
         else
         {
-            index -= register.QubitNumber;
-            goal = register.Cbits.FirstOrDefault(kvp =>
+            index -= Reg.QubitNumber;
+            goal = Reg.Cbits.FirstOrDefault(kvp =>
                 index < kvp.Value.Item1 + kvp.Value.Item2);
         }
         
         if (goal.Value.Item1 == 1)
         {
-            return bit.NewBitS(goal.Key);
+            return Bit.NewBitS(goal.Key);
         }
-
         var i = index - goal.Value.Item2;
-        return bit.NewBitA(new Tuple<string, int>(goal.Key, i));    
+        return Bit.NewBitA(new Tuple<string, int>(goal.Key, i));    
     }
-
-
-    public static @operator DestructGateGrid(List<Tower> grid)
-    {
-        var list = grid.Select(DestructTower).ToList();
-        list.Reverse();
-        list.RemoveAll(tower => tower == null);
-        if (list.Count == 0)
-        {
-            return @operator.NOP;
-        }
-        if (list.Count == 1)
-        {
-            return list.First();
-        }
-        return list.Aggregate((current, next) =>
-            @operator.NewOrder(new(next, current)));
-    }
-
-    private static @operator? DestructTower(Tower tower)
-    {
-        var list = tower.Gates.Select(DestructGate).ToList();
-        list.Reverse();
-        list.RemoveAll(gate => gate == null);
-        if (list.Count == 0)
-        {
-            return null;
-        }
-        if (list.Count == 1)
-        {
-            return list.First();
-        }
-        return list.Aggregate((current, next) => @operator.NewOrder(
-            new Tuple<@operator, @operator>(next, current)));
-    }
-
-    private static @operator? DestructGate(IGate gate)
+    private static Statement? DestructGate(IGate gate)
     {
         var bit1 = gate.TargetRange.Item1;
         var bit2 = gate.TargetRange.Item2;
         var cond = gate.Condition;
-        var op = @operator.NOP;
+        Statement? op = null;
         switch (gate.Type)
         {
-            case GateType.PHASEDISK:
-                op = @operator.PhaseDisk;
+            case GateType.Barrier:
+                op = Statement.NewBarrier(RecoverBit(bit1));
                 break;
-            case GateType.RESET:
-                op = @operator.NewReset(
-                    RecoverBit(Reg,bit1));
+            case GateType.Reset:
+                op = Statement.NewReset(RecoverBit(bit2));
                 break;
-            case GateType.BARRIER:
-                op = @operator.NewBarrier(
-                    RecoverBit(Reg,bit1));
+            case GateType.PhaseDisk:
+                op = Statement.PhaseDisk;
                 break;
-            case GateType.NONE:
+            case GateType.Measure:
+                op = Statement.NewMeasure(new Tuple<Bit, Bit>( 
+                    RecoverBit(bit1), RecoverBit(bit2)));
                 break;
-            case GateType.MEASURE:
-                op = @operator.NewMeasure(
-                    new Tuple<bit, bit>(
-                        RecoverBit(Reg, bit1),
-                        RecoverBit(Reg, bit2)));
+            case GateType.Single:
+                op = Statement.NewUnaryGate(new Tuple<UTag, Bit>(
+                    ((SingleQubitGate) gate).Tag, RecoverBit(bit1)));
+                break;
+            case GateType.Double:
+                var cast = (DoubleQubitGate) gate;
+                op = Statement.NewBinaryGate(new Tuple<BTag, Bit, Bit>(
+                    cast.Tag, RecoverBit(cast.Control.Item1), RecoverBit(cast.Control.Item2)));
+                break;
+            case GateType.Param:
+                var cast2 = (ParamSingleGate) gate;
+                var pars = Handler.parseArith(cast2.Theta.Item2);
+                if (!pars.Item2.Equals(Error.Success))
+                {
+                    throw new Exception("String maintenance in parameter is erroneous");
+                }
+                op = Statement.NewParamGate(new Tuple<PTag, ArithExpr, Bit>(
+                    cast2.Tag, pars.Item1.Value, RecoverBit(bit1)));
+                break;
+            case GateType.DoubleParam:
+                var cast3 = (ParamSingleGate) gate;
+                pars = Handler.parseArith(cast3.Theta.Item2);
+                if (!pars.Item2.Equals(Error.Success))
+                {
+                    throw new Exception("String maintenance in parameter is erroneous");
+                }
+                op = Statement.NewParamGate(new Tuple<PTag, ArithExpr, Bit>(
+                    cast3.Tag, pars.Item1.Value, RecoverBit(bit1)));
+                break;
+            case GateType.Toffoli:
+                var triplet = ((ToffoliGate) gate).Control;
+                op = Statement.NewToffoli(new Tuple<Bit, Bit, Bit>(
+                    RecoverBit(triplet.Item1), RecoverBit(triplet.Item2), RecoverBit(triplet.Item3)));
+                break;
+            case GateType.Unitary:
+                var cast4 = (UnitaryGate) gate;
+                var parsT = Handler.parseArith(cast4.Theta.Item2);
+                var parsP = Handler.parseArith(cast4.Phi.Item2);
+                var parsL = Handler.parseArith(cast4.Lambda.Item2);
+                if (!parsT.Item2.Equals(Error.Success) 
+                    || !parsP.Item2.Equals(Error.Success) 
+                    || !parsL.Item2.Equals(Error.Success))
+                {
+                    throw new Exception("String maintenance in unitary phase is erroneous");
+                }
+                op = Statement.NewUnitary(new Tuple<ArithExpr, ArithExpr, ArithExpr, Bit>(
+                    parsT.Item1.Value, parsP.Item1.Value, parsL.Item1.Value, RecoverBit(bit1)));
                 break;
             default:
-                op = DestructMatrix((IMatrixGate)gate);
+                op = null;
                 break;
-        }
-
-        if (op.Equals(@operator.NOP))
-        {
-            return null;
         }
         if (cond == null)
         {
             return op;
         }
         var expr = Handler.parseBool(cond);
-        if (!expr.Item2.Equals(error.Success))
+        if (!expr.Item2.Equals(Error.Success))
         {
-            throw new Exception("String build-up in condition is erroneous");
+            throw new Exception("String maintenance in condition is erroneous");
         }
-        return @operator.NewCondition(
-            new Tuple<boolExpr, @operator>(expr.Item1, op));
+        if (expr.Item1 == FSharpOption<BoolExpr>.None)
+        {
+            return op;
+        }
+        return Statement.NewCondition(
+            new Tuple<BoolExpr, Statement?>(expr.Item1.Value, op));
     }
-
-    private static @operator DestructMatrix(IMatrixGate gate)
+    private static IEnumerable<Statement> DestructTower(Tower tower)
     {
-        var bit1 = gate.TargetRange.Item1;
-        var bit2 = gate.TargetRange.Item2;
-        switch (gate.Type)
-        {
-            case GateType.H:
-                return @operator.NewH(RecoverBit(Reg, bit1));
-            case GateType.S:
-                return @operator.NewS(RecoverBit(Reg, bit1));
-            case GateType.T:
-                return @operator.NewT(RecoverBit(Reg, bit1));
-            case GateType.X:
-                return @operator.NewX(RecoverBit(Reg, bit1));
-            case GateType.Y:
-                return @operator.NewY(RecoverBit(Reg, bit1));
-            case GateType.Z:
-                return @operator.NewZ(RecoverBit(Reg, bit1));
-            case GateType.ID:
-                return @operator.NewI(RecoverBit(Reg, bit1));
-            case GateType.SX:
-                return @operator.NewSX(RecoverBit(Reg, bit1));
-            case GateType.SDG:
-                return @operator.NewSDG(RecoverBit(Reg, bit1));
-            case GateType.TDG:
-                return @operator.NewTDG(RecoverBit(Reg, bit1));
-            case GateType.SXDG:
-                return @operator.NewSXDG(RecoverBit(Reg, bit1));
-            case GateType.CNOT:
-                var ctrl = ((CnotGate)gate).Control;
-                return @operator.NewCNOT(
-                    new Tuple<bit, bit>(
-                        RecoverBit(Reg, ctrl.Item1),
-                        RecoverBit(Reg, ctrl.Item2)));
-            case GateType.SWAP:
-                return @operator.NewCNOT(
-                    new Tuple<bit, bit>(
-                        RecoverBit(Reg, bit1),
-                        RecoverBit(Reg, bit2)));
-            case GateType.CCX:
-                var ctrl2 = ((ToffoliGate)gate).Control;
-                return @operator.NewCCX(
-                    new Tuple<bit, bit, bit>(
-                        RecoverBit(Reg, ctrl2.Item1),
-                        RecoverBit(Reg, ctrl2.Item2),
-                        RecoverBit(Reg, ctrl2.Item3)));
-            default:
-                return DestructParametric((ParametricGate)gate);
-        }
+        return tower.Gates.Select(DestructGate).Where(op => op != null).ToList();
     }
-    
-    private static @operator DestructParametric(ParametricGate gate)
+    public static Tuple<Allocation, Schema> DestructCircuit()
     {
-        var args = gate.Phase.Select(tup 
-            => Handler.parseArith(tup.Item2).Item1).ToList();
-        var bit1 = gate.TargetRange.Item1;
-        switch (gate.Type)
+        var list = new List<Statement>();
+        foreach (var tower in Towers)
         {
-            case GateType.P:
-                return @operator.NewP(new (
-                    args[0], RecoverBit(Reg, bit1)));
-            case GateType.U:
-                return @operator.NewU(new (
-                    args[0], args[1], args[2], RecoverBit(Reg, bit1)));
-            case GateType.RXX:
-                var pair = ((RxxGate)gate).Control;
-                return @operator.NewRXX(new (args[0], 
-                    RecoverBit(Reg, pair.Item1), 
-                    RecoverBit(Reg, pair.Item2)));
-            case GateType.RZZ:
-                var pair2 = ((RzzGate)gate).Control;
-                return @operator.NewRZZ(new (args[0], 
-                    RecoverBit(Reg, pair2.Item1), 
-                    RecoverBit(Reg, pair2.Item2)));
-            case GateType.RX:
-                return @operator.NewRX(new (
-                    args[0], RecoverBit(Reg, bit1)));
-            case GateType.RY:
-                return @operator.NewRY(new (
-                    args[0], RecoverBit(Reg, bit1)));
-            case GateType.RZ:
-                return @operator.NewRZ(new(
-                    args[0], RecoverBit(Reg, bit1)));
-            default:
-                return @operator.NOP;
+            var additional = DestructTower(tower).ToList();
+            additional.RemoveAll(gate => gate == null);
+            list.AddRange(additional);
         }
+        list.RemoveAll(gate => gate == null);
+        
+        var alloc = DestructRegister();
+        var finalList = alloc.Item2;
+        finalList.AddRange(list);
+        var flow = Schema.NewFlow(ListModule.OfSeq(finalList));
+        
+        return new Tuple<Allocation, Schema>(alloc.Item1, flow);
     }
 }

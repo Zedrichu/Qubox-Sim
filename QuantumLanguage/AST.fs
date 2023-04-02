@@ -2,6 +2,7 @@
 /// Declaration module containing the types required to build the abstract syntax tree of QuLang.
 /// </summary>
 module public QuantumLanguage.AST
+
 (* F#
  -*- coding: utf-8 -*-
 Quantum Abstract Syntax Tree
@@ -15,8 +16,8 @@ Description: Declaration module containing the types required to build the abstr
 @__Status --> DEV
 *)
 
-open System
 open QuantumLanguage.VisitorPattern
+open QuantumLanguage.Tags
 
 /// Disjoint union type of arithmetic operators
 type AOp = // Arithmetic operators
@@ -131,30 +132,12 @@ type Error =
   | SemanticError of string
   /// Signals an evaluation error with message
   | EvaluationError of string
-  member this.ToString =
+  override this.ToString () =
     match this with
     | Success -> "Success"
     | SyntaxError (msg, line, col) -> $"Syntax error: %s{msg} at line %d{line}, column %d{col}"
     | SemanticError msg -> $"Semantic error: %s{msg}"
     | EvaluationError msg -> $"Evaluation error: %s{msg}"
-
-/// Disjoint union type of unary gates
-type UTag =
-  | H | ID | X | Y | Z
-  | TDG | SDG | S | T
-  | SX | SXDG 
-
-/// Disjoint union type of binary gates
-type BTag =
-  | SWAP | CNOT | CH | CS 
-
-/// Disjoint union type of binary-parametric gates
-type BPTag =
-  | RXX | RYY | RZZ
-  
-/// Disjoint union type of unary-parametric gates
-type PTag =
-  | RX | RY | RZ | P 
 
 /// Discriminated type of quantum gates and operators
 type Statement =
@@ -191,10 +174,10 @@ type Statement =
 /// Type of quantum/classical register allocation
 type Allocation = AllocQC of (Bit * Bit)
 /// Type of quantum circuit AST as list of Statements
-type Flow = Statement list
+type Schema = Flow of Statement list
 /// Type of program as unified allocation and circuit AST
-type Circuit = Allocation * Flow
-  
+type Circuit = Allocation * Schema
+   
 /// <summary>
 /// Record type to hold the established memory bindings (arithmetic/boolean/classical/quantum)
 /// </summary>

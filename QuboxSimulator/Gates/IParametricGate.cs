@@ -1,5 +1,7 @@
 using System.Numerics;
 using MathNet.Numerics.LinearAlgebra;
+using static QuantumLanguage.Tags;
+
 namespace QuboxSimulator.Gates;
 
 public abstract class ParametricGate: IMatrixGate
@@ -9,34 +11,39 @@ public abstract class ParametricGate: IMatrixGate
     public Tuple<int, int> TargetRange { get; set; }
     
     public string Id { get; set; }
-    
-    public GateType Type { get; set; }
+
+    public GateType Type { get; set; } = GateType.Param;
     
     public string? Condition { get; set; }
     
-    public Tuple<double, string>[] Phase { get; protected set; }
+    public Tuple<double, string> Theta { get; protected set; }
 }
 
 
 public class ParamSingleGate : ParametricGate
 {
-    public ParamSingleGate(Tuple<GateType, Matrix<Complex>> type, int target, string id, Tuple<double, string> phase, string? condition = null)
+    public PTag Tag { get; }
+    public ParamSingleGate(Matrix<Complex> matrix, PTag tag, int target, Tuple<double, string> phase, string? condition = null)
     {
-        Type = type.Item1;
-        Matrix = type.Item2;
+        Tag = tag;
+        Matrix = matrix;
         TargetRange = new Tuple<int, int>(target, target);
-        Id = id;
+        Id = tag.ToString();
         Condition = condition;
-        Phase = new []{phase};
+        Theta = phase;
     }
 }
 
 public class UnitaryGate : ParametricGate
 {
+    public Tuple<double, string> Phi { get; }
+    public Tuple<double, string> Lambda { get; }
     public UnitaryGate(Tuple<double, string>[] args, int target)
     {
-        Phase = args;
-        Type = GateType.U;
+        Theta = args[0];
+        Phi = args[1];
+        Lambda = args[2];
+        Type = GateType.Unitary;
         Id = "U";
         var theta = args[0].Item1;
         var phi = args[1].Item1;
@@ -50,47 +57,22 @@ public class UnitaryGate : ParametricGate
     }
 }
 
-public class RxxGate : ParametricGate
+public class ParamDoubleGate : ParametricGate
 {
     public Tuple<int, int> Control { get; set; }
     
-    public RxxGate(int target1, int target2, Tuple<double, string> phase)
+    public BPTag Tag { get; }
+    
+    public ParamDoubleGate(Matrix<Complex> matrix, BPTag tag, int target1, int target2, Tuple<double, string> phase)
     {
         var min = Math.Min(target1, target2);
         var max = Math.Max(target1, target2);
         TargetRange = new Tuple<int, int>(min, max);
+        Tag = tag;
         Control = new(target1, target2);
-        Id = "RXX";
-        Type = GateType.RXX;
-        Phase = new [] {phase};
-        Matrix = Matrix<Complex>.Build.DenseOfArray(new [,]
-        {
-            {Complex.One, Complex.Zero, Complex.Zero, Complex.Zero},
-            {Complex.Zero, Complex.One, Complex.Zero, Complex.Zero},
-            {Complex.Zero, Complex.Zero, Complex.Cos(Phase[0].Item1), -Complex.ImaginaryOne * Complex.Sin(Phase[0].Item1)},
-            {Complex.Zero, Complex.Zero, -Complex.ImaginaryOne * Complex.Sin(Phase[0].Item1), Complex.Cos(Phase[0].Item1)}
-        });
-    }
-}
-
-public class RzzGate : ParametricGate
-{
-    public Tuple<int, int> Control { get; set; }
-    public RzzGate(int target1, int target2, Tuple<double, string> phase)
-    {
-        var min = Math.Min(target1, target2);
-        var max = Math.Max(target1, target2);
-        TargetRange = new Tuple<int, int>(min, max);
-        Control = new(target1, target2);
-        Id = "RZZ";
-        Type = GateType.RZZ;
-        Phase = new [] {phase};
-        Matrix = Matrix<Complex>.Build.DenseOfArray(new [,]
-        {
-            {Complex.Cos(Phase[0].Item1), Complex.Zero, Complex.Zero, -Complex.ImaginaryOne * Complex.Sin(Phase[0].Item1)},
-            {Complex.Zero, Complex.Cos(Phase[0].Item1), Complex.ImaginaryOne * Complex.Sin(Phase[0].Item1), Complex.Zero},
-            {Complex.Zero, Complex.ImaginaryOne * Complex.Sin(Phase[0].Item1), Complex.Cos(Phase[0].Item1), Complex.Zero},
-            {-Complex.ImaginaryOne * Complex.Sin(Phase[0].Item1), Complex.Zero, Complex.Zero, Complex.Cos(Phase[0].Item1)}
-        });
+        Id = tag.ToString();
+        Type = GateType.DoubleParam;
+        Theta = phase;
+        Matrix = matrix;
     }
 }

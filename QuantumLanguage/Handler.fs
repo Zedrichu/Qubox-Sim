@@ -14,8 +14,8 @@ Description: Library to assist the parsing/compilation process from QuLang user-
 @__Version --> 1.2
 @__Status --> DEV
 *)
-
 open System
+open System.Reflection.PortableExecutable
 open FSharp.Text
 open Microsoft.FSharp.Core
 open QuantumLanguage.AST
@@ -48,7 +48,7 @@ let public parseQuLang (code:string) : Circuit Option * Error =
 /// /// </summary>
 /// <param name="expr">String awaiting parsing</param>
 /// <returns>Tuple of boolean AST and error tag</returns>
-let public parseBool (expr:string):(BoolExpr Option * Error) =
+let public parseBool (expr:string): BoolExpr Option * Error =
     let lexbuffer = Lexing.LexBuffer<_>.FromString expr // Create an input stream
     try
         // Create a TOKEN stream using the Lexer rules on the input stream
@@ -71,7 +71,7 @@ let public parseBool (expr:string):(BoolExpr Option * Error) =
 /// </summary>
 /// <param name="expr">String awaiting parsing</param>
 /// <returns>Tuple of arithmetic AST and error tag</returns>
-let public parseArith (expr:string):(ArithExpr option * Error) =
+let public parseArith (expr:string): ArithExpr option * Error =
     let lexbuffer = Lexing.LexBuffer<_>.FromString expr // Create an input stream
     try
         // Create a TOKEN stream using the Lexer rules on the input stream
@@ -95,7 +95,7 @@ let public parseArith (expr:string):(ArithExpr option * Error) =
 /// <param name="circuit">Generated AST for translation(AST.Circuit)</param>
 /// <returns>QuLang string representation</returns>
 let rec public translateCircuit (circuit:Circuit) : string = 
-    let AllocQC(q, c), flow = circuit
+    let AllocQC(q, c), Flow(flow) = circuit
     $"Qalloc {Translator.transBit q};\nCalloc {Translator.transBit c};
         \n\n{Translator.transFlow flow}"
    
@@ -106,7 +106,7 @@ let rec public translateCircuit (circuit:Circuit) : string =
 /// <param name="circuit">Generated circuit AST for compilation (AST.Circuit)</param>
 /// <returns>Q# string representation</returns>
 let internal compileCircuit (circuit:Circuit):string =
-    let AllocQC(q,c), flow = circuit
+    let AllocQC(q,c), Flow(flow) = circuit
     let str = Compiler.compileAlloc q true + "\n" +
               Compiler.compileAlloc c false + "\n\n"
     str + Compiler.compileFlow flow
@@ -118,7 +118,7 @@ let internal compileCircuit (circuit:Circuit):string =
 /// <param name="ast">Generated circuit AST for analysis</param>
 /// <returns>Tuple of circuit memory and error tag</returns>
 let public analyzeSemantics (ast:Circuit): Memory * Error =
-    let reg, ops = ast
+    let reg, Flow ops = ast
     try
         let quantumMap, classicMap = Interpreter.allocateBits reg
         let memory = Memory.empty.SetQuantumClassic quantumMap classicMap
@@ -132,13 +132,14 @@ let public analyzeSemantics (ast:Circuit): Memory * Error =
 /// <param name="ast">Generated AST for optimization</param>
 /// <param name="memory">Initialized circuit memory</param>
 /// <returns>Tuple of optimized AST, updated circuit memory and error tag</returns>
-let public optimizeAST (ast:Flow) (memory:Memory):
-    Statement list * Memory * Error =
+let public optimizeAST (ast:Schema) (memory:Memory):
+    Schema * Memory * Error =
     try
-        let optimized = Interpreter.optimizeCircuit ast Map.empty Map.empty 0
+        let (Flow ops) = ast
+        let optimized = Interpreter.optimizeCircuit ops Map.empty Map.empty 0
         let _, memA, memB, optAST = optimized
         let updMemory = (memory.SetArithmetic memA).SetBoolean memB
-        optAST, updMemory, Success
+        Flow optAST, updMemory, Success
     with e -> ast, memory, EvaluationError e.Message
 
 /// <summary>

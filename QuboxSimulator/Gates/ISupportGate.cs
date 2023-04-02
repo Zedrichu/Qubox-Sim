@@ -59,7 +59,7 @@ internal class NoneGate : SupportGate
     public NoneGate(int target)
     {
         Id = "NONE";
-        Type = GateType.NONE;
+        Type = GateType.None;
         TargetRange = new Tuple<int, int>(target, target);
     }
 
@@ -73,7 +73,7 @@ internal class BarrierGate : SupportGate
     public BarrierGate(int target)
     {
         Id = "BARRIER";
-        Type = GateType.BARRIER;
+        Type = GateType.Barrier;
         TargetRange = new Tuple<int, int>(target, target);
     }
 }
@@ -86,7 +86,7 @@ internal class ResetGate : SupportGate
     public ResetGate(int target)
     {
         Id = "RESET";
-        Type = GateType.RESET;
+        Type = GateType.Reset;
         TargetRange = new Tuple<int, int>(target, target);
     }
 }
@@ -99,7 +99,7 @@ internal class MeasureGate : SupportGate
     public MeasureGate(int quantum, int classic)
     {
         Id = "MEASURE";
-        Type = GateType.MEASURE;
+        Type = GateType.Measure;
         TargetRange = new Tuple<int, int>(quantum, classic);
     }
 }
@@ -112,7 +112,7 @@ internal class PhaseDisk : SupportGate
     public PhaseDisk(int qubitNo)
     {
         Id = "PHASEDISK";
-        Type = GateType.PHASEDISK;
+        Type = GateType.PhaseDisk;
         TargetRange = new Tuple<int, int>(0, qubitNo);
     }
 }

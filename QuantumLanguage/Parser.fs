@@ -5,9 +5,10 @@ open FSharp.Text.Lexing
 open FSharp.Text.Parsing.ParseHelpers
 # 2 "Parser.fsy"
 
+open Tags
 open AST
 
-# 10 "Parser.fs"
+# 11 "Parser.fs"
 // This type is the type of tokens accepted by the parser
 type token = 
   | BVAR
@@ -565,7 +566,7 @@ let _fsyacc_reductionSymbolCounts = [|1us;1us;1us;3us;1us;2us;1us;2us;1us;2us;3u
 let _fsyacc_productionToNonTerminalTable = [|0us;1us;2us;3us;3us;4us;4us;5us;5us;6us;7us;7us;8us;8us;9us;9us;9us;9us;9us;9us;9us;10us;10us;10us;10us;10us;10us;10us;11us;12us;12us;12us;13us;13us;14us;14us;15us;15us;16us;16us;16us;16us;16us;16us;16us;16us;16us;16us;16us;16us;16us;16us;16us;16us;17us;17us;17us;17us;17us;17us;17us;17us;17us;17us;17us;17us;17us;17us;17us;17us;17us;17us;17us;17us;17us;17us;17us;17us;17us;17us;17us;17us;17us;17us;17us;|]
 let _fsyacc_immediateActions = [|65535us;49152us;65535us;49152us;65535us;49152us;65535us;65535us;16387us;16388us;65535us;16389us;16390us;65535us;16391us;16392us;65535us;16393us;65535us;65535us;16394us;65535us;16395us;65535us;65535us;16396us;65535us;16397us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;16404us;16405us;16406us;16407us;65535us;16408us;65535us;16409us;65535us;65535us;16410us;16411us;65535us;65535us;16412us;65535us;65535us;65535us;16414us;16416us;16417us;65535us;65535us;65535us;16419us;65535us;65535us;16421us;16422us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;65535us;16429us;65535us;65535us;65535us;65535us;65535us;65535us;16436us;65535us;16437us;65535us;65535us;16439us;65535us;16440us;65535us;65535us;65535us;16441us;65535us;16442us;65535us;16443us;16444us;65535us;16445us;65535us;16446us;65535us;16447us;65535us;16448us;65535us;16449us;65535us;16450us;65535us;16451us;65535us;16452us;65535us;16453us;65535us;16454us;65535us;16455us;65535us;65535us;65535us;16456us;65535us;65535us;65535us;16457us;65535us;65535us;65535us;16458us;65535us;65535us;65535us;16459us;65535us;65535us;65535us;65535us;65535us;16460us;65535us;65535us;65535us;16461us;65535us;65535us;65535us;16462us;65535us;65535us;65535us;16463us;65535us;65535us;65535us;65535us;65535us;16464us;65535us;65535us;65535us;16465us;65535us;65535us;65535us;65535us;65535us;16466us;65535us;65535us;65535us;65535us;65535us;16467us;65535us;65535us;65535us;65535us;65535us;16468us;|]
 let _fsyacc_reductions = lazy [|
-# 568 "Parser.fs"
+# 569 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> AST.BoolExpr option in
             Microsoft.FSharp.Core.Operators.box
@@ -574,7 +575,7 @@ let _fsyacc_reductions = lazy [|
                       raise (FSharp.Text.Parsing.Accept(Microsoft.FSharp.Core.Operators.box _1))
                    )
                  : 'gentype__startstartBool));
-# 577 "Parser.fs"
+# 578 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> AST.ArithExpr option in
             Microsoft.FSharp.Core.Operators.box
@@ -583,7 +584,7 @@ let _fsyacc_reductions = lazy [|
                       raise (FSharp.Text.Parsing.Accept(Microsoft.FSharp.Core.Operators.box _1))
                    )
                  : 'gentype__startstartArith));
-# 586 "Parser.fs"
+# 587 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> AST.Circuit option in
             Microsoft.FSharp.Core.Operators.box
@@ -592,94 +593,83 @@ let _fsyacc_reductions = lazy [|
                       raise (FSharp.Text.Parsing.Accept(Microsoft.FSharp.Core.Operators.box _1))
                    )
                  : 'gentype__startstart));
-# 595 "Parser.fs"
+# 596 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> AST.Allocation in
-            let _2 = parseState.GetInput(2) :?> Flow in
+            let _2 = parseState.GetInput(2) :?> Statement list in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 55 "Parser.fsy"
-                                                               Some (_1, _2) 
+# 56 "Parser.fsy"
+                                                               Some (_1, Flow _2) 
                    )
-# 55 "Parser.fsy"
+# 56 "Parser.fsy"
                  : AST.Circuit option));
-# 607 "Parser.fs"
+# 608 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 56 "Parser.fsy"
+# 57 "Parser.fsy"
                                                                None 
                    )
-# 56 "Parser.fsy"
+# 57 "Parser.fsy"
                  : AST.Circuit option));
-# 617 "Parser.fs"
+# 618 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> ArithExpr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 59 "Parser.fsy"
+# 60 "Parser.fsy"
                                                                Some _1 
                    )
-# 59 "Parser.fsy"
+# 60 "Parser.fsy"
                  : AST.ArithExpr option));
-# 628 "Parser.fs"
+# 629 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 60 "Parser.fsy"
+# 61 "Parser.fsy"
                                                                None 
                    )
-# 60 "Parser.fsy"
+# 61 "Parser.fsy"
                  : AST.ArithExpr option));
-# 638 "Parser.fs"
+# 639 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> BoolExpr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 63 "Parser.fsy"
+# 64 "Parser.fsy"
                                                                Some _1 
                    )
-# 63 "Parser.fsy"
+# 64 "Parser.fsy"
                  : AST.BoolExpr option));
-# 649 "Parser.fs"
+# 650 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 64 "Parser.fsy"
+# 65 "Parser.fsy"
                                                                None 
                    )
-# 64 "Parser.fsy"
+# 65 "Parser.fsy"
                  : AST.BoolExpr option));
-# 659 "Parser.fs"
+# 660 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_qallocation in
             let _2 = parseState.GetInput(2) :?> 'gentype_callocation in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 73 "Parser.fsy"
+# 74 "Parser.fsy"
                                                                AllocQC(_1, _2) 
                    )
-# 73 "Parser.fsy"
+# 74 "Parser.fsy"
                  : AST.Allocation));
-# 671 "Parser.fs"
-        (fun (parseState : FSharp.Text.Parsing.IParseState) ->
-            let _2 = parseState.GetInput(2) :?> Bit in
-            Microsoft.FSharp.Core.Operators.box
-                (
-                   (
-# 76 "Parser.fsy"
-                                                         _2 
-                   )
-# 76 "Parser.fsy"
-                 : 'gentype_qallocation));
-# 682 "Parser.fs"
+# 672 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> Bit in
             Microsoft.FSharp.Core.Operators.box
@@ -690,18 +680,18 @@ let _fsyacc_reductions = lazy [|
                    )
 # 77 "Parser.fsy"
                  : 'gentype_qallocation));
-# 693 "Parser.fs"
+# 683 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> Bit in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 81 "Parser.fsy"
+# 78 "Parser.fsy"
                                                          _2 
                    )
-# 81 "Parser.fsy"
-                 : 'gentype_callocation));
-# 704 "Parser.fs"
+# 78 "Parser.fsy"
+                 : 'gentype_qallocation));
+# 694 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> Bit in
             Microsoft.FSharp.Core.Operators.box
@@ -712,299 +702,298 @@ let _fsyacc_reductions = lazy [|
                    )
 # 82 "Parser.fsy"
                  : 'gentype_callocation));
-# 715 "Parser.fs"
+# 705 "Parser.fs"
+        (fun (parseState : FSharp.Text.Parsing.IParseState) ->
+            let _2 = parseState.GetInput(2) :?> Bit in
+            Microsoft.FSharp.Core.Operators.box
+                (
+                   (
+# 83 "Parser.fsy"
+                                                         _2 
+                   )
+# 83 "Parser.fsy"
+                 : 'gentype_callocation));
+# 716 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> ArithExpr in
             let _3 = parseState.GetInput(3) :?> ArithExpr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 89 "Parser.fsy"
+# 90 "Parser.fsy"
                                                            BinaryOp(_1, Mul, _3) 
                    )
-# 89 "Parser.fsy"
+# 90 "Parser.fsy"
                  : ArithExpr));
-# 727 "Parser.fs"
+# 728 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> ArithExpr in
             let _3 = parseState.GetInput(3) :?> ArithExpr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 90 "Parser.fsy"
+# 91 "Parser.fsy"
                                                            BinaryOp(_1, Div, _3) 
                    )
-# 90 "Parser.fsy"
+# 91 "Parser.fsy"
                  : ArithExpr));
-# 739 "Parser.fs"
+# 740 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> ArithExpr in
             let _3 = parseState.GetInput(3) :?> ArithExpr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 91 "Parser.fsy"
+# 92 "Parser.fsy"
                                                            BinaryOp(_1, Add, _3) 
                    )
-# 91 "Parser.fsy"
+# 92 "Parser.fsy"
                  : ArithExpr));
-# 751 "Parser.fs"
+# 752 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> ArithExpr in
             let _3 = parseState.GetInput(3) :?> ArithExpr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 92 "Parser.fsy"
+# 93 "Parser.fsy"
                                                            BinaryOp(_1, Sub, _3) 
                    )
-# 92 "Parser.fsy"
+# 93 "Parser.fsy"
                  : ArithExpr));
-# 763 "Parser.fs"
+# 764 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> ArithExpr in
             let _3 = parseState.GetInput(3) :?> ArithExpr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 93 "Parser.fsy"
+# 94 "Parser.fsy"
                                                            BinaryOp(_1, Pow, _3) 
                    )
-# 93 "Parser.fsy"
+# 94 "Parser.fsy"
                  : ArithExpr));
-# 775 "Parser.fs"
+# 776 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> ArithExpr in
             let _3 = parseState.GetInput(3) :?> ArithExpr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 94 "Parser.fsy"
+# 95 "Parser.fsy"
                                                            BinaryOp(_1, Mod, _3) 
                    )
-# 94 "Parser.fsy"
+# 95 "Parser.fsy"
                  : ArithExpr));
-# 787 "Parser.fs"
+# 788 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> ArithExpr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 95 "Parser.fsy"
+# 96 "Parser.fsy"
                                                            _1 
                    )
-# 95 "Parser.fsy"
+# 96 "Parser.fsy"
                  : ArithExpr));
-# 798 "Parser.fs"
+# 799 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 98 "Parser.fsy"
+# 99 "Parser.fsy"
                                                            Pi 
                    )
-# 98 "Parser.fsy"
+# 99 "Parser.fsy"
                  : ArithExpr));
-# 808 "Parser.fs"
+# 809 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> int in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 99 "Parser.fsy"
+# 100 "Parser.fsy"
                                                            Num(_1) 
                    )
-# 99 "Parser.fsy"
+# 100 "Parser.fsy"
                  : ArithExpr));
-# 819 "Parser.fs"
+# 820 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> float in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 100 "Parser.fsy"
+# 101 "Parser.fsy"
                                                            Float(_1) 
                    )
-# 100 "Parser.fsy"
+# 101 "Parser.fsy"
                  : ArithExpr));
-# 830 "Parser.fs"
+# 831 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> ArithExpr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 101 "Parser.fsy"
+# 102 "Parser.fsy"
                                                            UnaryOp(Minus, _2) 
                    )
-# 101 "Parser.fsy"
+# 102 "Parser.fsy"
                  : ArithExpr));
-# 841 "Parser.fs"
+# 842 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> ArithExpr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 102 "Parser.fsy"
+# 103 "Parser.fsy"
                                                            UnaryOp(Plus, _2) 
                    )
-# 102 "Parser.fsy"
+# 103 "Parser.fsy"
                  : ArithExpr));
-# 852 "Parser.fs"
+# 853 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> ArithExpr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 103 "Parser.fsy"
+# 104 "Parser.fsy"
                                                            _2 
                    )
-# 103 "Parser.fsy"
+# 104 "Parser.fsy"
                  : ArithExpr));
-# 863 "Parser.fs"
+# 864 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_str in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 104 "Parser.fsy"
+# 105 "Parser.fsy"
                                                            VarA(_1) 
                    )
-# 104 "Parser.fsy"
+# 105 "Parser.fsy"
                  : ArithExpr));
-# 874 "Parser.fs"
+# 875 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> string in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 108 "Parser.fsy"
+# 109 "Parser.fsy"
                                                            _1 
                    )
-# 108 "Parser.fsy"
+# 109 "Parser.fsy"
                  : 'gentype_str));
-# 885 "Parser.fs"
+# 886 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
-            let _1 = parseState.GetInput(1) :?> Flow in
-            let _2 = parseState.GetInput(2) :?> Flow in
+            let _1 = parseState.GetInput(1) :?> Statement list in
+            let _2 = parseState.GetInput(2) :?> Statement list in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 112 "Parser.fsy"
+# 113 "Parser.fsy"
                                                            _1 @ _2 
                    )
-# 112 "Parser.fsy"
-                 : Flow));
-# 897 "Parser.fs"
+# 113 "Parser.fsy"
+                 : Statement list));
+# 898 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> Statement in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 113 "Parser.fsy"
+# 114 "Parser.fsy"
                                                            [_1] 
                    )
-# 113 "Parser.fsy"
-                 : Flow));
-# 908 "Parser.fs"
+# 114 "Parser.fsy"
+                 : Statement list));
+# 909 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 114 "Parser.fsy"
+# 115 "Parser.fsy"
                                                            [] 
                    )
-# 114 "Parser.fsy"
-                 : Flow));
-# 918 "Parser.fs"
+# 115 "Parser.fsy"
+                 : Statement list));
+# 919 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 119 "Parser.fsy"
+# 120 "Parser.fsy"
                                                             Click 
                    )
-# 119 "Parser.fsy"
+# 120 "Parser.fsy"
                  : Result));
-# 928 "Parser.fs"
+# 929 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 120 "Parser.fsy"
+# 121 "Parser.fsy"
                                                             NoClick 
                    )
-# 120 "Parser.fsy"
+# 121 "Parser.fsy"
                  : Result));
-# 938 "Parser.fs"
+# 939 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> string in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 124 "Parser.fsy"
+# 125 "Parser.fsy"
                                                            BitS(_1) 
                    )
-# 124 "Parser.fsy"
+# 125 "Parser.fsy"
                  : Bit));
-# 949 "Parser.fs"
+# 950 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_str in
             let _3 = parseState.GetInput(3) :?> int in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 125 "Parser.fsy"
+# 126 "Parser.fsy"
                                                            BitA(_1, _3) 
                    )
-# 125 "Parser.fsy"
+# 126 "Parser.fsy"
                  : Bit));
-# 961 "Parser.fs"
+# 962 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> Bit in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 129 "Parser.fsy"
+# 130 "Parser.fsy"
                                                        _1 
                    )
-# 129 "Parser.fsy"
+# 130 "Parser.fsy"
                  : Bit));
-# 972 "Parser.fs"
+# 973 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> Bit in
             let _3 = parseState.GetInput(3) :?> Bit in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 130 "Parser.fsy"
+# 131 "Parser.fsy"
                                                        BitSeq(_1, _3) 
                    )
-# 130 "Parser.fsy"
+# 131 "Parser.fsy"
                  : Bit));
-# 984 "Parser.fs"
+# 985 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> bool in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 136 "Parser.fsy"
+# 137 "Parser.fsy"
                                                                B (_1) 
                    )
-# 136 "Parser.fsy"
-                 : BoolExpr));
-# 995 "Parser.fs"
-        (fun (parseState : FSharp.Text.Parsing.IParseState) ->
-            let _1 = parseState.GetInput(1) :?> BoolExpr in
-            let _3 = parseState.GetInput(3) :?> BoolExpr in
-            Microsoft.FSharp.Core.Operators.box
-                (
-                   (
-# 137 "Parser.fsy"
-                                                               LogicOp(_1, And, _3) 
-                   )
 # 137 "Parser.fsy"
                  : BoolExpr));
-# 1007 "Parser.fs"
+# 996 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> BoolExpr in
             let _3 = parseState.GetInput(3) :?> BoolExpr in
@@ -1012,11 +1001,11 @@ let _fsyacc_reductions = lazy [|
                 (
                    (
 # 138 "Parser.fsy"
-                                                               LogicOp(_1, Or, _3) 
+                                                               LogicOp(_1, And, _3) 
                    )
 # 138 "Parser.fsy"
                  : BoolExpr));
-# 1019 "Parser.fs"
+# 1008 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> BoolExpr in
             let _3 = parseState.GetInput(3) :?> BoolExpr in
@@ -1024,23 +1013,23 @@ let _fsyacc_reductions = lazy [|
                 (
                    (
 # 139 "Parser.fsy"
-                                                               LogicOp(_1, And, _3) 
-                   )
-# 139 "Parser.fsy"
-                 : BoolExpr));
-# 1031 "Parser.fs"
-        (fun (parseState : FSharp.Text.Parsing.IParseState) ->
-            let _1 = parseState.GetInput(1) :?> BoolExpr in
-            let _3 = parseState.GetInput(3) :?> BoolExpr in
-            Microsoft.FSharp.Core.Operators.box
-                (
-                   (
-# 140 "Parser.fsy"
                                                                LogicOp(_1, Or, _3) 
                    )
+# 139 "Parser.fsy"
+                 : BoolExpr));
+# 1020 "Parser.fs"
+        (fun (parseState : FSharp.Text.Parsing.IParseState) ->
+            let _1 = parseState.GetInput(1) :?> BoolExpr in
+            let _3 = parseState.GetInput(3) :?> BoolExpr in
+            Microsoft.FSharp.Core.Operators.box
+                (
+                   (
+# 140 "Parser.fsy"
+                                                               LogicOp(_1, And, _3) 
+                   )
 # 140 "Parser.fsy"
                  : BoolExpr));
-# 1043 "Parser.fs"
+# 1032 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> BoolExpr in
             let _3 = parseState.GetInput(3) :?> BoolExpr in
@@ -1048,377 +1037,389 @@ let _fsyacc_reductions = lazy [|
                 (
                    (
 # 141 "Parser.fsy"
+                                                               LogicOp(_1, Or, _3) 
+                   )
+# 141 "Parser.fsy"
+                 : BoolExpr));
+# 1044 "Parser.fs"
+        (fun (parseState : FSharp.Text.Parsing.IParseState) ->
+            let _1 = parseState.GetInput(1) :?> BoolExpr in
+            let _3 = parseState.GetInput(3) :?> BoolExpr in
+            Microsoft.FSharp.Core.Operators.box
+                (
+                   (
+# 142 "Parser.fsy"
                                                                LogicOp(_1, Xor, _3) 
                    )
-# 141 "Parser.fsy"
+# 142 "Parser.fsy"
                  : BoolExpr));
-# 1055 "Parser.fs"
+# 1056 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> BoolExpr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 142 "Parser.fsy"
+# 143 "Parser.fsy"
                                                                Not(_2)
                    )
-# 142 "Parser.fsy"
+# 143 "Parser.fsy"
                  : BoolExpr));
-# 1066 "Parser.fs"
+# 1067 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> Bit in
             let _3 = parseState.GetInput(3) :?> Result in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 143 "Parser.fsy"
+# 144 "Parser.fsy"
                                                                Check(_1,_3) 
                    )
-# 143 "Parser.fsy"
+# 144 "Parser.fsy"
                  : BoolExpr));
-# 1078 "Parser.fs"
+# 1079 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> ArithExpr in
             let _3 = parseState.GetInput(3) :?> ArithExpr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 144 "Parser.fsy"
+# 145 "Parser.fsy"
                                                                RelationOp(_1, EQ, _3) 
                    )
-# 144 "Parser.fsy"
+# 145 "Parser.fsy"
                  : BoolExpr));
-# 1090 "Parser.fs"
+# 1091 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> ArithExpr in
             let _3 = parseState.GetInput(3) :?> ArithExpr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 145 "Parser.fsy"
+# 146 "Parser.fsy"
                                                                RelationOp(_1, NEQ, _3) 
                    )
-# 145 "Parser.fsy"
+# 146 "Parser.fsy"
                  : BoolExpr));
-# 1102 "Parser.fs"
+# 1103 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> ArithExpr in
             let _3 = parseState.GetInput(3) :?> ArithExpr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 146 "Parser.fsy"
+# 147 "Parser.fsy"
                                                                RelationOp(_1, GT, _3) 
                    )
-# 146 "Parser.fsy"
+# 147 "Parser.fsy"
                  : BoolExpr));
-# 1114 "Parser.fs"
+# 1115 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> ArithExpr in
             let _3 = parseState.GetInput(3) :?> ArithExpr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 147 "Parser.fsy"
+# 148 "Parser.fsy"
                                                                RelationOp(_1, GTE, _3) 
                    )
-# 147 "Parser.fsy"
+# 148 "Parser.fsy"
                  : BoolExpr));
-# 1126 "Parser.fs"
+# 1127 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> ArithExpr in
             let _3 = parseState.GetInput(3) :?> ArithExpr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 148 "Parser.fsy"
+# 149 "Parser.fsy"
                                                                RelationOp(_1, LT, _3) 
                    )
-# 148 "Parser.fsy"
+# 149 "Parser.fsy"
                  : BoolExpr));
-# 1138 "Parser.fs"
+# 1139 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> ArithExpr in
             let _3 = parseState.GetInput(3) :?> ArithExpr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 149 "Parser.fsy"
+# 150 "Parser.fsy"
                                                                RelationOp(_1, LTE, _3) 
                    )
-# 149 "Parser.fsy"
+# 150 "Parser.fsy"
                  : BoolExpr));
-# 1150 "Parser.fs"
+# 1151 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> BoolExpr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 150 "Parser.fsy"
+# 151 "Parser.fsy"
                                                                _2 
                    )
-# 150 "Parser.fsy"
+# 151 "Parser.fsy"
                  : BoolExpr));
-# 1161 "Parser.fs"
+# 1162 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> string in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 151 "Parser.fsy"
+# 152 "Parser.fsy"
                                                                VarB(_2) 
                    )
-# 151 "Parser.fsy"
+# 152 "Parser.fsy"
                  : BoolExpr));
-# 1172 "Parser.fs"
+# 1173 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> 'gentype_str in
             let _3 = parseState.GetInput(3) :?> ArithExpr in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 157 "Parser.fsy"
+# 158 "Parser.fsy"
                                                                        Assign(_1, _3) 
                    )
-# 157 "Parser.fsy"
+# 158 "Parser.fsy"
                  : Statement));
-# 1184 "Parser.fs"
+# 1185 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _1 = parseState.GetInput(1) :?> BoolExpr in
             let _3 = parseState.GetInput(3) :?> 'gentype_str in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 158 "Parser.fsy"
+# 159 "Parser.fsy"
                                                                        AssignB(_3, _1) 
                    )
-# 158 "Parser.fsy"
+# 159 "Parser.fsy"
                  : Statement));
-# 1196 "Parser.fs"
+# 1197 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> BoolExpr in
             let _3 = parseState.GetInput(3) :?> Statement in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 159 "Parser.fsy"
+# 160 "Parser.fsy"
                                                                        Condition(_2, _3) 
                    )
-# 159 "Parser.fsy"
+# 160 "Parser.fsy"
                  : Statement));
-# 1208 "Parser.fs"
+# 1209 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> Bit in
             let _4 = parseState.GetInput(4) :?> Bit in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 160 "Parser.fsy"
+# 161 "Parser.fsy"
                                                                        Measure(_2, _4) 
                    )
-# 160 "Parser.fsy"
+# 161 "Parser.fsy"
                  : Statement));
-# 1220 "Parser.fs"
+# 1221 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> Bit in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 161 "Parser.fsy"
+# 162 "Parser.fsy"
                                                                        Reset(_2) 
                    )
-# 161 "Parser.fsy"
+# 162 "Parser.fsy"
                  : Statement));
-# 1231 "Parser.fs"
+# 1232 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> Bit in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 162 "Parser.fsy"
+# 163 "Parser.fsy"
                                                                        Barrier(_2) 
                    )
-# 162 "Parser.fsy"
+# 163 "Parser.fsy"
                  : Statement));
-# 1242 "Parser.fs"
+# 1243 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 163 "Parser.fsy"
+# 164 "Parser.fsy"
                                                                        PhaseDisk 
                    )
-# 163 "Parser.fsy"
+# 164 "Parser.fsy"
                  : Statement));
-# 1252 "Parser.fs"
+# 1253 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> Bit in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 167 "Parser.fsy"
+# 168 "Parser.fsy"
                                                    UnaryGate(H, _2) 
                    )
-# 167 "Parser.fsy"
+# 168 "Parser.fsy"
                  : Statement));
-# 1263 "Parser.fs"
+# 1264 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> Bit in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 168 "Parser.fsy"
+# 169 "Parser.fsy"
                                                    UnaryGate(ID, _2) 
                    )
-# 168 "Parser.fsy"
+# 169 "Parser.fsy"
                  : Statement));
-# 1274 "Parser.fs"
+# 1275 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> Bit in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 169 "Parser.fsy"
+# 170 "Parser.fsy"
                                                    UnaryGate(X, _2) 
                    )
-# 169 "Parser.fsy"
+# 170 "Parser.fsy"
                  : Statement));
-# 1285 "Parser.fs"
+# 1286 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> Bit in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 170 "Parser.fsy"
+# 171 "Parser.fsy"
                                                    UnaryGate(Y, _2) 
                    )
-# 170 "Parser.fsy"
+# 171 "Parser.fsy"
                  : Statement));
-# 1296 "Parser.fs"
+# 1297 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> Bit in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 171 "Parser.fsy"
+# 172 "Parser.fsy"
                                                    UnaryGate(Z, _2) 
                    )
-# 171 "Parser.fsy"
+# 172 "Parser.fsy"
                  : Statement));
-# 1307 "Parser.fs"
+# 1308 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> Bit in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 172 "Parser.fsy"
+# 173 "Parser.fsy"
                                                    UnaryGate(TDG, _2) 
                    )
-# 172 "Parser.fsy"
+# 173 "Parser.fsy"
                  : Statement));
-# 1318 "Parser.fs"
+# 1319 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> Bit in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 173 "Parser.fsy"
+# 174 "Parser.fsy"
                                                    UnaryGate(T, _2) 
                    )
-# 173 "Parser.fsy"
+# 174 "Parser.fsy"
                  : Statement));
-# 1329 "Parser.fs"
+# 1330 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> Bit in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 174 "Parser.fsy"
+# 175 "Parser.fsy"
                                                    UnaryGate(S, _2) 
                    )
-# 174 "Parser.fsy"
+# 175 "Parser.fsy"
                  : Statement));
-# 1340 "Parser.fs"
+# 1341 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> Bit in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 175 "Parser.fsy"
+# 176 "Parser.fsy"
                                                    UnaryGate(SDG, _2) 
                    )
-# 175 "Parser.fsy"
+# 176 "Parser.fsy"
                  : Statement));
-# 1351 "Parser.fs"
+# 1352 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> Bit in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 176 "Parser.fsy"
+# 177 "Parser.fsy"
                                                    UnaryGate(SX, _2) 
                    )
-# 176 "Parser.fsy"
+# 177 "Parser.fsy"
                  : Statement));
-# 1362 "Parser.fs"
+# 1363 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> Bit in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 177 "Parser.fsy"
+# 178 "Parser.fsy"
                                                    UnaryGate(SXDG, _2) 
                    )
-# 177 "Parser.fsy"
+# 178 "Parser.fsy"
                  : Statement));
-# 1373 "Parser.fs"
+# 1374 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _3 = parseState.GetInput(3) :?> ArithExpr in
             let _5 = parseState.GetInput(5) :?> Bit in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 179 "Parser.fsy"
+# 180 "Parser.fsy"
                                                               ParamGate(P, _3, _5) 
                    )
-# 179 "Parser.fsy"
+# 180 "Parser.fsy"
                  : Statement));
-# 1385 "Parser.fs"
+# 1386 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _3 = parseState.GetInput(3) :?> ArithExpr in
             let _5 = parseState.GetInput(5) :?> Bit in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 180 "Parser.fsy"
+# 181 "Parser.fsy"
                                                               ParamGate(RX, _3, _5) 
                    )
-# 180 "Parser.fsy"
+# 181 "Parser.fsy"
                  : Statement));
-# 1397 "Parser.fs"
+# 1398 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _3 = parseState.GetInput(3) :?> ArithExpr in
             let _5 = parseState.GetInput(5) :?> Bit in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 181 "Parser.fsy"
+# 182 "Parser.fsy"
                                                               ParamGate(RY, _3, _5) 
                    )
-# 181 "Parser.fsy"
+# 182 "Parser.fsy"
                  : Statement));
-# 1409 "Parser.fs"
+# 1410 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _3 = parseState.GetInput(3) :?> ArithExpr in
             let _5 = parseState.GetInput(5) :?> Bit in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 182 "Parser.fsy"
+# 183 "Parser.fsy"
                                                               ParamGate(RZ, _3, _5) 
                    )
-# 182 "Parser.fsy"
+# 183 "Parser.fsy"
                  : Statement));
-# 1421 "Parser.fs"
+# 1422 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _3 = parseState.GetInput(3) :?> ArithExpr in
             let _5 = parseState.GetInput(5) :?> ArithExpr in
@@ -1427,48 +1428,48 @@ let _fsyacc_reductions = lazy [|
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 183 "Parser.fsy"
+# 184 "Parser.fsy"
                                                                                           Unitary(_3, _5, _7, _9) 
                    )
-# 183 "Parser.fsy"
+# 184 "Parser.fsy"
                  : Statement));
-# 1435 "Parser.fs"
+# 1436 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> Bit in
             let _4 = parseState.GetInput(4) :?> Bit in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 185 "Parser.fsy"
+# 186 "Parser.fsy"
                                                                BinaryGate(CH, _2, _4) 
                    )
-# 185 "Parser.fsy"
+# 186 "Parser.fsy"
                  : Statement));
-# 1447 "Parser.fs"
+# 1448 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> Bit in
             let _4 = parseState.GetInput(4) :?> Bit in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 186 "Parser.fsy"
+# 187 "Parser.fsy"
                                                                BinaryGate(CS, _2, _4) 
                    )
-# 186 "Parser.fsy"
+# 187 "Parser.fsy"
                  : Statement));
-# 1459 "Parser.fs"
+# 1460 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> Bit in
             let _4 = parseState.GetInput(4) :?> Bit in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 187 "Parser.fsy"
+# 188 "Parser.fsy"
                                                                BinaryGate(CNOT, _2, _4) 
                    )
-# 187 "Parser.fsy"
+# 188 "Parser.fsy"
                  : Statement));
-# 1471 "Parser.fs"
+# 1472 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> Bit in
             let _4 = parseState.GetInput(4) :?> Bit in
@@ -1476,24 +1477,24 @@ let _fsyacc_reductions = lazy [|
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 188 "Parser.fsy"
+# 189 "Parser.fsy"
                                                                Toffoli(_2, _4, _6) 
                    )
-# 188 "Parser.fsy"
+# 189 "Parser.fsy"
                  : Statement));
-# 1484 "Parser.fs"
+# 1485 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _2 = parseState.GetInput(2) :?> Bit in
             let _4 = parseState.GetInput(4) :?> Bit in
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 189 "Parser.fsy"
-                                                               BinaryGate(AST.SWAP, _2, _4) 
+# 190 "Parser.fsy"
+                                                               BinaryGate(Tags.SWAP, _2, _4) 
                    )
-# 189 "Parser.fsy"
+# 190 "Parser.fsy"
                  : Statement));
-# 1496 "Parser.fs"
+# 1497 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _3 = parseState.GetInput(3) :?> ArithExpr in
             let _5 = parseState.GetInput(5) :?> Bit in
@@ -1501,12 +1502,12 @@ let _fsyacc_reductions = lazy [|
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 191 "Parser.fsy"
+# 192 "Parser.fsy"
                                                                          BinaryParamGate(RXX, _3, _5, _7) 
                    )
-# 191 "Parser.fsy"
+# 192 "Parser.fsy"
                  : Statement));
-# 1509 "Parser.fs"
+# 1510 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _3 = parseState.GetInput(3) :?> ArithExpr in
             let _5 = parseState.GetInput(5) :?> Bit in
@@ -1514,12 +1515,12 @@ let _fsyacc_reductions = lazy [|
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 192 "Parser.fsy"
+# 193 "Parser.fsy"
                                                                          BinaryParamGate(RYY, _3, _5, _7) 
                    )
-# 192 "Parser.fsy"
+# 193 "Parser.fsy"
                  : Statement));
-# 1522 "Parser.fs"
+# 1523 "Parser.fs"
         (fun (parseState : FSharp.Text.Parsing.IParseState) ->
             let _3 = parseState.GetInput(3) :?> ArithExpr in
             let _5 = parseState.GetInput(5) :?> Bit in
@@ -1527,13 +1528,13 @@ let _fsyacc_reductions = lazy [|
             Microsoft.FSharp.Core.Operators.box
                 (
                    (
-# 193 "Parser.fsy"
+# 194 "Parser.fsy"
                                                                          BinaryParamGate(RZZ, _3, _5, _7) 
                    )
-# 193 "Parser.fsy"
+# 194 "Parser.fsy"
                  : Statement));
 |]
-# 1536 "Parser.fs"
+# 1537 "Parser.fs"
 let tables : FSharp.Text.Parsing.Tables<_> = 
   { reductions = _fsyacc_reductions.Value;
     endOfInputTag = _fsyacc_endOfInputTag;

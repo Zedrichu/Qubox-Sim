@@ -1,27 +1,33 @@
 using QuantumLanguage;
+using static QuantumLanguage.AST;
 using static QuantumLanguage.Handler;
 using QuboxSimulator.Circuits;
+using QuboxSimulator.Gates;
 
 namespace QuboxSimulator;
 
 public static class Interpreter
 {
-    private static AST.Memory _memory = AST.Memory.empty;
-    private static AST.@operator _operator = AST.@operator.NOP;
-    private static AST.error Error { get; set; } = AST.error.Success;
+    private static Memory _memory = Memory.empty;
+    private static Tuple<Allocation, Schema>? _circuit;
+
+    private static Error Error { get; set; } = Error.Success;
     
     public static void HandleLang(string? quLangCode)
     {
-        var ast = parseQuLang(quLangCode);
-        if (!ast.Item2.Equals(AST.error.Success))
+        var astOption = parseQuLang(quLangCode);
+        if (!astOption.Item2.Equals(Error.Success))
         {
-            Error = ast.Item2;
+            Error = astOption.Item2;
             return;
         }
-        Console.WriteLine("QuLang Parsed | AST: " + ast.Item1);
+
+        var ast = astOption.Item1.Value;
         
-        var sem = analyzeSemantics(ast.Item1.Item1, ast.Item1.Item2);
-        if (!sem.Item2.Equals(AST.error.Success))
+        Console.WriteLine("QuLang Parsed | AST: " + ast);
+        
+        var sem = analyzeSemantics(ast.Item1, ast.Item2);
+        if (!sem.Item2.Equals(AST.Error.Success))
         {
             Error = sem.Item2;
             return;
@@ -29,27 +35,29 @@ public static class Interpreter
         _memory = sem.Item1;
         Console.WriteLine("Semantics Analyzed | Memory: " + _memory);
         
-        var optimal = optimizeAST(ast.Item1.Item2, _memory);
-        if (!optimal.Item3.Equals(AST.error.Success))
+        var optimal = optimizeAST(ast.Item2, _memory);
+        if (!optimal.Item3.Equals(Error.Success))
         {
             Error = optimal.Item3;
             return;
         }
         
-        Error = AST.error.Success;
+        Error = Error.Success;
         _memory = optimal.Item2;
-        _operator = optimal.Item1;
+        _circuit = new Tuple<Allocation, Schema>(ast.Item1, optimal.Item1);
         
-        Console.WriteLine("AST Optimized | AST: " + _operator);
+        Console.WriteLine("AST Optimized | AST: " + _circuit);
         Console.Error.WriteLine(Error.ToString());
     }
 
-    public static Circuit Interpret()
+    public static Circuit? Interpret()
     {
         var register = new Register(_memory);
-        var visitor = new OperatorVisitor(_memory);
-        var gates = _operator.Accept(visitor);
-
+        var visitor = new StatementVisitor(_memory);
+        if (_circuit == null) return null;
+        var gates = _circuit.Item2.Item.Select(
+                statement => statement.Accept(visitor)).ToList();
+        gates.RemoveAll(gate => gate == null);
         return CircuitFactory.BuildCircuit(gates, register);
     }
     

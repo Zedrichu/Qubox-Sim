@@ -17,6 +17,7 @@ Description: Compiler module handling the conversion from AST structure to Q# co
 
 open AST
 open QuantumLanguage.AST
+open Tags
 
 /// <summary>
 /// Function to compile the quantum results to Q# syntax.
@@ -32,6 +33,7 @@ let rec private compileResult (result:Result):string =
 /// Function to compile bit structures to Q# syntax.
 /// </summary>
 /// <param name="expr">Bit expression (sequence, array-like or single)</param>
+/// <param name="flag">True for qubits, false for classical bits</param>
 /// <returns>Q# string representation</returns>
 let rec internal compileAlloc (expr:Bit) (flag:bool):string =
     match flag with
@@ -108,7 +110,7 @@ let rec private compileStatement (expr:Statement):string =
     | UnaryGate(SDG, bit) -> "Rz(-PI()/2, "+compileBit bit+");" // S†
     | UnaryGate(SX, bit) -> "Rx(PI()/2, "+compileBit bit+");" // Global phase 
     | UnaryGate(SXDG, bit) -> "Rx(-PI()/2, "+compileBit bit+");" // Global phase
-    | UnaryGate(tag, bit) -> "{tag}("+compileBit bit+");"
+    | UnaryGate(tag, bit) -> $"{tag}({compileBit bit});"
     | ParamGate(P, phase, bit) -> "Rz("+(compileArith phase).ToString()+", "+compileBit bit+");" // up to global phase
     | ParamGate(RZ, angle, bit) -> "Rz("+(compileArith angle).ToString()+", "+compileBit bit+");"
     | ParamGate(RY, angle, bit) -> "Ry("+(compileArith angle).ToString()+", "+compileBit bit+");"
@@ -125,7 +127,7 @@ let rec private compileStatement (expr:Statement):string =
     | _ -> ""
 
 /// Helper to aggregate statements in a flow    
-let rec internal compileFlow (flow:Flow):string =
+let rec internal compileFlow (flow:Statement list):string =
     match flow with
     | head::tail -> compileStatement head + "\n" + compileFlow tail
     | [] -> ""

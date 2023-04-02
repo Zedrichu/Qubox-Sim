@@ -1,5 +1,6 @@
 // Open the file that defines the types used as AST in the QuLang-parser
 %{
+open Tags
 open AST
 %}
 
@@ -39,7 +40,7 @@ open AST
 %type <AST.ArithExpr option> startArith
 %type <AST.Allocation> allocation
 %type <Statement> operator
-%type <Flow> statements
+%type <Statement list> statements
 %type <Bit> bit
 %type <Bit> bitsequence
 %type <Result> result
@@ -52,7 +53,7 @@ open AST
 
 // The first production in "formal" notation is start -> expression
 start:
-  | allocation statements EOF           { Some ($1, $2) }
+  | allocation statements EOF           { Some ($1, Flow $2) }
   | EOF                                 { None }
   
 startArith:
@@ -186,7 +187,7 @@ operator:
   | CTRLS bit SEP bit                   { BinaryGate(CS, $2, $4) }
   | CTRLNOT bit SEP bit                 { BinaryGate(CNOT, $2, $4) }
   | TOFFOLI bit SEP bit SEP bit         { Toffoli($2, $4, $6) }
-  | SWAP bit SEP bit                    { BinaryGate(AST.SWAP, $2, $4) } // Conflict with some swap function
+  | SWAP bit SEP bit                    { BinaryGate(Tags.SWAP, $2, $4) } // Conflict with some swap function
 // Parametric gates on multiple qubits
   | SYMMRXX LPAR arithmetic RPAR bit SEP bit      { BinaryParamGate(RXX, $3, $5, $7) } 
   | SYMMRYY LPAR arithmetic RPAR bit SEP bit      { BinaryParamGate(RYY, $3, $5, $7) } 

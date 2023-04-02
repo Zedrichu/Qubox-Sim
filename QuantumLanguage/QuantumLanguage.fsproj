@@ -16,6 +16,7 @@
         <PackageReference Include="FsLexYacc" Version="11.0.1" GeneratePathProperty="true" />
         <PackageReference Include="FsLexYacc.Runtime" Version="11.0.1" />
         <Compile Include="VisitorPattern.fs" />
+        <Compile Include="Tags.fs" />
         <Compile Include="AST.fs" />
         <FsYacc Include="Parser.fsy">
             <OtherFlags>--module QuantumLanguage.Parser --internal</OtherFlags>
@@ -37,6 +38,7 @@
         <Pack>True</Pack>
         <Link>qubox-logo.png</Link>
       </None>
+      <Compile Include="Tags.fs" />
     </ItemGroup>
 
 </Project>

@@ -11,12 +11,11 @@ public class ConsoleDemo
         var circuit = Interpreter.Interpret();
         Console.WriteLine(circuit);
         
-        //Test out generation
-        var reg = circuit.Allocation;
-        Generator.Reg = reg;
-        var alloc = Generator.DestructRegister(reg);
-        var gates = Generator.DestructGateGrid(circuit.GateGrid);
-        Console.WriteLine(alloc);
-        Console.WriteLine(gates);
+        // Testing generation
+        if (circuit == null) return;
+        var _ = new Generator(circuit);
+        var ast = Generator.DestructCircuit();
+        Console.WriteLine(ast.Item1);
+        Console.WriteLine(ast.Item2);
     }
  }

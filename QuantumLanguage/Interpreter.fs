@@ -73,7 +73,7 @@ let rec private evalArith (expr:ArithExpr) (memory:Map<string, ArithExpr * int>)
     match expr with
     | Pi | Num _ | Float _ -> expr
     | VarA s -> try
-                    let (a, _) = Map.find s memory
+                    let a, _ = Map.find s memory
                     evalArith a memory
                 with _ -> failwith $"Unknown variable in expression - {s} has not been declared!"    
     | BinaryOp(x,Mul, y) ->  let x1 = evalArith x memory
@@ -191,46 +191,46 @@ let rec private evalArith (expr:ArithExpr) (memory:Map<string, ArithExpr * int>)
 /// Function to eager evaluate boolean expressions with reduction rules
 /// </summary>
 /// <param name="expr">Boolean expression to be reduced</param>
-/// <param name="memory">Boolean mapping of identifiers</param>
-/// <param name="memarith">Arithmetic mapping of identifiers</param>
+/// <param name="memoryB">Boolean mapping of identifiers</param>
+/// <param name="memoryA">Arithmetic mapping of identifiers</param>
 /// <exception cref="System.Exception">Boolean invalid variable access</exception>
 /// <returns>Reduced evaluation of AST boolean expression</returns>
-let rec private evalBool (expr:BoolExpr) (memory:Map<string, BoolExpr * int>)
-    (memarith:Map<string, ArithExpr * int>) : BoolExpr =
+let rec private evalBool (expr:BoolExpr) (memoryB:Map<string, BoolExpr * int>)
+    (memoryA:Map<string, ArithExpr * int>) : BoolExpr =
     match expr with 
     | B _ -> expr
     | VarB s -> try
-                    let b, _ = Map.find s memory
-                    evalBool b memory memarith
+                    let b, _ = Map.find s memoryB
+                    evalBool b memoryB memoryA
                 with _ -> failwith $"Unknown variable in expression - {s} has not been declared!"    
-    | LogicOp(x, And, y) ->  let x1 = evalBool x memory memarith
-                             let y1 = evalBool y memory memarith
+    | LogicOp(x, And, y) ->  let x1 = evalBool x memoryB memoryA
+                             let y1 = evalBool y memoryB memoryA
                              match x1, y1 with
                              | B x, B y -> B (x && y)
                              | c,d when c=d -> x1
                              | c, Not(d) | Not(d), c when c=d -> B false
                              | _ -> LogicOp(x1, And, y1)
-    | LogicOp(x,Or,y) -> let x1 = evalBool x memory memarith
-                         let y1 = evalBool y memory memarith
+    | LogicOp(x,Or,y) -> let x1 = evalBool x memoryB memoryA
+                         let y1 = evalBool y memoryB memoryA
                          match x1, y1 with
                          | B a, B b -> B (a || b)
                          | c,d when c=d -> x1
                          | c, Not(d) | Not(d), c when c=d -> B true
                          | _ -> LogicOp(x1, Or, y1)
-    | LogicOp(x,Xor,y) -> let x1 = evalBool x memory memarith
-                          let y1 = evalBool y memory memarith
+    | LogicOp(x,Xor,y) -> let x1 = evalBool x memoryB memoryA
+                          let y1 = evalBool y memoryB memoryA
                           match x1, y1 with
                           | B a, B b -> B (a <> b)
                           | c,d when c=d -> B false
                           | c, Not(d) | Not(d), c when c=d -> B true
                           | _ -> LogicOp(x1, Xor, y1)
-    | Not x ->  let x1 = evalBool x memory memarith
+    | Not x ->  let x1 = evalBool x memoryB memoryA
                 match x1 with
                 | B a -> B (not a)
                 | Not a -> a
                 | _ -> Not(x)
-    | RelationOp(x,EQ,y) -> let x1 = evalArith x memarith
-                            let y1 = evalArith y memarith
+    | RelationOp(x,EQ,y) -> let x1 = evalArith x memoryA
+                            let y1 = evalArith y memoryA
                             match x1, y1 with
                             | Num a, Num b -> B (a = b)
                             | Num a, Float b -> B (float a = b)
@@ -238,8 +238,8 @@ let rec private evalBool (expr:BoolExpr) (memory:Map<string, BoolExpr * int>)
                             | Float a, Float b -> B (a = b)
                             | c, d when c=d -> B true
                             | _ -> RelationOp(x1, EQ, y1)
-    | RelationOp(x,NEQ,y)-> let x1 = evalArith x memarith
-                            let y1 = evalArith y memarith
+    | RelationOp(x,NEQ,y)-> let x1 = evalArith x memoryA
+                            let y1 = evalArith y memoryA
                             match x1, y1 with
                             | Num a, Num b -> B (a <> b)
                             | Num a, Float b -> B (float a <> b)
@@ -247,41 +247,41 @@ let rec private evalBool (expr:BoolExpr) (memory:Map<string, BoolExpr * int>)
                             | Float a, Float b -> B (a <> b)
                             | c, d when c=d -> B false
                             | _ -> Not(RelationOp(x1, EQ, y1))
-    | RelationOp(x,LT,y) -> let x1 = evalArith x memarith
-                            let y1 = evalArith y memarith
+    | RelationOp(x,LT,y) -> let x1 = evalArith x memoryA
+                            let y1 = evalArith y memoryA
                             match x1, y1 with
                             | Num a, Num b -> B (a < b)
                             | Num a, Float b -> B (float a < b)
                             | Float a, Num b -> B (a < float b)
                             | Float a, Float b -> B (a < b)
                             | _ -> RelationOp(x1, LT, y1)
-    | RelationOp(x,LTE,y) -> let x1 = evalArith x memarith
-                             let y1 = evalArith y memarith
+    | RelationOp(x,LTE,y) -> let x1 = evalArith x memoryA
+                             let y1 = evalArith y memoryA
                              match x1, y1 with
                              | Num a, Num b -> B (a <= b)
                              | Num a, Float b -> B (float a <= b)
                              | Float a, Num b -> B (a <= float b)
                              | Float a, Float b -> B (a <= b)
                              // a <= b = not (b < a)
-                             | _ -> evalBool (Not (RelationOp(y1, LT, x1))) memory memarith
-    | RelationOp(x,GT,y) -> let x1 = evalArith x memarith
-                            let y1 = evalArith y memarith
+                             | _ -> evalBool (Not (RelationOp(y1, LT, x1))) memoryB memoryA
+    | RelationOp(x,GT,y) -> let x1 = evalArith x memoryA
+                            let y1 = evalArith y memoryA
                             match x1, y1 with
                             | Num a, Num b -> B (a > b)
                             | Num a, Float b -> B (float a > b)
                             | Float a, Num b -> B (a > float b)
                             | Float a, Float b -> B (a > b)
                             // a > b = b < a
-                            | _ -> evalBool (RelationOp(y1, LT, x1)) memory memarith
-    | RelationOp(x,GTE,y) -> let x1 = evalArith x memarith
-                             let y1 = evalArith y memarith
+                            | _ -> evalBool (RelationOp(y1, LT, x1)) memoryB memoryA
+    | RelationOp(x,GTE,y) -> let x1 = evalArith x memoryA
+                             let y1 = evalArith y memoryA
                              match x1, y1 with
                              | Num a, Num b -> B (a >= b)
                              | Num a, Float b -> B (float a >= b)
                              | Float a, Num b -> B (a >= float b)
                              | Float a, Float b -> B (a >= b)
                              // a >= b = not (a < b)
-                             | _ -> evalBool (Not (RelationOp(x1, LT, y1))) memory memarith
+                             | _ -> evalBool (Not (RelationOp(x1, LT, y1))) memoryB memoryA
     | Check _ -> expr
 
 /// <summary>
@@ -290,6 +290,7 @@ let rec private evalBool (expr:BoolExpr) (memory:Map<string, BoolExpr * int>)
 /// <param name="st">Abstract Syntax Tree of Statement for optimization (AST.Statement)</param>
 /// <param name="memArith">Initial arithmetic variable memory</param>
 /// <param name="memBool">Initial boolean variable memory</param>
+/// <param name="no">Ordering of assignments in circuit</param>
 /// <returns>Tuple of arithmetic and boolean variable memories and optimized Statement</returns>    
 let rec private optimizeStatement (st:Statement) (memArith:Map<string, ArithExpr * int>)
     (memBool:Map<string, BoolExpr * int>) (no:int) : int * Map<string, ArithExpr * int>
@@ -310,10 +311,11 @@ let rec private optimizeStatement (st:Statement) (memArith:Map<string, ArithExpr
 /// <param name="expr">Abstract Syntax Tree of circuit flow for optimization (AST.Elements)</param>
 /// <param name="memArith">Initial arithmetic variable memory</param>
 /// <param name="memBool">Initial boolean variable memory</param>
+/// <param name="no">Ordering of assignments in circuit</param>
 /// <returns>Tuple of arithmetic and boolean variable memories and optimized Flow</returns>
-let rec internal optimizeCircuit (expr:Flow) (memArith:Map<string, ArithExpr * int>)
+let rec internal optimizeCircuit (expr:Statement list) (memArith:Map<string, ArithExpr * int>)
     (memBool:Map<string, BoolExpr * int>) (no:int) : int * Map<string, ArithExpr * int>
-    * Map<string, BoolExpr * int> * Flow =     
+    * Map<string, BoolExpr * int> * Statement list =     
     match expr with
     | head::tail -> let no1, memArith1, memBool1, head1 = optimizeStatement head memArith memBool no
                     let no2, memArith2, memBool2, tail1 = optimizeCircuit tail memArith1 memBool1 no1
@@ -394,7 +396,7 @@ let rec analyseStatement (st:Statement) (memory:Memory):unit =
 /// <param name="ast">Flow AST to be analyzed semantically</param>
 /// <param name="memory">Record mappings of defined identifiers</param>
 /// <exception cref="System.Exception">Invalid register definition (semantic)</exception>
-let rec internal semanticAnalyzer (ast:Flow) (memory:Memory):unit =
+let rec internal semanticAnalyzer (ast:Statement list) (memory:Memory):unit =
     match ast with
     | head::tail ->
                 // Analyze the first operator

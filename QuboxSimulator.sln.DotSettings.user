@@ -27,6 +27,7 @@
 	<s:Boolean x:Key="/Default/Environment/Filtering/IncludeCoverageFilters/=_002A_003B_002A_003B_002ALexer_003B_002A/@EntryIndexedValue">True</s:Boolean>
 	
 	<s:Boolean x:Key="/Default/Environment/Filtering/IncludeCoverageFilters/=_002A_003B_002A_003B_002AParser_003B_002A/@EntryIndexedValue">True</s:Boolean>
+	<s:String x:Key="/Default/Environment/Highlighting/HighlightingSourceSnapshotLocation/@EntryValue">/Users/adrianzvizdenco/Library/Caches/JetBrains/Rider2022.3/resharper-host/temp/Rider/vAny/CoverageData/_QuboxSimulator.853814830/Snapshot/snapshot.utdcvr</s:String>
 	
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=2a05d837_002D3b55_002D4b40_002Da672_002D4d5c030701cc/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="All tests from Solution" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
   &lt;Solution /&gt;
