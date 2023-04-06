@@ -12,6 +12,8 @@
         <Content Include="QCode.txt" />
         <None Include="Tester.fsx" />
         <Compile Include="UnitReduction.fs" />
+        <Compile Include="UnitAnalysis.fs" />
+        <Compile Include="UnitTranslation.fs" />
     </ItemGroup>
 
     <ItemGroup>

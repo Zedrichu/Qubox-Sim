@@ -1,0 +1,33 @@
+.monaco-editor-container {
+    width: initial;
+    min-height: 400px;
+    min-width: 500px;
+}
+
+.qulang-editor {
+    min-height: 400px;
+    min-width: 500px;
+    width: 100%;
+    height: 100%;
+}
+
+.monaco-editor-background, .monaco-editor {
+    background-image:  repeating-linear-gradient(85deg,
+    rgba(67, 0, 65, 0.73) 20px,
+    rgb(15,24,88) 70px,
+    rgb(15,24,88) 77px,
+    rgba(0, 0, 0, 0.66) 200px,
+    rgba(0, 0, 0, 0.66) 400px,
+    rgba(35, 0, 31, 0.82) 450px,
+    rgba(95, 0, 83, 0.82) 500px,
+    rgba(0, 81, 70, 0.77) 600px,
+    rgba(67, 0, 65, 0.73) 650px
+    );
+}
+
+.monaco-editor .margin {
+    background-image: linear-gradient(85deg,
+    rgb(15,24,88),
+    rgb(15,24,88) 25%,
+    rgba(0, 0, 0, 0.66));
+}

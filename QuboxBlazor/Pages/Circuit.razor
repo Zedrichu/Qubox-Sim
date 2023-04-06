@@ -8,37 +8,33 @@
         <h1>Circuit</h1>
         <p role="status">Current gate count: @_currentCount</p>
         <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+        <p> Here's the parent: <br/> @Content </p>
+        <blockquote>If strings match, event callback works!</blockquote>
+    </div>
+    <div style="float: right; width: 60%;">
+        <QuLangEditor @bind-CodeContent="Content"></QuLangEditor>
     </div>
     
-    <StandaloneCodeEditor Id="qulang-editor" ConstructionOptions="EditorConstructionOptions"/>
 </div>
+    
 
 @code {
+    
     private int _currentCount = 0;
+    
+    private string Content { get; set; } = "...";
 
+    private Circuit _circuit = new ();
+    
     private void IncrementCount()
     {
         _currentCount++;
     }
     
-    private StandaloneCodeEditor _editor = null!;
-    private string _valueToSet = "";
-
-    private static StandaloneEditorConstructionOptions EditorConstructionOptions(StandaloneCodeEditor editor)
+    private void UpdateCircuit()
     {
-        return new StandaloneEditorConstructionOptions
-        {
-            AutomaticLayout = true,
-            FontFamily = "CaskaydiaCove Nerd Font Mono, monospace, Menlo",
-            FontSize = 15,
-            Language = "qulang",
-            FontLigatures = true,
-            Theme = "qubox",
-            Value = "Qalloc q[2];\n" + "Calloc c[2];\n\n" + "H q[0];\n" +
-                    "CNOT q[0], q[1];\n" + "H q[0];\n\n" + "P(5*Pi/2) q[1];\n\n" +
-                    "Measure q[1] -> c[1];\n" + "Measure q[0] -> c[0];\n" +
-                    "If (c[0] |> Click or false and 3>=5.0) Z q[0];\n",
-        };
+        Interpreter.HandleLang(Content);
+        var circuit = Interpreter.Interpret();
     }
     
     

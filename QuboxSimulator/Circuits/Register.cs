@@ -31,6 +31,29 @@ public class Register
     {
         return dictionary.Aggregate("", (current, pair) => current + $"{pair.Key} {pair.Value} \n");
     }
+
+    public string GetBitName(int index)
+    {
+        KeyValuePair<string, Tuple<int, int>> goal;
+        if (index < QubitNumber)
+        {
+            goal = Qubits.FirstOrDefault(kvp =>
+                index < kvp.Value.Item1 + kvp.Value.Item2);
+        }
+        else
+        {
+            index -= QubitNumber;
+            goal = Cbits.FirstOrDefault(kvp =>
+                index < kvp.Value.Item1 + kvp.Value.Item2);
+        }
+
+        if (goal.Value.Item1 == 1)
+        {
+            return goal.Key;
+        }
+        return $"{goal.Key}[{index - goal.Value.Item2}]";
+
+    }
     
     public override string ToString()
     {

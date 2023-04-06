@@ -30,56 +30,26 @@ let rec internal transBit (bit:Bit):string =
     | BitSeq(bit, bit_seq) -> transBit bit + ", " + transBit bit_seq
 
 /// <summary>
-/// Function to translate arithmetic expressions to QuLang declaration.
-/// Recursive on the structure of type arithExpr.
-/// </summary>
-/// <param name="expr">Arithmetic expression (AST.arithExpr)</param>
-/// <returns>QuLang string representation</returns>
-let rec private transArith (expr:ArithExpr):string =
-    match expr with
-    | VarA s -> s
-    | Num i -> i.ToString()
-    | Float f -> f.ToString()
-    | Pi -> "Pi"
-    | BinaryOp (a1, op, a2) -> $"({a1} {op} {a2})"
-    | UnaryOp (op, a) -> $"{op} ({a})"
-
-/// <summary>
-/// Function to translate boolean expressions to QuLang declaration.
-/// Recursive on the structure of type boolExpr.
-/// </summary>
-/// <param name="expr">Boolean expression (AST.boolExpr)</param>
-/// <returns>QuLang string representation</returns>
-let rec private transBool (expr:BoolExpr):string =
-    match expr with
-    | B b -> b.ToString()
-    | VarB s -> "~"+s
-    | LogicOp (b1, op, b2) -> $"({b1} {op} {b2})"
-    | RelationOp (a1, op, a2) -> $"({a1} {op} {a2})"
-    | Not b -> $"not ({b})"
-    | Check (cb, r) -> $"{cb} |> {r}"
-
-/// <summary>
 /// Function to translate quantum statements to QuLang declaration.
 /// </summary>
 /// <param name="st">Statement AST to be translated</param>
 /// <returns>QuLang string representation</returns>
 let rec private transStatement (st:Statement):string =
     match st with
-    | Assign(var, value) -> $"{var} := {transArith value};"
-    | AssignB(var, value) -> $"{transBool value} =| {var};"
-    | Condition(b, op) -> $"If ( {transBool b} ) {transStatement op}"
+    | Assign(var, value) -> $"{var} := {value};"
+    | AssignB(var, value) -> $"{value} =| {var};"
+    | Condition(b, op) -> $"If ( {b} ) {transStatement op}"
     | Measure(q, c) -> $"Measure {transBit q} -> {transBit c};"
     | Reset(bit) -> $"Reset {transBit bit};"
     | Barrier(bit) -> $"Barrier {transBit bit};"
     | PhaseDisk -> "PhaseDisk;"
     | UnaryGate(uTag, bit) -> $"{uTag} {transBit bit};"
     | BinaryGate(bTag, bit1, bit2) -> $"{bTag} {transBit bit1}, {transBit bit2};"
-    | ParamGate(pTag, theta, bit) -> $"{pTag} ({transArith theta}) {transBit bit};"
+    | ParamGate(pTag, theta, bit) -> $"{pTag} ({theta}) {transBit bit};"
     | BinaryParamGate(bpTag, theta, bit1, bit2) ->
-                $"{bpTag} ({transArith theta}) {transBit bit1}, {transBit bit2};"
+                $"{bpTag} ({theta}) {transBit bit1}, {transBit bit2};"
     | Unitary(theta, phi, lambda, bit) ->
-                $"U ({transArith theta}, {transArith phi}, {transArith lambda}) {transBit bit};"
+                $"U ({theta}, {phi}, {lambda}) {transBit bit};"
     | Toffoli(bit, bit1, bit2) ->
                 $"CCX {transBit bit}, {transBit bit1}, {transBit bit2};"
 

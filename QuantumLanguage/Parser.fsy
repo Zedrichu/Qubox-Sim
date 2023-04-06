@@ -24,6 +24,7 @@ open AST
 
 %left OR SOR
 %left AND SAND
+%left XOR
 %right NEG
 
 %right SEP

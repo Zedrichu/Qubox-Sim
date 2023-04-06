@@ -5,17 +5,20 @@ public class ConsoleDemo
 {
     public static void Main(string[] args)
     {
-        // Testing interpreter 
+        // Testing Interpreter
         var quLangCode = Console.ReadLine();
         Interpreter.HandleLang(quLangCode);
         var circuit = Interpreter.Interpret();
         Console.WriteLine(circuit);
         
-        // Testing generation
+        // Testing Generator
         if (circuit == null) return;
         var _ = new Generator(circuit);
         var ast = Generator.DestructCircuit();
         Console.WriteLine(ast.Item1);
         Console.WriteLine(ast.Item2);
+        
+        // Testing SVG Provider
+        SvgProvider.DrawCircuitSvg("grid.svg", circuit);
     }
  }

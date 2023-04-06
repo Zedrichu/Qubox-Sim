@@ -69,7 +69,7 @@ let internal allocateBits (alloc:Allocation):Map<string,int * int> * Map<string,
 /// <param name="memory">Mapping of arithmetic variables to expressions</param>
 /// <exception cref="System.Exception">Arithmetic invalid variable access, division by zero</exception>
 /// <returns>Reduced evaluation of AST arithmetic expression</returns>
-let rec private evalArith (expr:ArithExpr) (memory:Map<string, ArithExpr * int>):ArithExpr =
+let rec internal evalArith (expr:ArithExpr) (memory:Map<string, ArithExpr * int>) : ArithExpr =
     match expr with
     | Pi | Num _ | Float _ -> expr
     | VarA s -> try
@@ -100,6 +100,7 @@ let rec private evalArith (expr:ArithExpr) (memory:Map<string, ArithExpr * int>)
                                  evalArith (BinaryOp(BinaryOp(c, Mul, Float a), Add, BinaryOp(d, Mul, Float a))) memory
                              | UnaryOp (Minus, a), _ -> evalArith (UnaryOp(Minus, BinaryOp(a, Mul, y1))) memory
                              | _, UnaryOp (Minus, a) -> evalArith (UnaryOp(Minus, BinaryOp(x1, Mul, a))) memory
+                             | Pi, c -> evalArith (BinaryOp(c, Mul, Pi)) memory
                              | _ -> BinaryOp(x1, Mul, y1)
     | BinaryOp(x,Div,y) -> let x1 = evalArith x memory
                            let y1 = evalArith y memory
@@ -134,6 +135,7 @@ let rec private evalArith (expr:ArithExpr) (memory:Map<string, ArithExpr * int>)
                             | Float a, Float b -> Float (a + b)
                             | UnaryOp (Minus, a), _ -> evalArith (BinaryOp(a, Sub, y1)) memory
                             | _, UnaryOp (Minus, a) -> evalArith (BinaryOp(x1, Sub, a)) memory
+                            | c, Pi -> evalArith (BinaryOp(Pi, Add, c)) memory
                             | _ -> BinaryOp(x1, Add, y1)    
     | BinaryOp(x,Sub, y) ->  let x1 = evalArith x memory
                              let y1 = evalArith y memory
@@ -195,7 +197,7 @@ let rec private evalArith (expr:ArithExpr) (memory:Map<string, ArithExpr * int>)
 /// <param name="memoryA">Arithmetic mapping of identifiers</param>
 /// <exception cref="System.Exception">Boolean invalid variable access</exception>
 /// <returns>Reduced evaluation of AST boolean expression</returns>
-let rec private evalBool (expr:BoolExpr) (memoryB:Map<string, BoolExpr * int>)
+let rec internal evalBool (expr:BoolExpr) (memoryB:Map<string, BoolExpr * int>)
     (memoryA:Map<string, ArithExpr * int>) : BoolExpr =
     match expr with 
     | B _ -> expr
@@ -209,6 +211,7 @@ let rec private evalBool (expr:BoolExpr) (memoryB:Map<string, BoolExpr * int>)
                              | B x, B y -> B (x && y)
                              | c,d when c=d -> x1
                              | c, Not(d) | Not(d), c when c=d -> B false
+                             | Check (b, r), d -> LogicOp(d, And, Check (b,r))
                              | _ -> LogicOp(x1, And, y1)
     | LogicOp(x,Or,y) -> let x1 = evalBool x memoryB memoryA
                          let y1 = evalBool y memoryB memoryA
@@ -216,6 +219,7 @@ let rec private evalBool (expr:BoolExpr) (memoryB:Map<string, BoolExpr * int>)
                          | B a, B b -> B (a || b)
                          | c,d when c=d -> x1
                          | c, Not(d) | Not(d), c when c=d -> B true
+                         | Check (b, r), d -> LogicOp(d, Or, Check (b,r))
                          | _ -> LogicOp(x1, Or, y1)
     | LogicOp(x,Xor,y) -> let x1 = evalBool x memoryB memoryA
                           let y1 = evalBool y memoryB memoryA
@@ -223,6 +227,7 @@ let rec private evalBool (expr:BoolExpr) (memoryB:Map<string, BoolExpr * int>)
                           | B a, B b -> B (a <> b)
                           | c,d when c=d -> B false
                           | c, Not(d) | Not(d), c when c=d -> B true
+                          | Check (b, r), d -> LogicOp(d, Xor, Check (b,r))
                           | _ -> LogicOp(x1, Xor, y1)
     | Not x ->  let x1 = evalBool x memoryB memoryA
                 match x1 with
@@ -335,12 +340,11 @@ let rec private validateRegister (bit:Bit) (flag:string) (memory:Map<string, int
     | BitA(s, i) ->
                 try
                     let alloc, _ = Map.find s memory
-                    if (i<0 && alloc <= i) then failwith "Overflow of register"
+                    if (i<0 || alloc <= i) then failwith "Overflow of register"
                 with _ -> 
                     failwith $"{flag} bit register {s}[{i}] has not been allocated!"
     | BitS s -> if Map.containsKey s memory then ()
                 else failwith $"{flag} bit register {s} has not been allocated!"
-    | _ -> failwith "Invalid operator target!"   
 
 /// <summary>
 /// Function to peek inside boolean expression and extract classical registers used.

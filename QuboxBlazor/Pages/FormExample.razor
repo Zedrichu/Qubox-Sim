@@ -13,12 +13,12 @@
 
 @code {
     private ExampleModel exampleModel = new();
-    private AST.@operator ast;
+    private Tuple<AST.Allocation, AST.Schema> ast;
     
     private void HandleSubmit()
     {
         Logger.LogInformation("Submitted");
         var tuple = parseQuLang(exampleModel.Code);
-        ast = tuple.Item1.Item2;
+        ast = tuple.Item1.Value;
     }
 }

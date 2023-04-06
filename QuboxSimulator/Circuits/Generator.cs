@@ -11,7 +11,6 @@ public class Generator
 {
     public static Register Reg { private get; set; } = new (Memory.empty);
     public static List<Tower> Towers { private get; set; } = new();
-    public Tuple<Allocation, FSharpList<Statement>>? Ast { get; private set; }
     public Generator(Circuit circuit)
     {
         Reg = circuit.Allocation;

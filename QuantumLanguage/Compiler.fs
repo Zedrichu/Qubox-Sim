@@ -56,7 +56,6 @@ let rec private compileBit (bit:Bit) : string =
     match bit with
     | BitA(b,i) -> $"{b}[%i{i}]" 
     | BitS b -> b
-    | _ -> ""
 
 /// <summary>
 /// Function to compile arithmetic expressions to Q# syntax.

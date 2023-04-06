@@ -5,11 +5,11 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <Executable>true</Executable>
-        <OutputType>Exe</OutputType>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="MathNet.Numerics" Version="5.0.0" />  
+      <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
+      <PackageReference Include="SkiaSharp" Version="2.88.3" />
     </ItemGroup>
 
     <ItemGroup>

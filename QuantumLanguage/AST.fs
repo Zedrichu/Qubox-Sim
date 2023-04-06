@@ -31,7 +31,7 @@ type AOp = // Arithmetic operators
     | Mul -> "*"
     | Div -> "/"
     | Pow -> "^"
-    | Mod -> "%%"
+    | Mod -> "%"
     | Plus -> ""
     | Minus -> "-"
 
@@ -54,7 +54,7 @@ type ArithExpr =
     | Float f -> f.ToString()
     | VarA s -> s
     | BinaryOp (a1, op, a2) -> $"({a1} {op} {a2})"
-    | UnaryOp (op, a) -> $"{op} ({a})"
+    | UnaryOp (op, a) -> $"({op} {a})"
   
 /// Tagged type of quantum/classical bit declarations
 type Bit =
@@ -113,7 +113,7 @@ type BoolExpr =
     member this.Accept (visitor: IVisitor<BoolExpr, 'a>) = visitor.Visit this
   override this.ToString () =
     match this with
-    | B b -> b.ToString()
+    | B b -> b.ToString().ToLower()
     | VarB s -> "~"+s
     | LogicOp (b1, op, b2) -> $"({b1} {op} {b2})"
     | RelationOp (a1, op, a2) -> $"({a1} {op} {a2})"

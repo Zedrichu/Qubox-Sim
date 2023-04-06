@@ -15,7 +15,6 @@ Description: Library to assist the parsing/compilation process from QuLang user-
 @__Status --> DEV
 *)
 open System
-open System.Reflection.PortableExecutable
 open FSharp.Text
 open Microsoft.FSharp.Core
 open QuantumLanguage.AST
@@ -38,8 +37,7 @@ let public parseQuLang (code:string) : Circuit Option * Error =
               let line = lexbuffer.EndPos.pos_lnum + 1
               let column = lexbuffer.EndPos.pos_cnum - lexbuffer.EndPos.pos_bol
               let token = Lexing.LexBuffer<_>.LexemeString lexbuffer
-              printfn $"Parse error in program at : Line %i{line},
-                %i{column}, Unexpected token: %A{token}"
+              printfn $"Parse error in program at : Line %i{line}, %i{column}, Unexpected token: %A{token}"
               // Return an empty AST and the syntax error
               (None, SyntaxError(token, line, column))
 
@@ -105,7 +103,7 @@ let rec public translateCircuit (circuit:Circuit) : string =
 /// </summary>
 /// <param name="circuit">Generated circuit AST for compilation (AST.Circuit)</param>
 /// <returns>Q# string representation</returns>
-let internal compileCircuit (circuit:Circuit):string =
+let public compileCircuit (circuit:Circuit):string =
     let AllocQC(q,c), Flow(flow) = circuit
     let str = Compiler.compileAlloc q true + "\n" +
               Compiler.compileAlloc c false + "\n\n"
@@ -140,6 +138,18 @@ let public optimizeAST (ast:Schema) (memory:Memory):
         let _, memA, memB, optAST = optimized
         let updMemory = (memory.SetArithmetic memA).SetBoolean memB
         Flow optAST, updMemory, Success
+    with e -> ast, memory, EvaluationError e.Message
+
+let public optimizeLogic (ast:BoolExpr) (memory:Memory) : BoolExpr * Memory * Error =
+    try
+        let optimized = Interpreter.evalBool ast memory.Boolean memory.Arithmetic
+        optimized, memory, Success
+    with e -> ast, memory, EvaluationError e.Message
+
+let public optimizeArithmetic (ast:ArithExpr) (memory:Memory) : ArithExpr * Memory * Error =
+    try
+        let optimized = Interpreter.evalArith ast memory.Arithmetic
+        optimized, memory, Success
     with e -> ast, memory, EvaluationError e.Message
 
 /// <summary>
