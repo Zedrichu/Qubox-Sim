@@ -1,3 +1,6 @@
+using MathNet.Numerics.LinearAlgebra;
+using Complex = System.Numerics.Complex;
+
 namespace QuboxSimulator.Gates;
 /* C#
  -*- coding: utf-8 -*-
@@ -18,13 +21,13 @@ Includes the declaration of the concrete support gates, supported by the simulat
 /// </summary>
 public interface IGate
 {
-    public abstract Tuple<int, int> TargetRange { get; set; }
+    public Tuple<int, int> TargetRange { get; set; }
 
-    public abstract string? Condition { get; set; }
+    public string? Condition { get; set; }
     
-    public abstract string Id { get; set; }
-    
-    public abstract GateType Type { get; set; }
+    public string Id { get; }
+
+    public GateType Type { get; }
 }
 
 /// <summary>
@@ -32,7 +35,10 @@ public interface IGate
 /// </summary>
 public interface ISupportGate: IGate
 {
-    
+    public SupportType SupportType { get; set; }
+    public Vector<Complex> SupportState(
+        Vector<Complex> state,
+        Dictionary<int, Tuple<double, double>> results);
 }
 
 internal abstract class SupportGate : ISupportGate
@@ -43,11 +49,19 @@ internal abstract class SupportGate : ISupportGate
     
     public string Id { get; set; }
     
-    public GateType Type { get; set; }
+    public SupportType SupportType { get; set; }
+
+    public GateType Type { get; set; } = GateType.Support;
     
     public override string ToString()
     {
         return $"Gate:{Id} Target: {TargetRange}";
+    }
+
+    public virtual Vector<Complex> SupportState(Vector<Complex> state,
+        Dictionary<int, Tuple<double, double>> results)
+    {
+        return state;
     }
 }
 
@@ -59,10 +73,9 @@ internal class NoneGate : SupportGate
     public NoneGate(int target)
     {
         Id = "NONE";
-        Type = GateType.None;
+        SupportType = SupportType.None;
         TargetRange = new Tuple<int, int>(target, target);
     }
-
 }
 
 /// <summary>
@@ -73,7 +86,7 @@ internal class BarrierGate : SupportGate
     public BarrierGate(int target)
     {
         Id = "BARRIER";
-        Type = GateType.Barrier;
+        SupportType = SupportType.Barrier;
         TargetRange = new Tuple<int, int>(target, target);
     }
 }
@@ -86,8 +99,19 @@ internal class ResetGate : SupportGate
     public ResetGate(int target)
     {
         Id = "RESET";
-        Type = GateType.Reset;
+        SupportType = SupportType.Reset;
         TargetRange = new Tuple<int, int>(target, target);
+    }
+    public override Vector<Complex> SupportState(Vector<Complex> state,
+        Dictionary<int, Tuple<double, double>> results)
+    {
+        var size = state.Count;
+        var rank = size / (2 ^ (TargetRange.Item1+1));
+        for (var i=1; i<size; i++)
+        {
+            if (i / rank % 2 == 1) state[i] = 0;
+        }
+        return state;
     }
 }
 
@@ -99,8 +123,35 @@ internal class MeasureGate : SupportGate
     public MeasureGate(int quantum, int classic)
     {
         Id = "MEASURE";
-        Type = GateType.Measure;
+        SupportType = SupportType.Measure;
         TargetRange = new Tuple<int, int>(quantum, classic);
+    }
+    
+    public override Vector<Complex> SupportState(Vector<Complex> state,
+        Dictionary<int, Tuple<double, double>> results)
+    {
+        var size = state.Count;
+        var rank = size / (2 ^ (TargetRange.Item1+1));
+        
+        var pair = new Tuple<double, double>(0, 0);
+        for (var i = 0; i < size; i++)
+        {
+            if (i / rank % 2 == 0)
+                pair = new Tuple<double, double>(
+                    pair.Item1 + Math.Pow(state[i].Magnitude, 2), pair.Item2
+                );
+            else
+                pair = new Tuple<double, double>(
+                    pair.Item1, pair.Item2 + Math.Pow(state[i].Magnitude, 2)
+                );
+        }
+        results.Add(TargetRange.Item2, pair);
+        
+        for (var i=1; i<size; i++)
+        {
+            if (i / rank % 2 == 1) state[i] = 0;
+        }
+        return state;
     }
 }
 
@@ -112,7 +163,7 @@ internal class PhaseDisk : SupportGate
     public PhaseDisk(int qubitNo)
     {
         Id = "PHASEDISK";
-        Type = GateType.PhaseDisk;
+        SupportType = SupportType.PhaseDisk;
         TargetRange = new Tuple<int, int>(0, qubitNo);
     }
 }

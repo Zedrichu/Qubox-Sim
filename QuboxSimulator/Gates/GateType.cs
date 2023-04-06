@@ -4,7 +4,11 @@ public enum GateType
 {
     Single, Param, 
     Double, DoubleParam,
-    Toffoli, Unitary, None,
-    Barrier, Measure,
-    Reset, PhaseDisk,
+    Toffoli, Unitary, Support,
+}
+
+public enum SupportType
+{
+    Barrier, Reset, Measure,
+    None, PhaseDisk
 }

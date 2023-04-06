@@ -20,5 +20,10 @@ public class ConsoleDemo
         
         // Testing SVG Provider
         SvgProvider.DrawCircuitSvg("grid.svg", circuit);
+        
+        // Testing Simulator
+        var simulator = new Simulator(circuit);
+        Console.WriteLine(simulator.Run());
+        
     }
  }

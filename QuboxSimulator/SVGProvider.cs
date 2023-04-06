@@ -9,7 +9,6 @@ public class SvgProvider
 {
     private const int InterGatePadding = 20;
     
-    //#TODO! BIG TODO! This is a mess, and it needs to be cleaned up.
     private static void DrawBox(SKCanvas svg, int x, int y, int width, int height, string id)
     {
         var redPaint = new SKPaint
@@ -76,7 +75,8 @@ public class SvgProvider
     }
     private static void DrawGate(IGate gate, int gWidth, int gHeight, int x, int y, SKCanvas svg)
     {
-        if (gate.Type == GateType.None) return;
+        if (gate.Type == GateType.Support 
+            && ((ISupportGate) gate).SupportType == SupportType.None) return;
         var size = gate.TargetRange.Item2 - gate.TargetRange.Item1 + 1;
         var gateHeight = size * (gHeight+InterGatePadding) - InterGatePadding;
         var gateY = y + gate.TargetRange.Item1 * (gHeight + InterGatePadding);

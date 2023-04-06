@@ -166,16 +166,16 @@ public static class GateFactory
         return new ParamSingleGate(ParamGates(phase.Item1)[token], token, target, phase);
     }
 
-    public static ISupportGate CreateGate(string token, int target, int classic = -1)
+    public static ISupportGate CreateGate(SupportType token, int target, int classic = -1)
     {
         return token switch
         {
-            "NONE" => new NoneGate(target),
-            "BARRIER" => new BarrierGate(target),
-            "RESET" => new ResetGate(target),
-            "MEASURE" => new MeasureGate(target, classic),
-            "PHASEDISK" => new PhaseDisk(target),
-            _ => new NoneGate(0)
+            SupportType.None => new NoneGate(target),
+            SupportType.Barrier => new BarrierGate(target),
+            SupportType.Reset => new ResetGate(target),
+            SupportType.Measure => new MeasureGate(target, classic),
+            SupportType.PhaseDisk => new PhaseDisk(target),
+            _ => throw new ArgumentOutOfRangeException(nameof(token), token, null)
         };
     }
     

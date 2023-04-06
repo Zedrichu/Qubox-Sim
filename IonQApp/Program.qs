@@ -6,7 +6,7 @@
     @EntryPoint()
     operation GetRandomResult() : Result {
         use q = Qubit();
-        H(q);w
+        H(q);
         return M(q);
     }
 }

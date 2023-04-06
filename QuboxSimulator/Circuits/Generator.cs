@@ -95,26 +95,36 @@ public class Generator
         var i = index - goal.Value.Item2;
         return Bit.NewBitA(new Tuple<string, int>(goal.Key, i));    
     }
-    private static Statement? DestructGate(IGate gate)
+
+    private static Statement? DestructSupport(ISupportGate gate)
     {
         var bit1 = gate.TargetRange.Item1;
         var bit2 = gate.TargetRange.Item2;
+        switch (gate.SupportType)
+        {
+            case SupportType.Barrier:
+                return Statement.NewBarrier(RecoverBit(bit1));
+            case SupportType.Reset:
+                return Statement.NewReset(RecoverBit(bit2));
+            case SupportType.PhaseDisk:
+                return Statement.PhaseDisk;
+            case SupportType.Measure:
+                return Statement.NewMeasure(new Tuple<Bit, Bit>( 
+                    RecoverBit(bit1), RecoverBit(bit2)));
+            default:
+                return null;
+        }
+    }
+
+    private static Statement? DestructGate(IGate gate)
+    {
+        var bit1 = gate.TargetRange.Item1;
         var cond = gate.Condition;
-        Statement? op = null;
+        Statement? op;
         switch (gate.Type)
         {
-            case GateType.Barrier:
-                op = Statement.NewBarrier(RecoverBit(bit1));
-                break;
-            case GateType.Reset:
-                op = Statement.NewReset(RecoverBit(bit2));
-                break;
-            case GateType.PhaseDisk:
-                op = Statement.PhaseDisk;
-                break;
-            case GateType.Measure:
-                op = Statement.NewMeasure(new Tuple<Bit, Bit>( 
-                    RecoverBit(bit1), RecoverBit(bit2)));
+            case GateType.Support:
+                op = DestructSupport((ISupportGate) gate);
                 break;
             case GateType.Single:
                 op = Statement.NewUnaryGate(new Tuple<UTag, Bit>(
@@ -186,7 +196,8 @@ public class Generator
     }
     private static IEnumerable<Statement> DestructTower(Tower tower)
     {
-        return tower.Gates.Select(DestructGate).Where(op => op != null).ToList();
+        var statements = tower.Gates.Select(DestructGate).Where(op => op != null);
+        return statements.ToList();
     }
     public static Tuple<Allocation, Schema> DestructCircuit()
     {

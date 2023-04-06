@@ -16,7 +16,6 @@ public class Circuit
     
     public void AddGate(IGate gate)
     {   
-        //#TODO! Model the barrier/CNOT block definition
         var tower = GateGrid.FirstOrDefault(t => t.AcceptGate(gate));
         
         if (tower != null) return;

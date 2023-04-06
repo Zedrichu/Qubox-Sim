@@ -89,14 +89,14 @@ public class StatementVisitor: IVisitor<Statement, IGate>
                     new[] { lambda, phi, theta }, target1);
             case Statement.Reset op:
                 target1 = _memory.GetOrder(op.Item);
-                return GateFactory.CreateGate("RESET", target1);
+                return GateFactory.CreateGate(SupportType.Reset, target1);
             case Statement.Barrier bar:
                 target1 = _memory.GetOrder(bar.Item);
-                return GateFactory.CreateGate("BARRIER", target1);
+                return GateFactory.CreateGate(SupportType.Barrier, target1);
             case Statement.Measure pair:
                 target1 = _memory.GetOrder(pair.Item.Item1);
                 var reg = _memory.CountQuantum;
-                return GateFactory.CreateGate("MEASURE", target1, reg);
+                return GateFactory.CreateGate(SupportType.Measure, target1, reg);
             case Statement.BinaryParamGate quadruplet:
                 phase = GetPhaseTuple(quadruplet.Item.Item2);
                 target1 = _memory.GetOrder(quadruplet.Item.Item3);
@@ -104,7 +104,7 @@ public class StatementVisitor: IVisitor<Statement, IGate>
                 return GateFactory.CreateGate(quadruplet.Item.Item1, target1, target2, phase);
             case var _ when ast.Equals(Statement.PhaseDisk):
                 target1 = _memory.CountQuantum;
-                return GateFactory.CreateGate("PHASEDISK", target1-1);
+                return GateFactory.CreateGate(SupportType.PhaseDisk, target1-1);
             default:
                 return GateFactory.CreatePlaceholder();
         }
