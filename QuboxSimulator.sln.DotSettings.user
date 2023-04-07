@@ -58,10 +58,11 @@
 	
 	
 	
-	<s:String x:Key="/Default/Environment/Highlighting/HighlightingSourceSnapshotLocation/@EntryValue">/Users/adrianzvizdenco/Library/Caches/JetBrains/Rider2022.3/resharper-host/temp/Rider/vAny/CoverageData/_QuboxSimulator.853814830/Snapshot/snapshot.utdcvr</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=5dd84b1c_002D04f8_002D4dd0_002Db4a8_002D1ae00103c091/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="All tests from UnitTranslation.fs" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
-  &lt;Project Location="/Users/adrianzvizdenco/RiderProjects/QuboxSimulator/QuantumLanguage.Tests" Presentation="&amp;lt;QuantumLanguage.Tests&amp;gt;" /&gt;
+	
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=5dd84b1c_002D04f8_002D4dd0_002Db4a8_002D1ae00103c091/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="All tests from UnitTranslation.fs" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;Project Location="\Users\adrianzvizdenco\RiderProjects\QuboxSimulator\QuantumLanguage.Tests" Presentation="&amp;lt;QuantumLanguage.Tests&amp;gt;" /&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
+	<s:Boolean x:Key="/Default/UnloadedProject/UnloadedProjects/=38f5c743_002D41b1_002D42ea_002Dbf87_002Df9121d3784ec_0023IonQApp/@EntryIndexedValue">True</s:Boolean>
 	
 	
 	
@@ -70,4 +71,5 @@
 	
 	
 	
-	<s:Boolean x:Key="/Default/UnloadedProject/UnloadedProjects/=38f5c743_002D41b1_002D42ea_002Dbf87_002Df9121d3784ec_0023IonQApp/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>
+	
+	</wpf:ResourceDictionary>

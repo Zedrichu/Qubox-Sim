@@ -1,4 +1,4 @@
-﻿namespace Quantum.App1 {
+﻿namespace Quantum.App {
 
     open Microsoft.Quantum.Canon;
     open Microsoft.Quantum.Intrinsic;

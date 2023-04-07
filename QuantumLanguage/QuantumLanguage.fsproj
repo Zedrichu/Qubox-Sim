@@ -8,7 +8,6 @@
         <PackageIcon>qubox-logo.png</PackageIcon>
         <Company>Qubox</Company>
         <NeutralLanguage>en</NeutralLanguage>
-        <OutputType>Exe</OutputType>
     </PropertyGroup>
 
     <ItemGroup>

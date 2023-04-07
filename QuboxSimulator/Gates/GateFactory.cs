@@ -49,13 +49,13 @@ public static class GateFactory
                 new[,]
                 {
                     { 1, 0 },
-                    { 0, Complex.Pow(Math.E, Complex.ImaginaryOne * Math.PI / 4) }
+                    { 0, Complex.Exp(Complex.ImaginaryOne * Math.PI / 4) }
                 }) }, {
             UTag.TDG, Matrix<Complex>.Build.DenseOfArray(
                 new[,]
                 {
                     { 1, 0 },
-                    { 0, Complex.Pow(Math.E, Complex.ImaginaryOne * -Math.PI / 4) }
+                    { 0, Complex.Exp(Complex.ImaginaryOne * -Math.PI / 4) }
                 }) }, {
             UTag.SX, Matrix<Complex>.Build.DenseOfArray(
                 new[,]

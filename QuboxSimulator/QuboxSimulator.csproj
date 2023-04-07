@@ -5,7 +5,6 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <Executable>true</Executable>
-        <OutputType>Exe</OutputType>
     </PropertyGroup>
 
     <ItemGroup>

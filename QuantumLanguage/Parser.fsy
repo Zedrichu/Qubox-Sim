@@ -179,9 +179,9 @@ operator:
   | SQRTXDG bit             { UnaryGate(SXDG, $2) }
 // Parametric gates on one qubit
   | PHASE LPAR arithmetic RPAR bit     { ParamGate(P, $3, $5) }
-  | RZGATE LPAR arithmetic RPAR bit    { ParamGate(RX, $3, $5) }
+  | RZGATE LPAR arithmetic RPAR bit    { ParamGate(RZ, $3, $5) }
   | RYGATE LPAR arithmetic RPAR bit    { ParamGate(RY, $3, $5) }
-  | RXGATE LPAR arithmetic RPAR bit    { ParamGate(RZ, $3, $5) }
+  | RXGATE LPAR arithmetic RPAR bit    { ParamGate(RX, $3, $5) }
   | UNITARY LPAR arithmetic SEP arithmetic SEP arithmetic RPAR bit { Unitary($3, $5, $7, $9) }
 // Gates on multiple qubits
   | CTRLH bit SEP bit                   { BinaryGate(CH, $2, $4) }

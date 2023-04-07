@@ -131,7 +131,7 @@ internal class MeasureGate : SupportGate
         Dictionary<int, Tuple<double, double>> results)
     {
         var size = state.Count;
-        var rank = size / (2 ^ (TargetRange.Item1+1));
+        var rank = size / Math.Pow(TargetRange.Item1+1, 2);
         
         var pair = new Tuple<double, double>(0, 0);
         for (var i = 0; i < size; i++)

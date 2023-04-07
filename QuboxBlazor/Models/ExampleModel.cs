@@ -1,4 +1,4 @@
-namespace BlazorApp1.Models;
+namespace QuboxBlazor.Models;
 
 public class ExampleModel
 {

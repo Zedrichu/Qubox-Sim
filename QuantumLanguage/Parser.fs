@@ -1391,7 +1391,7 @@ let _fsyacc_reductions = lazy [|
                 (
                    (
 # 182 "Parser.fsy"
-                                                              ParamGate(RX, _3, _5) 
+                                                              ParamGate(RZ, _3, _5) 
                    )
 # 182 "Parser.fsy"
                  : Statement));
@@ -1415,7 +1415,7 @@ let _fsyacc_reductions = lazy [|
                 (
                    (
 # 184 "Parser.fsy"
-                                                              ParamGate(RZ, _3, _5) 
+                                                              ParamGate(RX, _3, _5) 
                    )
 # 184 "Parser.fsy"
                  : Statement));
