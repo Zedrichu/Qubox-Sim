@@ -1,16 +1,15 @@
-<div style="float: inherit; width: 100%; align-items: center">
-    <h3>Code Editor</h3>
-    <div>
-        New Value: <input type="text" @bind="ValueToSet" /> <button @onclick="SetValue">Set Value</button>
-    </div>
-    <div style="color: rgb(255,236,69);">
-        <button @onclick="GetValue">Get Value</button> Value obtained: <p style="color: #20c997">@CodeContent</p>
+<div style="text-align: center; align-items: center;">
+    <h1>Code Editor</h1>
+    <div class="info-body">
+        New Value: <input type="text" @bind="ValueToSet" /> <button @onclick="SetValue">Set Value</button> <br/>
+        <button @onclick="GetValue">Get Value</button>
+        Value obtained: <h1>Content:</h1><p>@CodeContent</p>
     </div>
 </div>
-<div class="qulang-editor" onmouseleave="@UpdateContent" style="text-align: left; float: right; width: 167%">
-    <StandaloneCodeEditor @ref="_editor" Id="qulang-editor" ConstructionOptions="EditorConstructionOptions" 
-                          OnDidInit="EditorOnDidInit" OnDidChangeCursorPosition="@EditorChangedPosition" 
-                          OnDidChangeModelContent="@EditorChangedContent"/>
+<div id="editor-box" onmouseleave="@UpdateContent">
+    <StandaloneCodeEditor @ref="_editor" Id="qulang-editor" CssClass="qulang-editor"
+                          ConstructionOptions="EditorConstructionOptions" OnDidInit="EditorOnDidInit" 
+                          OnDidChangeCursorPosition="@EditorChangedPosition" OnDidChangeModelContent="@EditorChangedContent"/>
 </div>
 
 @code {

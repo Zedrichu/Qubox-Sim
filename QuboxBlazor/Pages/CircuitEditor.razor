@@ -1,7 +1,9 @@
-﻿@page "/circuit"
+@page "/circuit-editor"
+@using QuboxSimulator.Circuits
 
 <PageTitle>Circuit Sandbox</PageTitle>
 
+<PageDescription> The code editor is a powerful tool for editing and debugging your code. </PageDescription>
 <div style="min-height: 200px; overflow: hidden">
     <div style="float: left; width: 40%; text-align: center; color: rgb(255,236,69);
         align-content: center; background: rgb(15,24,88);">
@@ -13,18 +15,17 @@
     </div>
     <div style="float: right; width: 60%;">
         <QuLangEditor @bind-CodeContent="Content"></QuLangEditor>
+        
     </div>
-    
+
 </div>
-    
 
 @code {
-    
     private int _currentCount = 0;
     
-    private string Content { get; set; } = "...";
+    private string Content { get; set; } = "...Try typing something in the editor or switch focus...";
 
-    private Circuit _circuit = new ();
+    private Circuit _circuit;
     
     private void IncrementCount()
     {
@@ -36,6 +37,4 @@
         Interpreter.HandleLang(Content);
         var circuit = Interpreter.Interpret();
     }
-    
-    
 }

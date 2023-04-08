@@ -49,7 +49,7 @@ require(['vs/editor/editor.main'], function() {
                         "@operators": "operator",
                         "@results": "result",
                         "@default": "variable",}}],
-                [/[-+*\/^%=&<>|]/, "operator"],
+                [/[-+*\/^%:=&<>|]/, "operator"],
                 [/[{}()\[\]]/, "@brackets"],
                 [/[0-9]+/, "number"],
                 [/[;,]/, "delimiter"],
@@ -107,7 +107,7 @@ require(['vs/editor/editor.main'], function() {
         colors: {
             "editor.foreground": "#fffadc",
             "editor.background": "#070e14",
-            "editor.selectionBackground": "#141a20",
+            "editor.selectionBackground": "#200000",
             "editor.lineHighlightBackground": "#141a20",
             "editor.lineHighlightBorder": "#ffffff",
             "editorLineNumber.foreground": "#75c3a8",
