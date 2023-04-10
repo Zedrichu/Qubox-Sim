@@ -10,7 +10,7 @@ public static class Interpreter
     private static Memory _memory = Memory.empty;
     private static Tuple<Allocation, Schema>? _circuit;
 
-    private static Error Error { get; set; } = Error.Success;
+    public static Error Error { get; private set; } = Error.Success;
     
     public static void HandleLang(string? quLangCode)
     {
@@ -46,7 +46,6 @@ public static class Interpreter
         _circuit = new Tuple<Allocation, Schema>(ast.Item1, optimal.Item1);
         
         Console.WriteLine("AST Optimized | AST: " + _circuit);
-        Console.Error.WriteLine(Error.ToString());
     }
 
     public static Circuit? Interpret()

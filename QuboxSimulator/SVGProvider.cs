@@ -22,13 +22,14 @@ public class SvgProvider
         {
             Color = SKColors.White,
             StrokeWidth = 3,
+            TextAlign = SKTextAlign.Center,
             IsAntialias = true,
         };
         
         var rect = new SKRoundRect(SKRect.Create(x, y, width, height), 10);
         svg.DrawRoundRect(rect, redPaint);
-        svg.DrawText(id, x+width/4-5, y+height/2+5, 
-            new SKFont(SKTypeface.FromFile("cascadiaFont.otf"), 20F), whitePaint);
+        svg.DrawText(id, x+width/2, y+height/2, 
+            new SKFont(SKTypeface.FromFile("cascadiaFont.otf"), 18F), whitePaint);
     }
     private static void DrawTower(SKCanvas svg, int x, int y, int height, int width, Tower tower)
     {
@@ -78,11 +79,11 @@ public class SvgProvider
         if (gate.Type == GateType.Support 
             && ((ISupportGate) gate).SupportType == SupportType.None) return;
         var size = gate.TargetRange.Item2 - gate.TargetRange.Item1 + 1;
-        var gateHeight = size * (gHeight+InterGatePadding) - InterGatePadding;
+        var gateHeight = size * (gHeight + InterGatePadding) - InterGatePadding;
         var gateY = y + gate.TargetRange.Item1 * (gHeight + InterGatePadding);
         DrawBox(svg, x, gateY, gWidth, gateHeight, gate.Id);
     }
-    private static void DrawTowerGrid(List<Tower> grid, int leftOffset, int height, int width, SKCanvas svg)
+    public static void DrawTowerGrid(List<Tower> grid, int leftOffset, int height, int width, SKCanvas svg)
     {
         const int InterTowerPadding = 30;
         var towerWidth = width / grid.Count - 2 * InterTowerPadding;
@@ -106,7 +107,7 @@ public class SvgProvider
         
         var grayPaint = new SKPaint
         {
-            Color = new SKColor(219, 199,175),
+            Color = new SKColor(255, 242,189),
             StrokeWidth = 3,
             IsAntialias = true,
         };
@@ -116,14 +117,9 @@ public class SvgProvider
             
             Color = SKColors.BlueViolet,
             StrokeWidth = 3,
+            TextAlign = SKTextAlign.Center,
             IsAntialias = true,
             Style = SKPaintStyle.Stroke
-        };
-        var bluePaint = new SKPaint
-        {
-            Color = SKColors.DarkBlue,
-            StrokeWidth = 1,
-            IsAntialias = true,
         };
 
         var verticalOffset = 10;
@@ -140,7 +136,7 @@ public class SvgProvider
             svg.DrawLine(0, p, 50, p, vioPaint);
             svg.DrawRoundRect(SKRect.Create(0, p-20, 50, 40), 10, 10, grayPaint);
             svg.DrawText(circuit.Allocation.GetBitName(i), 5, p+5, 
-                new SKFont(SKTypeface.FromFile("cascadiaFont.otf"), 16F), bluePaint);
+                new SKFont(SKTypeface.FromFile("cascadiaFont.otf"), 18F), vioPaint);
         }
         
         DrawTowerGrid(circuit.GateGrid, 50, 500, 700, svg);

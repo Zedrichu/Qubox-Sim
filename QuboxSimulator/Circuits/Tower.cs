@@ -56,7 +56,8 @@ public class Tower
 
     public override string ToString()
     {
-        return Gates.Aggregate("<", (current, gate) => current + "_" + gate) + ">";
+        return Gates.Aggregate("<", (current, gate) => gate.Id == "NONE"? 
+            current : current + "_" + gate) + ">";
     }
 }
 

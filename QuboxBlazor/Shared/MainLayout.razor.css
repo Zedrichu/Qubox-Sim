@@ -33,7 +33,7 @@ main {
 
 .top-row {
     background-color: rgb(15,24,88);
-    border-bottom: 1px solid rgb(255,236,69);
+    border-bottom: 2px solid rgb(255,236,69);
     justify-content: flex-end;
     height: 3.5rem;
     display: flex;

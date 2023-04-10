@@ -3,38 +3,73 @@
 
 <PageTitle>Circuit Sandbox</PageTitle>
 
-<PageDescription> The code editor is a powerful tool for editing and debugging your code. </PageDescription>
 <div style="min-height: 200px; overflow: hidden">
     <div style="float: left; width: 40%; text-align: center; color: rgb(255,236,69);
         align-content: center; background: rgb(15,24,88);">
         <h1>Circuit</h1>
-        <p role="status">Current gate count: @_currentCount</p>
-        <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
-        <p> Here's the parent: <br/> @Content </p>
-        <blockquote>If strings match, event callback works!</blockquote>
+        <div class="info-body">
+            <h1 @onmouseover="@UpdateCircuit">Hover to update circuit!</h1> <p>@PrintCircuit(_circuit)</p>
+        </div>
+        <blockquote>If representations match, event callback works!</blockquote>
+        
+        @{
+            if (Error != AST.Error.Success)
+            {
+                <div class="alert alert-danger" role="alert">
+                    <span class="glyphicon glyphicon-alert" aria-hidden="true">
+                        <b>Invalid! There's been an error detected in the code:</b> @Error.ToString()
+                    </span>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-success" role="alert">
+                    <span class="glyphicon glyphicon-ok" aria-hidden="true">
+                        <b>Successful!</b> The QuLang definition is syntactically and semantically correct.
+                    </span>
+                </div>
+            }
+        }
+        
+        <button class="download-button">Click to download Q# code!</button>
+        
     </div>
     <div style="float: right; width: 60%;">
         <QuLangEditor @bind-CodeContent="Content"></QuLangEditor>
-        
     </div>
-
+    
 </div>
+<SchemaVisual Circuit="@_circuit"></SchemaVisual>
 
 @code {
-    private int _currentCount = 0;
     
-    private string Content { get; set; } = "...Try typing something in the editor or switch focus...";
+    private Circuit? _circuit { get; set; }
+    
+    private AST.Error? Error { get; set; } = AST.Error.Success;
 
-    private Circuit _circuit;
-    
-    private void IncrementCount()
+    private string PrintCircuit(Circuit? circuit)
     {
-        _currentCount++;
+        if (circuit == null)
+        {
+            return "Circuit is missing!";
+        }
+        return circuit.ToString();
     }
-    
-    private void UpdateCircuit()
+
+    private void UpdateCircuit(MouseEventArgs e)
     {
         Interpreter.HandleLang(Content);
+        Console.WriteLine(Content);
         var circuit = Interpreter.Interpret();
+        Error = Interpreter.Error;
+        if (circuit == null)
+        {
+            Console.WriteLine("Circuit is still missing!");
+            return;
+        }
+        _circuit = circuit;
     }
+
+    private string Content { get; set; } = "...Try typing something in the editor or switch focus...";
+
 }

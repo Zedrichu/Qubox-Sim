@@ -194,8 +194,14 @@ type Memory =
    member this.SetQuantumClassic qmap cmap = { this with Quantum = qmap; Classical = cmap }
    member this.CountQuantum = (Map.fold (fun acc _ (value, _) -> acc+value) 0 this.Quantum)
    member this.CountClassical = (Map.fold (fun acc _ (value, _) -> acc+value) 0 this.Classical)
-   member this.GetOrder (bit:Bit) =
+   member this.GetQOrder (bit:Bit) =
      match bit with
      | BitA(s, i) -> let _, order = Map.find s this.Quantum in order + i
      | BitS s -> let _, order = Map.find s this.Quantum in order
      | BitSeq _ -> failwith "Invalid request of order for bit sequence!"
+   member this.GetCOrder (bit:Bit) =
+     match bit with
+     | BitA(s, i) -> let _, order = Map.find s this.Classical in order + i
+     | BitS s -> let _, order = Map.find s this.Classical in order
+     | BitSeq _ -> failwith "Invalid request of order for bit sequence!"
+  

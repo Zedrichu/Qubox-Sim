@@ -56,19 +56,19 @@ public class StatementVisitor: IVisitor<Statement, IGate>
         {
             case Statement.UnaryGate pair:
                 // Retrieve order of the target qubit in circuit mapping
-                var target1= _memory.GetOrder(pair.Item.Item2);
+                var target1= _memory.GetQOrder(pair.Item.Item2);
                 // Add gate created by factory to list
                 return GateFactory.CreateGate(pair.Item.Item1, target1);
             case Statement.ParamGate triple:
                 // Retrieve order of the target qubit in circuit mapping
-                target1 = _memory.GetOrder(triple.Item.Item3);
+                target1 = _memory.GetQOrder(triple.Item.Item3);
                 // Get phase angle and string representation
                 var phase = GetPhaseTuple(triple.Item.Item2);
                 // Add gate created by factory to list
                 return GateFactory.CreateGate(triple.Item.Item1, target1, phase);
             case Statement.BinaryGate pair:
-                target1 = _memory.GetOrder(pair.Item.Item2);
-                var target2 = _memory.GetOrder(pair.Item.Item3);
+                target1 = _memory.GetQOrder(pair.Item.Item2);
+                var target2 = _memory.GetQOrder(pair.Item.Item3);
                 return GateFactory.CreateGate(pair.Item.Item1, target1, target2);
             case Statement.Condition pair:
                 var condition = pair.Item.Item1.ToString();
@@ -76,31 +76,31 @@ public class StatementVisitor: IVisitor<Statement, IGate>
                 gate.Condition = condition;
                 return gate;
             case Statement.Toffoli triplet:
-                target1 = _memory.GetOrder(triplet.Item.Item1);
-                target2 = _memory.GetOrder(triplet.Item.Item2);
-                var target3 = _memory.GetOrder(triplet.Item.Item3);
+                target1 = _memory.GetQOrder(triplet.Item.Item1);
+                target2 = _memory.GetQOrder(triplet.Item.Item2);
+                var target3 = _memory.GetQOrder(triplet.Item.Item3);
                 return GateFactory.CreateGate(target1, target2, target3);
             case Statement.Unitary quadruplet:
                 var lambda = GetPhaseTuple(quadruplet.Item.Item1);
                 var phi = GetPhaseTuple(quadruplet.Item.Item2);
                 var theta = GetPhaseTuple(quadruplet.Item.Item3);
-                target1 = _memory.GetOrder(quadruplet.Item.Item4);
+                target1 = _memory.GetQOrder(quadruplet.Item.Item4);
                 return GateFactory.CreateGate(
                     new[] { lambda, phi, theta }, target1);
             case Statement.Reset op:
-                target1 = _memory.GetOrder(op.Item);
+                target1 = _memory.GetQOrder(op.Item);
                 return GateFactory.CreateGate(SupportType.Reset, target1);
             case Statement.Barrier bar:
-                target1 = _memory.GetOrder(bar.Item);
+                target1 = _memory.GetQOrder(bar.Item);
                 return GateFactory.CreateGate(SupportType.Barrier, target1);
             case Statement.Measure pair:
-                target1 = _memory.GetOrder(pair.Item.Item1);
-                var reg = _memory.CountQuantum;
-                return GateFactory.CreateGate(SupportType.Measure, target1, reg);
+                target1 = _memory.GetQOrder(pair.Item.Item1);
+                target2 = _memory.GetCOrder(pair.Item.Item2) + _memory.CountQuantum;
+                return GateFactory.CreateGate(SupportType.Measure, target1, target2);
             case Statement.BinaryParamGate quadruplet:
                 phase = GetPhaseTuple(quadruplet.Item.Item2);
-                target1 = _memory.GetOrder(quadruplet.Item.Item3);
-                target2 = _memory.GetOrder(quadruplet.Item.Item4);
+                target1 = _memory.GetQOrder(quadruplet.Item.Item3);
+                target2 = _memory.GetQOrder(quadruplet.Item.Item4);
                 return GateFactory.CreateGate(quadruplet.Item.Item1, target1, target2, phase);
             case var _ when ast.Equals(Statement.PhaseDisk):
                 target1 = _memory.CountQuantum;

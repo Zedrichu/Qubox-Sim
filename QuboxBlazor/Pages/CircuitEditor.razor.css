@@ -1,0 +1,96 @@
+.info-body h1 {
+    --s: 0.1em;   /* the thickness of the line */
+    --c: rgb(141,11,61); /* the color */
+
+    color: #0000;
+    padding-bottom: var(--s);
+    background:
+            linear-gradient(90deg,var(--c) 50%,#000 0) calc(100% - var(--_p,0%))/200% 100%,
+            linear-gradient(var(--c) 0 0) 0% 100%/var(--_p,0%) var(--s) no-repeat;
+    -webkit-background-clip: text,padding-box;
+    background-clip: text,padding-box;
+    transition: 0.5s;
+}
+.info-body h1:hover {--_p: 100%}
+
+.info-body h1 {
+    font-family: system-ui, sans-serif;
+    font-size: 3rem;
+    cursor: pointer;
+}
+
+.info-body {
+    width: 90%;
+    height: 90%;
+    margin: auto;
+    justify-content: center;
+    color: rgb(169,22,115);
+    font-weight: bold;
+    place-content: center;
+    border-radius: 20px;
+    background-color: rgb(255, 242, 189);
+    padding: 1rem 0;
+    -moz-box-shadow: #0071c1;
+}
+
+.download-button {
+    position: absolute;
+    top: 47%;
+    left: 35%;
+    transform: translate(-50%, -50%);
+}
+.download-button {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    text-decoration: none;
+    font-family: sans-serif;
+    background-color: rgb(141,11,61);;
+    height: 60px;
+    line-height: 60px;
+    text-align: center;
+    padding: 0 50px;
+    z-index: 1;
+    overflow: hidden;
+    border-radius: 10px;
+    text-transform: capitalize;
+}
+
+.download-button::after, .download-button::before {
+    content: '';
+    background-color: rgb(20,118,84);
+    position: absolute;
+    height: 50%;
+    width: 0%;
+    transition: 0.3s cubic-bezier(
+            .785, .135, .15, .86
+    );
+    -webkit-transition: 0.3s cubic-bezier(
+            .785, .135, .15, .86
+    );
+    z-index: -1;
+}
+
+.download-button:hover::before {
+    width: 100%;
+    right: 0;
+    left: auto;
+}
+
+.download-button::before {
+    top: 0;
+    left: 0;
+    right: auto;
+}
+
+.download-button:hover::after {
+    width: 100%;
+    left: 0;
+    right: auto;
+}
+
+.download-button::after {
+    bottom: 0;
+    right: 0;
+    left: auto;
+}

@@ -11,7 +11,7 @@ public class Circuit
     public Circuit(Register allocation)
     {
         Allocation = allocation;
-        GateGrid = new List<Tower>{new (Allocation.QubitNumber + 1)};
+        GateGrid = new List<Tower>{new (Allocation.QubitNumber + Allocation.CbitNumber)};
     }
     
     public void AddGate(IGate gate)
@@ -46,6 +46,6 @@ public class Circuit
 
     public override string ToString()
     {
-        return Allocation + GateGrid.Aggregate("", (current, tower) => current + "|" + tower )+" |";
+        return Allocation + "\n" + GateGrid.Aggregate("", (current, tower) => current + "|" + tower )+" |";
     }
 }

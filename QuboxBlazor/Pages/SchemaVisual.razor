@@ -1,0 +1,108 @@
+@using SkiaSharp
+@using QuboxSimulator.Circuits
+@using SkiaSharp.Views.Blazor
+
+<h1>Circuit Schema</h1>
+
+<div class="svg-sketch" style="width: @_areaWidth\px; height: @_areaHeight\px;">
+    
+    @* <svg class="schema" aria-hidden="true" focusable="false"> *@
+    @*     <use href="grid.svg" /> *@
+    @* </svg> *@
+    @* <img width="100%" src="grid.svg" alt="Circuit Visualization"/> *@
+    
+    <ContentView>
+        <SKCanvasView @ref="skiaView" OnPaintSurface="@PaintSurface"/>
+    </ContentView>
+    <style>
+        canvas {
+            width: 100%;
+            height: 100%;
+            padding-bottom: 2em;
+        }     
+    </style>
+    
+</div>
+
+@code {
+
+    [Parameter]
+    public Circuit Circuit { get; set; }
+
+    private SKCanvasView skiaView;
+    
+    private int _areaWidth = 700;
+    private int _areaHeight = 500;
+
+    private readonly int InterGatePadding = 20;
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        skiaView.EnableRenderLoop = true;
+        skiaView.EnableRenderLoop = false;
+        return base.OnAfterRenderAsync(firstRender);
+    }
+
+    private void PaintSurface(SKPaintSurfaceEventArgs e)
+    {
+        var svg = e.Surface.Canvas;
+        
+        svg.Clear(new SKColor(15,24,88));
+        
+        Console.WriteLine("Painting...");
+        
+        if (Circuit == null)
+        {
+            Console.WriteLine("Circuit is still missing!");
+            return;
+        }
+
+        var bitNumber = Circuit.Allocation.QubitNumber 
+                        + Circuit.Allocation.CbitNumber;
+
+
+        var grayPaint = new SKPaint
+        {
+            Color = new SKColor(219, 199,175),
+            StrokeWidth = 3,
+            IsAntialias = true,
+        };
+        
+        var vioPaint = new SKPaint
+        {
+            
+            Color = SKColors.BlueViolet,
+            StrokeWidth = 3,
+            IsAntialias = true,
+            Style = SKPaintStyle.Stroke
+        };
+        var bluePaint = new SKPaint
+        {
+            Color = SKColors.DarkBlue,
+            StrokeWidth = 1,
+            IsAntialias = true,
+        };
+
+        var verticalOffset = 10;
+        var pad = InterGatePadding;
+
+        var height = _areaHeight - 2 * verticalOffset - (bitNumber - 1) * pad;
+        
+        var gateHeight = height / bitNumber;
+        
+        // Draw the horizontal lines
+        for (int i = 0; i < bitNumber; i++)
+        {
+            float p = ((float) i*2 +1) / 2 * gateHeight + i * pad + verticalOffset;
+            
+            svg.DrawLine(0, p, _areaWidth / 10, p, vioPaint);
+            svg.DrawRoundRect(SKRect.Create(0, p-20, _areaWidth/13, 40), 10, 10, grayPaint);
+            svg.DrawText(Circuit.Allocation.GetBitName(i), 5, p+5, 
+                new SKFont(SKTypeface.FromFile("cascadiaFont.otf"), 16F), bluePaint);
+        }
+        
+        SvgProvider.DrawTowerGrid(Circuit.GateGrid, _areaWidth/10, 
+                                    _areaHeight, _areaWidth, svg);
+    }   
+    
+}
