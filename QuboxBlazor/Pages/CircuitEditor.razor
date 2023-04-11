@@ -35,8 +35,9 @@
                 </div>
             }
         }
-        
-        <button class="download-button" @onclick="@DownloadFile">Download Q# code</button>
+        <div style="position: relative; min-height: 130px; width: 100%;">
+            <button class="download-button" @onclick="@DownloadFile">Download Q# code</button>
+        </div>
         
     </div>
     <div style="float: right; width: 60%;">
@@ -45,6 +46,7 @@
     
 </div>
 <SchemaVisual Circuit="@_circuit"></SchemaVisual>
+
 
 @code {
     

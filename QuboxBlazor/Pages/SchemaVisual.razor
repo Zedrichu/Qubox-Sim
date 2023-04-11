@@ -4,13 +4,8 @@
 
 <h1>Circuit Schema</h1>
 
-<div class="svg-sketch" style="width: @_areaWidth\px; height: @_areaHeight\px;">
-    
-    @* <svg class="schema" aria-hidden="true" focusable="false"> *@
-    @*     <use href="grid.svg" /> *@
-    @* </svg> *@
-    @* <img width="100%" src="grid.svg" alt="Circuit Visualization"/> *@
-    
+<div class="svg-sketch" style="width: 700px; height: 500px;">
+
     <ContentView>
         <SKCanvasView @ref="skiaView" OnPaintSurface="@PaintSurface"/>
     </ContentView>
@@ -103,6 +98,7 @@
         
         SvgProvider.DrawTowerGrid(Circuit.GateGrid, _areaWidth/10, 
                                     _areaHeight, _areaWidth, svg);
+        svg.Scale(2,2);
     }   
     
 }

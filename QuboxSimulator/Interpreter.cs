@@ -51,9 +51,9 @@ public static class Interpreter
 
     public static Circuit? Interpret()
     {
+        if (!Error.Equals(Error.Success)) return null;
         var register = new Register(_memory);
         var visitor = new StatementVisitor(_memory);
-        if (_circuit == null) return null;
         var gates = _circuit.Item2.Item.Select(
                 statement => statement.Accept(visitor)).ToList();
         gates.RemoveAll(gate => gate == null);
