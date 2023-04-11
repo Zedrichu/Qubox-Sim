@@ -49,7 +49,7 @@ let ``Complex Quantum Code (mixed alloc, T, SX, arith, RZ, Pi )`` () =
     let (ast,_) = Handler.parseQuLang "Qalloc q[2]; Calloc c,r; T x; SX x; RZ (5+3*Pi/2) q[1];"
     Assert.That(ast, Is.EqualTo (Some (AllocQC (BitA ("q", 2), BitSeq (BitS "c", BitS "r")),
                                     Flow [UnaryGate (T, BitS "x"); UnaryGate (SX, BitS "x")
-                                          ParamGate (RX, BinaryOp (Num 5, Add, BinaryOp
+                                          ParamGate (RZ, BinaryOp (Num 5, Add, BinaryOp
                                           (BinaryOp (Num 3, Mul, Pi), Div, Num 2)), BitA ("q", 1))])))
     
 [<Test>]
@@ -67,7 +67,7 @@ let ``Focus on assigns, arithmetic, RY, RX`` () =
     Assert.That(ast, Is.EqualTo (Some(AllocQC (BitS "x", BitS "a"), Flow [Assign("b",BinaryOp
             (BinaryOp (UnaryOp (Minus, Pi), Div, Num 2), Sub, UnaryOp (Plus, Num 3)));
             ParamGate (RY, Num 4, BitS "z");
-            ParamGate (RZ, BinaryOp (Num 3, Sub, Num 2), BitS "k");
+            ParamGate (RX, BinaryOp (Num 3, Sub, Num 2), BitS "k");
             AssignB ("c", LogicOp (B true, And, LogicOp
             (LogicOp (RelationOp (Num 5, LT, Num 3), Or, B false), Or,
             RelationOp (BinaryOp (Float 5.0, Pow, Num 2), LTE, Num 10))))])));  

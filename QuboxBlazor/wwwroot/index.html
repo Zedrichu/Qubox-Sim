@@ -27,7 +27,34 @@
 
     <script src="monacoSetup.js"></script>
     
-    <script src="_framework/blazor.webassembly.js"></script>
+    <script>
+        const readFile = e => {
+            const file = e.target.files[0]
+            let reader = new FileReader();
+
+            reader.onload = function(e) {
+                let arrayBuffer = new Uint8Array(reader.result);
+                console.log(arrayBuffer);
+            }
+
+            reader.readAsArrayBuffer(file);
+        }
+        
+        window.downloadFile = async (fileName, contentStreamReference) => {
+            const arrayBuffer = await contentStreamReference.arrayBuffer();
+            const blob = new Blob([arrayBuffer]);
+            const url = URL.createObjectURL(blob);
+            const anchor = document.createElement('a');
+            anchor.href = url;
+            anchor.download = fileName ?? '';
+            anchor.click();
+            anchor.remove();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+    
+    <script src="_framework/blazor.webassembly.js"></script> 
+    
 
 </body>
 

@@ -1,5 +1,8 @@
 ﻿@page "/simulation"
-@inject HttpClient Http
+@using MathNet.Numerics.LinearAlgebra
+@using Complex = System.Numerics.Complex
+@implements IDisposable
+@inject StateContainer StateContainer
 
 <PageTitle>Simulation</PageTitle>
 
@@ -7,79 +10,63 @@
 
 <p>This component demonstrates the simulation of the provided circuit.</p>
 <div class="alert alert-danger" role="alert">
-    <b>Warning!</b>The simulation is not yet implemented. Coming soon!
+    <b>Warning! </b>The simulation is not yet implemented. Coming soon!
 </div>
 
-@if (forecasts == null)
-{
-    <div class="music">
-    <div class="bar"></div>
-    <div class="bar"></div>
-    <div class="bar"></div>
-    <div class="bar"></div>
-    <div class="bar"></div>
-    <div class="bar"></div>
-    <div class="bar"></div>
-    <div class="bar"></div>
-    <div class="bar"></div>
-    <div class="bar"></div>
-    </div>
-}
-else
-{
-    <div class="music">
-        <div class="bar"></div>
-        <div class="bar"></div>
-        <div class="bar"></div>
-        <div class="bar"></div>
-        <div class="bar"></div>
-        <div class="bar"></div>
-        <div class="bar"></div>
-        <div class="bar"></div>
-        <div class="bar"></div>
-        <div class="bar"></div>
-    </div>
-    <p>Here are the latest weather forecasts:</p>
-    <table class="table" style="color: rgb(255,236,69)">
-        <thead>
-        <tr>
-            <th>Date</th>
-            <th>Temp. (C)</th>
-            <th>Temp. (F)</th>
-            <th>Summary</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var forecast in forecasts)
-        {
-            <tr>
-                <td>@forecast.Date.ToShortDateString()</td>
-                <td>@forecast.TemperatureC</td>
-                <td>@forecast.TemperatureF</td>
-                <td>@forecast.Summary</td>
-            </tr>
-        }
-        </tbody>
-    </table>
-}
+<div class="info-body" style="justify-content: center; text-align: center">
+    <p>@StateContainer.PrintState()</p>
+    <h1 @onmouseover="@SimCircuit">Hover to simulate circuit!</h1>
+</div>
+<p>Here are the circuit simulation results:</p>
+<span>@DisplayResults(results)</span>
+
+<div class="music">
+<div class="bar"></div>
+<div class="bar"></div>
+<div class="bar"></div>
+<div class="bar"></div>
+<div class="bar"></div>
+<div class="bar"></div>
+<div class="bar"></div>
+<div class="bar"></div>
+<div class="bar"></div>
+<div class="bar"></div>
+</div>
+
 
 @code {
-    private WeatherForecast[]? forecasts;
+    private Vector<Complex>? results;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("sample-data/weather.json");
+        StateContainer.OnChange += StateHasChanged;
     }
 
-    public class WeatherForecast
+    public void Dispose()
     {
-        public DateTime Date { get; set; }
-
-        public int TemperatureC { get; set; }
-
-        public string? Summary { get; set; }
-
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+        StateContainer.OnChange -= StateHasChanged;
+    }
+    
+    private void SimCircuit()
+    {
+        var circuit = StateContainer.Property;
+        if (circuit == null)
+        {
+            return;
+        }
+        var simulator = new Simulator(circuit);
+        results = simulator.Run();
+        
+        StateHasChanged();
+    }
+    
+    private string DisplayResults(Vector<Complex>? results )
+    {
+        if (results == null)
+        {
+            return "No results to display";
+        }
+        return results.ToString();
     }
 
 }

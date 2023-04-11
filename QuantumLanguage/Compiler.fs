@@ -66,9 +66,9 @@ let rec private compileBit (bit:Bit) : string =
 let rec private compileArith (expr:ArithExpr):string = 
     match expr with
     | VarA x -> x
-    | Num x -> x.ToString()
-    | Float x -> x.ToString()
-    | Pi -> "PI ()"
+    | Num x -> $"%f{(float x)}"
+    | Float x -> $"%f{x}"
+    | Pi -> "PI()"
     | UnaryOp(op, x) -> "("+op.ToString()+(compileArith x)+")"
     | BinaryOp(x, op, y) -> "("+(compileArith x)+op.ToString()+(compileArith y)+")"
    
@@ -80,7 +80,8 @@ let rec private compileArith (expr:ArithExpr):string =
 /// <returns>Q# string representation</returns>
 let rec private compileBool (expr:BoolExpr):string = 
     match expr with 
-    | B x -> x.ToString()
+    | B x -> let t = x.ToString()
+             t.ToLower()
     | VarB s -> s
     | LogicOp(x,And,y) -> ""+(compileBool x)+" and "+(compileBool y)+""
     | LogicOp(x,Or,y) -> ""+(compileBool x)+" or "+(compileBool y)+""
@@ -102,13 +103,14 @@ let rec private compileStatement (expr:Statement):string =
     | Assign(var, value) -> "let "+var+" = "+compileArith value
     | AssignB(var, value) -> "let "+var+" = "+compileBool value
     | Condition(b, st) -> "if ("+compileBool b+") {"+compileStatement st+"}"
-    | Measure(q_bit, c_bit) -> "let "+compileBit c_bit+" = M("+compileBit q_bit+");"
+    | Measure(q_bit, BitA(s, i)) -> $"set {s} /= {i} <- M("+ compileBit q_bit+");"
+    | Measure(q_bit, BitS s) -> $"let {s} = M("+ compileBit q_bit+");"
     | Reset(BitS(q)) -> "Reset("+q+");"
     | Reset(BitA(q, _)) -> "ResetAll("+q+");"
-    | UnaryGate(TDG, bit) -> "Rz(-PI()/4, "+compileBit bit+");" // T†
-    | UnaryGate(SDG, bit) -> "Rz(-PI()/2, "+compileBit bit+");" // S†
-    | UnaryGate(SX, bit) -> "Rx(PI()/2, "+compileBit bit+");" // Global phase 
-    | UnaryGate(SXDG, bit) -> "Rx(-PI()/2, "+compileBit bit+");" // Global phase
+    | UnaryGate(TDG, bit) -> "Rz(-PI()/4.0, "+compileBit bit+");" // T†
+    | UnaryGate(SDG, bit) -> "Rz(-PI()/2.0, "+compileBit bit+");" // S†
+    | UnaryGate(SX, bit) -> "Rx(PI()/2.0, "+compileBit bit+");" // Global phase 
+    | UnaryGate(SXDG, bit) -> "Rx(-PI()/2.0, "+compileBit bit+");" // Global phase
     | UnaryGate(tag, bit) -> $"{tag}({compileBit bit});"
     | ParamGate(P, phase, bit) -> "Rz("+(compileArith phase).ToString()+", "+compileBit bit+");" // up to global phase
     | ParamGate(RZ, angle, bit) -> "Rz("+(compileArith angle).ToString()+", "+compileBit bit+");"
@@ -128,5 +130,5 @@ let rec private compileStatement (expr:Statement):string =
 /// Helper to aggregate statements in a flow    
 let rec internal compileFlow (flow:Statement list):string =
     match flow with
-    | head::tail -> compileStatement head + "\n" + compileFlow tail
+    | head::tail -> compileStatement head + "\n\t" + compileFlow tail
     | [] -> ""

@@ -1,5 +1,10 @@
 @page "/circuit-editor"
 @using QuboxSimulator.Circuits
+@using System.IO
+@using System.Text
+@implements IDisposable
+@inject StateContainer StateContainer
+@inject IJSRuntime JsRuntime
 
 <PageTitle>Circuit Sandbox</PageTitle>
 
@@ -8,7 +13,7 @@
         align-content: center; background: rgb(15,24,88);">
         <h1>Circuit</h1>
         <div class="info-body">
-            <h1 @onmouseover="@UpdateCircuit">Hover to update circuit!</h1> <p>@PrintCircuit(_circuit)</p>
+            <h1 @onmouseover="@UpdateCircuit">Hover to update circuit!</h1> <p>@StateContainer.PrintState()</p>
         </div>
         <blockquote>If representations match, event callback works!</blockquote>
         
@@ -31,7 +36,7 @@
             }
         }
         
-        <button class="download-button">Click to download Q# code!</button>
+        <button class="download-button" @onclick="@DownloadFile">Download Q# code</button>
         
     </div>
     <div style="float: right; width: 60%;">
@@ -47,13 +52,9 @@
     
     private AST.Error? Error { get; set; } = AST.Error.Success;
 
-    private string PrintCircuit(Circuit? circuit)
+    protected override void OnInitialized()
     {
-        if (circuit == null)
-        {
-            return "Circuit is missing!";
-        }
-        return circuit.ToString();
+        StateContainer.OnChange += StateHasChanged;
     }
 
     private void UpdateCircuit(MouseEventArgs e)
@@ -68,8 +69,34 @@
             return;
         }
         _circuit = circuit;
+        StateContainer.Property = _circuit;
+    }
+    
+    public void Dispose()
+    {
+        StateContainer.OnChange -= StateHasChanged;
     }
 
     private string Content { get; set; } = "...Try typing something in the editor or switch focus...";
 
+    private Stream GetStreamData()
+    {   
+        var generator = new Generator(_circuit);       
+        var ast = Generator.DestructCircuit();
+        var compiled = Handler.compileCircuit(ast.Item1, ast.Item2);
+        var wrapped = Handler.wrapQSharp(compiled);
+
+        var fileStream = new MemoryStream(Encoding.UTF8.GetBytes(wrapped));
+        return fileStream;
+    }
+
+    private async Task DownloadFile()
+    {
+        var stream = GetStreamData();
+        var fileName = "circuit.qs";
+        
+        using var streamRef = new DotNetStreamReference(stream);
+        await JsRuntime.InvokeVoidAsync("downloadFile", fileName, streamRef);
+    }
+    
 }

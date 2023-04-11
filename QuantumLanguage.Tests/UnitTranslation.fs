@@ -64,9 +64,12 @@ let ``Check Q# compilation of circuit #5`` () =
                  Condition (LogicOp (LogicOp (RelationOp (VarA "b", LT, BinaryOp (Num 3, Mod, Num 2)),
                        And, B true), Or, VarB "c"), BinaryParamGate(RZZ, UnaryOp (Minus, VarA "a"),
                                                                     BitS "x", BitS "y"));
+                Measure (BitA ("q", 1), BitA ("c", 1));
                 Measure (BitA ("q", 1), BitS "c")]
     let str = compileCircuit ast
     Assert.IsNotEmpty str
+    let wrapped = wrapQSharp str
+    Assert.IsNotEmpty wrapped
 
 [<Test>]
 let ``Check QuLang compilation of circuit - (double parsing procedure) #1`` () =

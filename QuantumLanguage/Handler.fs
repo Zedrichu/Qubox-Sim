@@ -109,6 +109,17 @@ let public compileCircuit (circuit:Circuit):string =
               Compiler.compileAlloc c false + "\n\n"
     str + Compiler.compileFlow flow
     
+let public wrapQSharp (compiled:string) : string =
+    let header = "namespace Quantum.App {\n\n
+    \topen Microsoft.Quantum.Canon;\n
+    \topen Microsoft.Quantum.Intrinsic;\n
+    \topen Microsoft.Quantum.Math;\n
+    
+    \t@EntryPoint()\n
+    \toperation SimulateCircuit() : Unit { \n
+        \t\t// Placeholder"
+    header + "\n" + compiled + "\n\t}\n}"
+    
     
 /// <summary>
 /// Interface method to analyze the semantics of the generated circuit AST

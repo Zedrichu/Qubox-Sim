@@ -8,6 +8,7 @@ namespace QuboxSimulator;
 public static class Interpreter
 {
     private static Memory _memory = Memory.empty;
+    
     private static Tuple<Allocation, Schema>? _circuit;
 
     public static Error Error { get; private set; } = Error.Success;
@@ -26,7 +27,7 @@ public static class Interpreter
         Console.WriteLine("QuLang Parsed | AST: " + ast);
         
         var sem = analyzeSemantics(ast.Item1, ast.Item2);
-        if (!sem.Item2.Equals(AST.Error.Success))
+        if (!sem.Item2.Equals(Error.Success))
         {
             Error = sem.Item2;
             return;
