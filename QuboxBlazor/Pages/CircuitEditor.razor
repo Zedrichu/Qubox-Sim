@@ -18,7 +18,7 @@
         <blockquote>If representations match, event callback works!</blockquote>
         
         @{
-            if (Error != AST.Error.Success)
+            if (!Error.Equals(AST.Error.Success))
             {
                 <div class="alert alert-danger" role="alert">
                     <span class="glyphicon glyphicon-alert" aria-hidden="true">
@@ -45,6 +45,7 @@
     </div>
     
 </div>
+
 <SchemaVisual Circuit="@_circuit"></SchemaVisual>
 
 
@@ -52,7 +53,7 @@
     
     private Circuit? _circuit { get; set; }
     
-    private AST.Error? Error { get; set; } = AST.Error.Success;
+    private AST.Error Error { get; set; } = AST.Error.Success;
 
     protected override void OnInitialized()
     {

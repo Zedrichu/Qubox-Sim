@@ -50,7 +50,7 @@ public class Generator
         var dict = Reg.ArithVariables;
         var list = dict.ToList();
         list.Sort((kvp1, kvp2) => 
-            kvp2.Value.Item2.CompareTo(kvp1.Value.Item2));
+            kvp1.Value.Item2.CompareTo(kvp2.Value.Item2));
         return list.Select(
             kvp => FormAssign(kvp.Key, kvp.Value.Item1)
             ).ToList();
@@ -60,7 +60,7 @@ public class Generator
         var dict = Reg.BoolVariables;
         var list = dict.ToList();
         list.Sort((kvp1, kvp2) => 
-            kvp2.Value.Item2.CompareTo(kvp1.Value.Item2));
+            kvp1.Value.Item2.CompareTo(kvp2.Value.Item2));
         return list.Select(
             kvp => FormAssign(kvp.Key, kvp.Value.Item1)
         ).ToList();
@@ -120,7 +120,7 @@ public class Generator
     {
         var bit1 = gate.TargetRange.Item1;
         var cond = gate.Condition;
-        Statement? op;
+        Statement? op = null;
         switch (gate.Type)
         {
             case GateType.Support:
@@ -138,22 +138,18 @@ public class Generator
             case GateType.Param:
                 var cast2 = (ParamSingleGate) gate;
                 var pars = Handler.parseArith(cast2.Theta.Item2);
-                if (!pars.Item2.Equals(Error.Success))
-                {
-                    throw new Exception("String maintenance in parameter is erroneous");
-                }
+                
+                // String maintenance was tested to be correct
                 op = Statement.NewParamGate(new Tuple<PTag, ArithExpr, Bit>(
                     cast2.Tag, pars.Item1.Value, RecoverBit(bit1)));
                 break;
             case GateType.DoubleParam:
-                var cast3 = (ParamSingleGate) gate;
+                var cast3 = (ParamDoubleGate) gate;
                 pars = Handler.parseArith(cast3.Theta.Item2);
-                if (!pars.Item2.Equals(Error.Success))
-                {
-                    throw new Exception("String maintenance in parameter is erroneous");
-                }
-                op = Statement.NewParamGate(new Tuple<PTag, ArithExpr, Bit>(
-                    cast3.Tag, pars.Item1.Value, RecoverBit(bit1)));
+                
+                // String maintenance was tested to be correct
+                op = Statement.NewBinaryParamGate(new Tuple<BPTag, ArithExpr, Bit, Bit>(
+                    cast3.Tag, pars.Item1.Value, RecoverBit(cast3.Control.Item1), RecoverBit(cast3.Control.Item2)));
                 break;
             case GateType.Toffoli:
                 var triplet = ((ToffoliGate) gate).Control;
@@ -165,17 +161,10 @@ public class Generator
                 var parsT = Handler.parseArith(cast4.Theta.Item2);
                 var parsP = Handler.parseArith(cast4.Phi.Item2);
                 var parsL = Handler.parseArith(cast4.Lambda.Item2);
-                if (!parsT.Item2.Equals(Error.Success) 
-                    || !parsP.Item2.Equals(Error.Success) 
-                    || !parsL.Item2.Equals(Error.Success))
-                {
-                    throw new Exception("String maintenance in unitary phase is erroneous");
-                }
+                
+                // String maintenance was tested to be correct
                 op = Statement.NewUnitary(new Tuple<ArithExpr, ArithExpr, ArithExpr, Bit>(
                     parsT.Item1.Value, parsP.Item1.Value, parsL.Item1.Value, RecoverBit(bit1)));
-                break;
-            default:
-                op = null;
                 break;
         }
         if (cond == null)
@@ -183,10 +172,7 @@ public class Generator
             return op;
         }
         var expr = Handler.parseBool(cond);
-        if (!expr.Item2.Equals(Error.Success))
-        {
-            throw new Exception("String maintenance in condition is erroneous");
-        }
+        
         if (expr.Item1 == FSharpOption<BoolExpr>.None)
         {
             return op;

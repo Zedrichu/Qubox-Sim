@@ -175,7 +175,6 @@ public static class GateFactory
             SupportType.Reset => new ResetGate(target),
             SupportType.Measure => new MeasureGate(target, classic),
             SupportType.PhaseDisk => new PhaseDisk(target),
-            _ => throw new ArgumentOutOfRangeException(nameof(token), token, null)
         };
     }
     
@@ -197,10 +196,5 @@ public static class GateFactory
     public static IMatrixGate CreateGate(int target1, int target2, int target3)
     {
         return new ToffoliGate(target1, target2, target3);
-    }
-
-    public static ISupportGate CreatePlaceholder()
-    {
-        return new NoneGate(0);
     }
 }

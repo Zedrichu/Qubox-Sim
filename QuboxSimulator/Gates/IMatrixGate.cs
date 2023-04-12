@@ -6,7 +6,7 @@ namespace QuboxSimulator.Gates;
 
 public interface IMatrixGate : IGate
 {
-    public Matrix<Complex> Matrix { get; set; }
+    public Matrix<Complex> Matrix { get; }
 }
 
 internal abstract class MatrixGate : IMatrixGate
@@ -29,12 +29,12 @@ internal abstract class MatrixGate : IMatrixGate
 
 internal class SingleQubitGate : MatrixGate
 {
-    public UTag Tag { get; private set; }
+    public UTag Tag { get; }
     
     public SingleQubitGate(Matrix<Complex> matrix, UTag tag, int target, string? condition = null)
     {
         Type = GateType.Single;
-        Matrix = matrix;
+        base.Matrix = matrix;
         Id = tag.ToString();
         Tag = tag;
         TargetRange = new Tuple<int, int>(target, target);
@@ -45,7 +45,7 @@ internal class SingleQubitGate : MatrixGate
 internal class DoubleQubitGate : MatrixGate
 {
     public BTag Tag { get; }
-    public Tuple<int,int> Control { get; set; }
+    public Tuple<int,int> Control { get; }
     
     public DoubleQubitGate(Matrix<Complex> matrix, BTag tag, int control, int target)
     {
@@ -61,7 +61,7 @@ internal class DoubleQubitGate : MatrixGate
 
 internal class ToffoliGate : MatrixGate
 {
-    public Tuple<int, int, int> Control { get; set; }
+    public Tuple<int, int, int> Control { get; }
     
     public ToffoliGate(int control1, int control2, int target)
     {

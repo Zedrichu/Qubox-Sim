@@ -4,8 +4,8 @@ namespace QuboxSimulator.Circuits;
 
 public class Tower
 {
-    public int Height { get; private set; } = 0;
-    public List<IGate> Gates { get; private set; }
+    public int Height { get; }
+    public List<IGate> Gates { get; }
 
     public Tuple<int, int> Locked { get; set; } = new (-1, -1);
 
@@ -18,13 +18,7 @@ public class Tower
             Gates.Add(new NoneGate(i));
         }
     }
-    
-    public Tower(List<IGate> gates)
-    {
-        Height = gates.Count;
-        Gates = gates;
-    }
-    
+
     public bool IsEmpty()
     {
         return Gates.All(gate => gate.Id == "None");

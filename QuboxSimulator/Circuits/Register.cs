@@ -4,16 +4,16 @@ namespace QuboxSimulator.Circuits;
 
 public class Register
 {
-    public int QubitNumber { get; private set; } = 0;
-    public int CbitNumber { get; private set; } = 0;
+    public int QubitNumber { get; } = 0;
+    public int CbitNumber { get; } = 0;
     
-    public Dictionary<string, Tuple<int, int>> Qubits { get; set; } = new();
+    public Dictionary<string, Tuple<int, int>> Qubits { get; } = new();
     
-    public Dictionary<string, Tuple<int, int>> Cbits { get; set; } = new();
+    public Dictionary<string, Tuple<int, int>> Cbits { get; } = new();
     
-    public Dictionary<string, Tuple<AST.BoolExpr, int>> BoolVariables { get; set; } = new();
+    public Dictionary<string, Tuple<AST.BoolExpr, int>> BoolVariables { get; } = new();
     
-    public Dictionary<string, Tuple<AST.ArithExpr, int>> ArithVariables { get; set; } = new();
+    public Dictionary<string, Tuple<AST.ArithExpr, int>> ArithVariables { get; } = new();
 
     public Register(AST.Memory memory)
     {

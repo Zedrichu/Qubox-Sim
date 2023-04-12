@@ -21,7 +21,7 @@ Includes the declaration of the concrete support gates, supported by the simulat
 /// </summary>
 public interface IGate
 {
-    public Tuple<int, int> TargetRange { get; set; }
+    public Tuple<int, int> TargetRange { get; }
 
     public string? Condition { get; set; }
     
@@ -35,7 +35,7 @@ public interface IGate
 /// </summary>
 public interface ISupportGate: IGate
 {
-    public SupportType SupportType { get; set; }
+    public SupportType SupportType { get; }
     public Vector<Complex> SupportState(
         Vector<Complex> state,
         Dictionary<int, Tuple<double, double>> results);
@@ -51,7 +51,7 @@ internal abstract class SupportGate : ISupportGate
     
     public SupportType SupportType { get; set; }
 
-    public GateType Type { get; set; } = GateType.Support;
+    public GateType Type { get;} = GateType.Support;
     
     public override string ToString()
     {
@@ -106,7 +106,7 @@ internal class ResetGate : SupportGate
         Dictionary<int, Tuple<double, double>> results)
     {
         var size = state.Count;
-        var rank = size / (2 ^ (TargetRange.Item1+1));
+        var rank = size / Math.Pow(2, TargetRange.Item1+1);
         for (var i=1; i<size; i++)
         {
             if (i / rank % 2 == 1) state[i] = 0;

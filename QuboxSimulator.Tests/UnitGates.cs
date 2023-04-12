@@ -13,7 +13,7 @@ public class GateTests
     }
 
     [Test]
-    public void Test1()
+    public void TestSimpleCircuit()
     {
         var code = "Qalloc q; Calloc c; H q; Measure q -> c;";
         Interpreter.HandleLang(code);
@@ -31,8 +31,13 @@ public class GateTests
         Assert.That(mgate.TargetRange.Item2, Is.EqualTo(1));
     }
 
-    public void Test2()
+    [Test]
+    public void TestGateFactory()
     {
-        
+        var code = "Qalloc q; Calloc c; If (3>5) Reset q; Measure q -> c;";
+        Interpreter.HandleLang(code);
+        var circuit = Interpreter.Interpret();
+        Assert.AreEqual(Interpreter.Error, AST.Error.Success);
+        Assert.That(circuit.GateGrid[0].Gates[0].Condition is not null);
     }
 }

@@ -24,10 +24,13 @@ public class Simulator
         foreach (var gate in  tower.Gates)
         {
             if (gate.TargetRange.Item1 >= _qubits) break;
-            var matrix = Matrix<Complex>.Build.DenseIdentity(2);
+            var matrix = Matrix<Complex>.Build.DenseIdentity(
+                (gate.TargetRange.Item2 - gate.TargetRange.Item1 + 1) * 2);
             if (gate.Type == GateType.Support)
             {
                 var supportGate = (ISupportGate) gate;
+                if (supportGate.SupportType is SupportType.Measure)
+                    matrix = Matrix<Complex>.Build.DenseIdentity((_qubits - gate.TargetRange.Item1) * 2);
                 stateVector = supportGate.SupportState(stateVector, _results);
             }
             else
@@ -47,13 +50,16 @@ public class Simulator
 
         foreach (var tower in _circuit.GateGrid)
         {
-            vector = TowerOperation(tower, vector);
+            if (!tower.IsEmpty())
+                vector = TowerOperation(tower, vector);
         }
 
         return vector.PointwisePower(2);
     }
     
-    
-    
+    public Dictionary<int, Tuple<double, double>> GetResults()
+    {
+        return _results;
+    }
 
 }

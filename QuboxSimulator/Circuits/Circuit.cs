@@ -4,9 +4,9 @@ namespace QuboxSimulator.Circuits;
 
 public class Circuit
 {
-    public Register Allocation { get; private set; }
+    public Register Allocation { get; }
     
-    public List<Tower> GateGrid { get; private set; }
+    public List<Tower> GateGrid { get; }
 
     public Circuit(Register allocation)
     {
@@ -34,7 +34,7 @@ public class Circuit
             } 
         }
 
-        if (gate.Id is "Barrier")
+        if (gate.Type is GateType.Support && ((SupportGate) gate).SupportType is SupportType.Barrier)
         {
             foreach (var t in GateGrid)
             {

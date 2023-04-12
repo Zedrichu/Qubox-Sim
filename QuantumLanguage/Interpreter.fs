@@ -209,6 +209,7 @@ let rec internal evalBool (expr:BoolExpr) (memoryB:Map<string, BoolExpr * int>)
                              let y1 = evalBool y memoryB memoryA
                              match x1, y1 with
                              | B x, B y -> B (x && y)
+                             | B false, _ -> B false
                              | c,d when c=d -> x1
                              | c, Not(d) | Not(d), c when c=d -> B false
                              | Check (b, r), d -> LogicOp(d, And, Check (b,r))
@@ -217,6 +218,7 @@ let rec internal evalBool (expr:BoolExpr) (memoryB:Map<string, BoolExpr * int>)
                          let y1 = evalBool y memoryB memoryA
                          match x1, y1 with
                          | B a, B b -> B (a || b)
+                         | B true, _ -> B true
                          | c,d when c=d -> x1
                          | c, Not(d) | Not(d), c when c=d -> B true
                          | Check (b, r), d -> LogicOp(d, Or, Check (b,r))
@@ -308,6 +310,10 @@ let rec private optimizeStatement (st:Statement) (memArith:Map<string, ArithExpr
     | Condition(b, statement) -> let b1 = evalBool b memBool memArith
                                  let no1, memArith1, memBool1, statement1 = optimizeStatement statement memArith memBool no
                                  no1, memArith1, memBool1, Condition(b1, statement1)
+    | ParamGate(pTag, expr, bit) -> let expr1 = evalArith expr memArith
+                                    no, memArith, memBool, ParamGate(pTag, expr1, bit)
+    | BinaryParamGate(bpTag, expr, bit1, bit2) -> let expr1 = evalArith expr memArith
+                                                  no, memArith, memBool, BinaryParamGate(bpTag, expr1, bit1, bit2)                                
     | _ -> no, memArith, memBool, st
     
 /// <summary>

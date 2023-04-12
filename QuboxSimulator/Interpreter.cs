@@ -1,4 +1,3 @@
-using QuantumLanguage;
 using static QuantumLanguage.AST;
 using static QuantumLanguage.Handler;
 using QuboxSimulator.Circuits;

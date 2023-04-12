@@ -13,7 +13,7 @@ System.Globalization.CultureInfo.CurrentCulture <- new System.Globalization.Cult
 // Define macros for some regular expressions used later
 let digit       = ['0'-'9'] 
 let num         = digit+
-let float       = ['-' '+']? (digit* '.' digit+ )
+let float       = (digit* '.' digit+ )
 //let float       = digit+ ( '.' digit+ | 'E' ('+'|'-')? digit+ )+
 let whitespace  = [' ' '\t']
 let newline     = "\n\r" | '\n' | '\r'

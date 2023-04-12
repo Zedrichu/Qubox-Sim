@@ -67,6 +67,7 @@ public class StatementVisitor: IVisitor<Statement, IGate>
                 // Add gate created by factory to list
                 return GateFactory.CreateGate(triple.Item.Item1, target1, phase);
             case Statement.BinaryGate pair:
+                // Retrieve order of the target qubits in circuit mapping
                 target1 = _memory.GetQOrder(pair.Item.Item2);
                 var target2 = _memory.GetQOrder(pair.Item.Item3);
                 return GateFactory.CreateGate(pair.Item.Item1, target1, target2);
@@ -106,7 +107,7 @@ public class StatementVisitor: IVisitor<Statement, IGate>
                 target1 = _memory.CountQuantum;
                 return GateFactory.CreateGate(SupportType.PhaseDisk, target1-1);
             default:
-                return GateFactory.CreatePlaceholder();
+                return GateFactory.CreateGate(SupportType.None, 0);
         }
     }
 }
@@ -149,7 +150,6 @@ public class ArithmeticVisitor : IVisitor<ArithExpr, double>
                     var x when x.Equals(AOp.Div) => left / right,
                     var x when x.Equals(AOp.Pow) => Math.Pow(left, right),
                     var x when x.Equals(AOp.Mod) => left % right,
-                    _ => value
                 };
                 break;
             case ArithExpr.VarA x:

@@ -1,5 +1,6 @@
 module Tests.Optimization
 
+open System
 open Microsoft.FSharp.Core
 open NUnit.Framework
 
@@ -96,6 +97,25 @@ let ``Test undefined arithmetic variable in reduction`` () =
     | Success -> Assert.Fail()
     | EvaluationError _ -> Assert.Pass()
 
+[<Test>]
+let ``Test for undefined variable in parameter AST`` () =
+    let code = "Qalloc q, r; Calloc c; x:=2+2; P (a+3) q;"
+    let ast, err = parseQuLang code
+    Assert.AreEqual(err, Success)
+    Console.WriteLine(ast |> Option.get)
+    let _, schema = ast |> Option.get
+    let _, _, err = optimizeAST schema Memory.empty
+    match err with
+        | Success -> Assert.Fail()
+        | EvaluationError _ -> Assert.Pass()
+
+[<Test>]
+let ``Test variables in parameter AST`` () =
+    let code = "Qalloc q, r; Calloc c; x:=2+2; P (5+3) q;"
+    let ast, err = parseQuLang code
+    Assert.AreEqual(err, Success)
+    let _, err = ast |> Option.get |> analyzeSemantics
+    Assert.AreEqual(err, Success)
     
 [<Test>]
 let ``Test boolean reductions solely #1`` () =
