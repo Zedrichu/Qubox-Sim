@@ -6,8 +6,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuboxSimulator.Tests", "Qub
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuboxSimulator", "QuboxSimulator\QuboxSimulator.csproj", "{74D2D2BB-7608-4A32-86D4-5B34CE4998A5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IonQApp", "IonQApp\IonQApp.csproj", "{38F5C743-41B1-42EA-BF87-F9121D3784EC}"
-EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "QuantumLanguage.Tests", "QuantumLanguage.Tests\QuantumLanguage.Tests.fsproj", "{DFB17DBC-2F34-4F20-9ABF-A47AC96A1B71}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuboxBlazor", "QuboxBlazor\QuboxBlazor.csproj", "{1874B8D5-CCBD-4FBD-A906-CDE2B98BE71C}"
