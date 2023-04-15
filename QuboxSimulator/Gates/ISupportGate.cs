@@ -36,9 +36,7 @@ public interface IGate
 public interface ISupportGate: IGate
 {
     public SupportType SupportType { get; }
-    public Vector<Complex> SupportState(
-        Vector<Complex> state,
-        Dictionary<int, Tuple<double, double>> results);
+    public void SupportState(State state);
 }
 
 internal abstract class SupportGate : ISupportGate
@@ -58,10 +56,8 @@ internal abstract class SupportGate : ISupportGate
         return $"Gate:{Id} Target: {TargetRange}";
     }
 
-    public virtual Vector<Complex> SupportState(Vector<Complex> state,
-        Dictionary<int, Tuple<double, double>> results)
+    public virtual void SupportState(State state)
     {
-        return state;
     }
 }
 
@@ -102,16 +98,9 @@ internal class ResetGate : SupportGate
         SupportType = SupportType.Reset;
         TargetRange = new Tuple<int, int>(target, target);
     }
-    public override Vector<Complex> SupportState(Vector<Complex> state,
-        Dictionary<int, Tuple<double, double>> results)
+    public override void SupportState(State state)
     {
-        var size = state.Count;
-        var rank = size / Math.Pow(2, TargetRange.Item1+1);
-        for (var i=1; i<size; i++)
-        {
-            if (i / rank % 2 == 1) state[i] = 0;
-        }
-        return state;
+        state.ResetQubit(TargetRange.Item1);
     }
 }
 
@@ -127,31 +116,9 @@ internal class MeasureGate : SupportGate
         TargetRange = new Tuple<int, int>(quantum, classic);
     }
     
-    public override Vector<Complex> SupportState(Vector<Complex> state,
-        Dictionary<int, Tuple<double, double>> results)
+    public override void SupportState(State state)
     {
-        var size = state.Count;
-        var rank = size / Math.Pow(TargetRange.Item1+1, 2);
-        
-        var pair = new Tuple<double, double>(0, 0);
-        for (var i = 0; i < size; i++)
-        {
-            if (i / rank % 2 == 0)
-                pair = new Tuple<double, double>(
-                    pair.Item1 + Math.Pow(state[i].Magnitude, 2), pair.Item2
-                );
-            else
-                pair = new Tuple<double, double>(
-                    pair.Item1, pair.Item2 + Math.Pow(state[i].Magnitude, 2)
-                );
-        }
-        results.Add(TargetRange.Item2, pair);
-        
-        for (var i=1; i<size; i++)
-        {
-            if (i / rank % 2 == 1) state[i] = 0;
-        }
-        return state;
+        state.Measure(TargetRange.Item1, TargetRange.Item2);
     }
 }
 
@@ -165,5 +132,10 @@ internal class PhaseDisk : SupportGate
         Id = "PHASEDISK";
         SupportType = SupportType.PhaseDisk;
         TargetRange = new Tuple<int, int>(0, qubitNo);
+    }
+
+    public override void SupportState(State state)
+    {
+        state.TrackPhase();
     }
 }

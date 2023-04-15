@@ -204,4 +204,6 @@ type Memory =
      | BitA(s, i) -> let _, order = Map.find s this.Classical in order + i
      | BitS s -> let _, order = Map.find s this.Classical in order
      | BitSeq _ -> failwith "Invalid request of order for bit sequence!"
+     
+     
   

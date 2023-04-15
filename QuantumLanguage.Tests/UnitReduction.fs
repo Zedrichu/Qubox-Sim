@@ -84,12 +84,21 @@ let ``Test arithmetic reductions solely #3`` () =
     Assert.AreEqual (Success, err)
     let optimal, _, err = optimizeArithmetic (Option.get ast) Memory.empty
     Assert.AreEqual (Success, err)
-    
     Assert.AreEqual (BinaryOp(Pi, Add, Float -15.3), optimal)    
+
+[<Test>]
+let ``Test arithmetic reductions solely #4`` () =
+    let code = "(Pi/2 * 4) / 2 + (Pi/2)/(Pi/2)+(-3-1)+(4-(-2))+(Pi+Pi)/(2*Pi)"
+    let ast, err = parseArith code
+    Assert.AreEqual (Success, err)
+    let optimal, _, err = optimizeArithmetic (Option.get ast) Memory.empty
+    Assert.AreEqual (Success, err)
+    Assert.AreEqual (BinaryOp(Pi, Add, Float 4), optimal)    
+    
     
 [<Test>]
 let ``Test undefined arithmetic variable in reduction`` () =
-    let code = "5+3-2+4/2*(3+ 2.0)+ 0.0/1 -a*0"
+    let code = "5+3-2+4/2*(3+ 2.0)+ 0.0/1 - a*0"
     let ast, err = parseArith code
     Assert.AreEqual (Success, err)
     let _, _, err = optimizeArithmetic (Option.get ast) Memory.empty
@@ -97,6 +106,26 @@ let ``Test undefined arithmetic variable in reduction`` () =
     | Success -> Assert.Fail()
     | EvaluationError _ -> Assert.Pass()
 
+[<Test>]
+let ``Test invalid division by zero`` () =
+    let code = "-(Pi/1) + (Pi/3*3) + 5/0 + 2/0.0"
+    let ast, err = parseArith code
+    Assert.AreEqual (Success, err)
+    let _, _, err = optimizeArithmetic (Option.get ast) Memory.empty
+    match err with
+    | Success -> Assert.Fail()
+    | EvaluationError _ -> Assert.Pass()
+    
+[<Test>]
+let ``Test invalid modulo by zero`` () =
+    let code = "-(Pi/1) + (Pi/3*3) + 5%0 + 2%0.0"
+    let ast, err = parseArith code
+    Assert.AreEqual (Success, err)
+    let _, _, err = optimizeArithmetic (Option.get ast) Memory.empty
+    match err with
+    | Success -> Assert.Fail()
+    | EvaluationError _ -> Assert.Pass()    
+    
 [<Test>]
 let ``Test for undefined variable in parameter AST`` () =
     let code = "Qalloc q, r; Calloc c; x:=2+2; P (a+3) q;"
@@ -125,6 +154,15 @@ let ``Test boolean reductions solely #1`` () =
     let optimal, _, err = optimizeLogic (Option.get ast) Memory.empty
     Assert.AreEqual (Success, err)
     Assert.AreEqual (B true, optimal)
+
+[<Test>]
+let ``Test arithmetic reductions for exponentiation`` () =
+    let code = "0 % 5 + 0.0 % 3 + (0 - Pi/2 + Pi/2) - (-3 - Pi * 0) + ((-3) ^ 1) + (2.3 ^ 0.0) + 0 ^ 5"
+    let ast, err = parseArith code
+    Assert.AreEqual (Success, err)
+    let optimal, _, err = optimizeArithmetic (Option.get ast) Memory.empty
+    Assert.AreEqual (Success, err)
+    Assert.AreEqual (Float 1.0, optimal)    
     
 [<Test>]
 let ``Test undefined boolean variable solely`` () =
@@ -143,7 +181,7 @@ let ``Test boolean reductions solely #2`` () =
     Assert.AreEqual (Success, err)
     let optimal, _, _ = optimizeLogic (Option.get ast) Memory.empty
     Assert.AreEqual (B false, optimal)
-
+    
 [<Test>]
 let ``Test boolean reductions solely #3`` () =
     let code = "not (true or 5.0 < 3.0 and 5 != 4.0 ^ 2) and ((false or 3.0 != 1*0.0) xor not (1.0 >= 0 and 9.0 == 9))"
@@ -151,3 +189,59 @@ let ``Test boolean reductions solely #3`` () =
     Assert.AreEqual (Success, err)
     let optimal, _, _ = optimizeLogic (Option.get ast) Memory.empty
     Assert.AreEqual (B false, optimal)
+    
+[<Test>]
+let ``Test boolean reductions solely #4`` () =
+    let code = "not ( not ( c |> Click) ) and ( c |> Click) or 0.0 ^ 2 == 1.0 and Pi/2*3/Pi == 1.5"
+    let ast, err = parseBool code
+    Assert.AreEqual (Success, err)
+    let optimal, _, _ = optimizeLogic (Option.get ast) Memory.empty
+    Assert.AreEqual (Check(BitS "c", Click), optimal)
+
+[<Test>]
+let ``Test boolean reductions solely #5`` () =
+    let code = "(c |> Click) or not (c |> Click) and (c |> NoClick) and ((Pi > 3) xor (Pi > 3))"
+    let ast,err = parseBool code
+    Assert.AreEqual (Success, err)
+    let optimal, _, _ = optimizeLogic (Option.get ast) Memory.empty
+    Assert.AreEqual (Check(BitS "c", Click), optimal)
+
+[<Test>]
+let ``Test boolean reductions solely #6`` () =
+    let code = "(((c |> Click) and (Pi > 3)) and false) or ((Pi/2 != 3 or Pi/2 != 3) and (Pi/2 == 3))"
+    let ast,err = parseBool code
+    Assert.AreEqual (Success, err)
+    let optimal, _, _ = optimizeLogic (Option.get ast) Memory.empty
+    Assert.AreEqual (B false, optimal)
+    
+[<Test>]
+let ``Test boolean reductions solely #7`` () =
+    let code = "Pi>3 and (not (Pi>3)) or (Pi == Pi and true)"
+    let ast,err = parseBool code
+    Assert.AreEqual (Success, err)
+    let optimal, _, _ = optimizeLogic (Option.get ast) Memory.empty
+    Assert.AreEqual (B true, optimal)
+    
+[<Test>]
+let ``Test boolean reductions solely #8`` () =
+    let code = "((Pi>3) xor (Pi>3)) or (Pi != Pi and 3 == 5.2 or 3 != 0)"
+    let ast,err = parseBool code
+    Assert.AreEqual (Success, err)
+    let optimal, _, _ = optimizeLogic (Option.get ast) Memory.empty
+    Assert.AreEqual (B true, optimal)
+
+[<Test>]
+let ``Test boolean reductions solely #9`` () =
+    let code = "(Pi >= (3+Pi) and false) and (4 <= Pi)"
+    let ast,err = parseBool code
+    Assert.AreEqual (Success, err)
+    let optimal, _, _ = optimizeLogic (Option.get ast) Memory.empty
+    Assert.AreEqual (B false, optimal)
+    
+[<Test>]
+let ``Test boolean reductions solely #10`` () =
+    let code = "(not (Pi > 3) and (Pi > 3)) or (c |> Click or c|> Click or not (c |> Click))"
+    let ast,err = parseBool code
+    Assert.AreEqual (Success, err)
+    let optimal, _, _ = optimizeLogic (Option.get ast) Memory.empty
+    Assert.AreEqual (B true, optimal)

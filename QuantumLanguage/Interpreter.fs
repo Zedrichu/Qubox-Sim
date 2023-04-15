@@ -62,6 +62,24 @@ let internal allocateBits (alloc:Allocation):Map<string,int * int> * Map<string,
         failwith $"Invalid allocation of classical register {var} (already allocated as quantum)."
         else (qlist, clist)
 
+
+/// Helper functions to aid reductions
+let interopB op a b =
+    match a,b with
+    | Num a, Num b -> B (op (float a) (float b) )
+    | Num a, Float b -> B (op (float a) b)
+    | Float a, Num b -> B (op a (float b))
+    | Float a, Float b -> B (op a b)    
+    | _ -> failwith "Non-atomic expressions"
+    
+let interopA op a b =
+    match a,b with
+    | Num a, Num b -> Num (int (op (float a) (float b)) )
+    | Num a, Float b -> Float (op (float a) b)
+    | Float a, Num b -> Float (op a (float b))
+    | Float a, Float b -> Float (op a b)
+    | _ -> failwith "Non-atomic expressions"
+
 /// <summary>
 /// Function to eager evaluate arithmetic expressions with reduction rules.
 /// </summary>
@@ -71,7 +89,6 @@ let internal allocateBits (alloc:Allocation):Map<string,int * int> * Map<string,
 /// <returns>Reduced evaluation of AST arithmetic expression</returns>
 let rec internal evalArith (expr:ArithExpr) (memory:Map<string, ArithExpr * int>) : ArithExpr =
     match expr with
-    | Pi | Num _ | Float _ -> expr
     | VarA s -> try
                     let a, _ = Map.find s memory
                     evalArith a memory
@@ -79,79 +96,53 @@ let rec internal evalArith (expr:ArithExpr) (memory:Map<string, ArithExpr * int>
     | BinaryOp(x,Mul, y) ->  let x1 = evalArith x memory
                              let y1 = evalArith y memory
                              match x1, y1 with
-                             | Num a, Num b -> Num (a * b)
                              | Num 0, _ | _, Num 0 -> Num 0
                              | Float 0.0, _ | _, Float 0.0 -> Float 0.0
                              | Num 1, _ | Float 1.0, _ -> y1
                              | _, Num 1 | _, Float 1.0 -> x1
-                             | Float a, Num b -> Float (a * float b)
-                             | Num a, Float b -> Float (float a * b)
-                             | Float a, Float b -> Float (a * b)
-                             | BinaryOp(a, Div, c), BinaryOp(b, Div, d) ->
-                                 evalArith (BinaryOp(BinaryOp(a, Mul, b), Div, BinaryOp(c, Mul, d))) memory
-                             | BinaryOp(a, Div, c), b | b, BinaryOp(a, Div, c) when b=c -> a
-                             | BinaryOp(c, Add, d), Num b ->
-                                 evalArith (BinaryOp(BinaryOp(c, Mul, Num b), Add, BinaryOp(d, Mul, Num b))) memory
-                             | BinaryOp(c, Add, d), Float b ->
-                                 evalArith (BinaryOp(BinaryOp(c, Mul, Float b), Add, BinaryOp(d, Mul, Float b))) memory
-                             | Num a, BinaryOp(c, Add, d) ->
-                                 evalArith (BinaryOp(BinaryOp(c, Mul, Num a), Add, BinaryOp(d, Mul, Num a))) memory
-                             | Float a, BinaryOp(c, Add, d) ->
-                                 evalArith (BinaryOp(BinaryOp(c, Mul, Float a), Add, BinaryOp(d, Mul, Float a))) memory
-                             | UnaryOp (Minus, a), _ -> evalArith (UnaryOp(Minus, BinaryOp(a, Mul, y1))) memory
-                             | _, UnaryOp (Minus, a) -> evalArith (UnaryOp(Minus, BinaryOp(x1, Mul, a))) memory
-                             | Pi, c -> evalArith (BinaryOp(c, Mul, Pi)) memory
-                             | _ -> BinaryOp(x1, Mul, y1)
+                             | BinaryOp(a, Div, c), Num b ->
+                                 evalArith (BinaryOp(a, Mul, BinaryOp(Num b, Div, c))) memory
+                             | Pi, c -> BinaryOp(c, Mul, Pi)
+                             | _ -> try
+                                        interopA (*) x1 y1
+                                    with _ -> BinaryOp(x1, Mul, y1)
     | BinaryOp(x,Div,y) -> let x1 = evalArith x memory
                            let y1 = evalArith y memory
                            match x1, y1 with
-                           | Num a, Num b -> Num (a / b)
                            | Num 0, _ -> Num 0
-                           | _, Num 0 -> failwith $"Invalid division by zero - undefined!"
                            | Float 0.0, _ -> Float 0.0
-                           | _, Float 0.0 -> failwith $"Invalid division by zero - undefined!"
-                           | Num 1, _ -> y1
-                           | _, Num 1 -> x1
+                           | _, Num 0 | _, Float 0.0 -> failwith $"Invalid division by zero - undefined!"
+                           | _, Num 1 | _, Float 1.0 -> x1
                            | c, d when c=d -> Num 1
-                           | Float 1.0, _ -> y1
-                           | _, Float 1.0 -> x1
-                           | Float a, Num b -> Float (a / float b)
-                           | Num a, Float b -> Float (float a / b)
-                           | Float a, Float b -> Float (a / b)
+                           | BinaryOp(a, Mul, c), Num b ->
+                               evalArith (BinaryOp(BinaryOp(a, Div, Num b), Mul, c)) memory
                            | UnaryOp (Minus, a), _ -> evalArith (UnaryOp (Minus,BinaryOp(a,Div,y1))) memory
-                           | _, UnaryOp (Minus, a) -> evalArith (UnaryOp (Minus,BinaryOp(x1,Div,a))) memory
-                           | _ -> BinaryOp(x1,Div,y1)
+                           | _ -> try
+                                    interopA (/) x1 y1
+                                  with _ -> BinaryOp(x1, Div, y1)
     | BinaryOp(x,Add, y) -> let x1 = evalArith x memory
                             let y1 = evalArith y memory
                             match x1, y1 with
-                            | Num a, Num b -> Num (a + b)
-                            | Num 0, _ -> y1
-                            | c, d when c=d -> evalArith (BinaryOp(Num 2, Mul, x1)) memory
-                            | _, Num 0 -> x1
-                            | Float 0.0, _ -> y1
-                            | _, Float 0.0 -> x1
-                            | Float a, Num b -> Float (a + float b)
-                            | Num a, Float b -> Float (float a + b)
-                            | Float a, Float b -> Float (a + b)
+                            | _, Num 0 | _, Float 0.0 -> x1
+                            | Num 0, _ | Float 0.0, _ -> y1
+                            | BinaryOp(a, Add, c), Num b ->
+                                evalArith (BinaryOp(a, Add, BinaryOp(c, Add, Float b))) memory
+                            | c, d when c=d -> BinaryOp(Num 2, Mul, x1)
                             | UnaryOp (Minus, a), _ -> evalArith (BinaryOp(a, Sub, y1)) memory
-                            | _, UnaryOp (Minus, a) -> evalArith (BinaryOp(x1, Sub, a)) memory
                             | c, Pi -> evalArith (BinaryOp(Pi, Add, c)) memory
-                            | _ -> BinaryOp(x1, Add, y1)    
+                            | _ -> try
+                                       interopA (+) x1 y1
+                                   with _ -> BinaryOp(x1, Add, y1)  
     | BinaryOp(x,Sub, y) ->  let x1 = evalArith x memory
                              let y1 = evalArith y memory
                              match x1, y1 with
-                             | Num a, Num b -> Num (a - b)
                              | c , d when c=d -> Num 0
-                             | Num 0, _ -> evalArith (UnaryOp (Minus, y1)) memory
-                             | _, Num 0 -> x1
-                             | Float 0.0, _ -> evalArith (UnaryOp (Minus, y1)) memory
-                             | _, Float 0.0 -> x1
-                             | Float a, Num b -> Float (a - float b)
-                             | Num a, Float b -> Float (float a - b)
-                             | Float a, Float b -> Float (a - b)
-                             | UnaryOp (Minus, a), _ -> evalArith (UnaryOp (Minus,BinaryOp(a, Add, y1))) memory
-                             | _, UnaryOp (Minus, a) -> evalArith (BinaryOp(x1, Add, a)) memory
-                             | _ -> BinaryOp(x1, Sub, y1)
+                             | Num 0, _ | Float 0.0, _ ->
+                                    evalArith (UnaryOp (Minus, y1)) memory
+                             | _, Num 0 | _, Float 0.0 -> x1
+                             | _ -> try
+                                        interopA (-) x1 y1
+                                    with _ -> BinaryOp(x1, Sub, y1)
     | UnaryOp(Minus,x) -> let x1 = evalArith x memory
                           match x1 with
                           | Num a -> Num (-a)
@@ -162,32 +153,26 @@ let rec internal evalArith (expr:ArithExpr) (memory:Map<string, ArithExpr * int>
     | BinaryOp(x,Pow,y) -> let x1 = evalArith x memory
                            let y1 = evalArith y memory
                            match x1, y1 with
-                           | Num a, Num b -> Num (int (float a ** float b))
                            | Num 0, _ -> Num 0
-                           | _, Num 0 -> Num 1
+                           | _, Num 0 | Num 1, _ -> Num 1
                            | Float 0.0, _ -> Float 0.0
-                           | _, Float 0.0 -> Float 1.0
-                           | Num 1, _ -> Num 1
-                           | _, Num 1 -> x1
-                           | Float 1.0, _ -> Float 1.0
-                           | _, Float 1.0 -> x1
-                           | Float a, Num b -> Float (a ** float b)
-                           | Num a, Float b -> Float (float a ** b)
-                           | Float a, Float b -> Float (a ** b)
-                           | _ -> BinaryOp(x1, Pow, y1)
+                           | _, Float 0.0 | Float 1.0, _ -> Float 1.0
+                           | _, Num 1 | _, Float 1.0 -> x1
+                           | _ -> try
+                                        interopA ( ** ) x1 y1
+                                  with _ -> BinaryOp(x1, Pow, y1)
     | BinaryOp(x,Mod,y) -> let x1 = evalArith x memory
                            let y1 = evalArith y memory
                            match x1, y1 with
-                           | Num a, Num b -> Num (a % b)
                            | Num 0, _ -> Num 0
-                           | _, Num 0 -> failwith $"Invalid modulo by zero - undefined!"
                            | Float 0.0, _ -> Float 0.0
-                           | _, Float 0.0 -> failwith $"Invalid modulo by zero - undefined!"
-                           | Float a, Num b -> Float (a % float b)
-                           | Num a, Float b -> Float (float a % b)
-                           | Float a, Float b -> Float (a % b)
-                           | _ -> BinaryOp(x1, Mod, y1)
+                           | _, Num 0 | _, Float 0.0 -> failwith $"Invalid modulo by zero - undefined!"
+                           | _ -> try
+                                        interopA (%) x1 y1
+                                  with _ -> BinaryOp(x1, Mod, y1)
     | _ -> expr
+
+    
 
 /// <summary>
 /// Function to eager evaluate boolean expressions with reduction rules
@@ -200,36 +185,37 @@ let rec internal evalArith (expr:ArithExpr) (memory:Map<string, ArithExpr * int>
 let rec internal evalBool (expr:BoolExpr) (memoryB:Map<string, BoolExpr * int>)
     (memoryA:Map<string, ArithExpr * int>) : BoolExpr =
     match expr with 
-    | B _ -> expr
+    | Check(_, Click) | B _ -> expr
     | VarB s -> try
                     let b, _ = Map.find s memoryB
                     evalBool b memoryB memoryA
                 with _ -> failwith $"Unknown variable in expression - {s} has not been declared!"    
+    | LogicOp(x, And, Not(y)) when x=y -> B false
     | LogicOp(x, And, y) ->  let x1 = evalBool x memoryB memoryA
                              let y1 = evalBool y memoryB memoryA
                              match x1, y1 with
                              | B x, B y -> B (x && y)
-                             | B false, _ -> B false
                              | c,d when c=d -> x1
-                             | c, Not(d) | Not(d), c when c=d -> B false
-                             | Check (b, r), d -> LogicOp(d, And, Check (b,r))
+                             | B false, _ | _, B false -> B false   
+                             | B true, _ -> y1
+                             | Not(c), d | d, Not(c) when c=d -> B false
+                             | Check (b, r), d ->
+                                 evalBool (LogicOp(d, And, Check (b,r))) memoryB memoryA
                              | _ -> LogicOp(x1, And, y1)
     | LogicOp(x,Or,y) -> let x1 = evalBool x memoryB memoryA
                          let y1 = evalBool y memoryB memoryA
                          match x1, y1 with
                          | B a, B b -> B (a || b)
-                         | B true, _ -> B true
+                         | B true, _ | _, B true -> B true
+                         | _, B false -> x1
                          | c,d when c=d -> x1
                          | c, Not(d) | Not(d), c when c=d -> B true
-                         | Check (b, r), d -> LogicOp(d, Or, Check (b,r))
                          | _ -> LogicOp(x1, Or, y1)
     | LogicOp(x,Xor,y) -> let x1 = evalBool x memoryB memoryA
                           let y1 = evalBool y memoryB memoryA
                           match x1, y1 with
                           | B a, B b -> B (a <> b)
                           | c,d when c=d -> B false
-                          | c, Not(d) | Not(d), c when c=d -> B true
-                          | Check (b, r), d -> LogicOp(d, Xor, Check (b,r))
                           | _ -> LogicOp(x1, Xor, y1)
     | Not x ->  let x1 = evalBool x memoryB memoryA
                 match x1 with
@@ -239,57 +225,45 @@ let rec internal evalBool (expr:BoolExpr) (memoryB:Map<string, BoolExpr * int>)
     | RelationOp(x,EQ,y) -> let x1 = evalArith x memoryA
                             let y1 = evalArith y memoryA
                             match x1, y1 with
-                            | Num a, Num b -> B (a = b)
-                            | Num a, Float b -> B (float a = b)
-                            | Float a, Num b -> B (a = float b)
-                            | Float a, Float b -> B (a = b)
                             | c, d when c=d -> B true
-                            | _ -> RelationOp(x1, EQ, y1)
+                            | _ -> try
+                                       interopB (=) x1 y1
+                                   with _ -> RelationOp(x1, EQ, y1)
     | RelationOp(x,NEQ,y)-> let x1 = evalArith x memoryA
                             let y1 = evalArith y memoryA
                             match x1, y1 with
-                            | Num a, Num b -> B (a <> b)
-                            | Num a, Float b -> B (float a <> b)
-                            | Float a, Num b -> B (a <> float b)
-                            | Float a, Float b -> B (a <> b)
                             | c, d when c=d -> B false
-                            | _ -> Not(RelationOp(x1, EQ, y1))
+                            | _ -> try
+                                        interopB (<>) x1 y1
+                                   with _ ->
+                                       Not(RelationOp(x1, EQ, y1))
     | RelationOp(x,LT,y) -> let x1 = evalArith x memoryA
                             let y1 = evalArith y memoryA
-                            match x1, y1 with
-                            | Num a, Num b -> B (a < b)
-                            | Num a, Float b -> B (float a < b)
-                            | Float a, Num b -> B (a < float b)
-                            | Float a, Float b -> B (a < b)
-                            | _ -> RelationOp(x1, LT, y1)
+                            try
+                                interopB (<) x1 y1
+                            with _ ->
+                                RelationOp(x1, LT, y1)
+                            
     | RelationOp(x,LTE,y) -> let x1 = evalArith x memoryA
                              let y1 = evalArith y memoryA
-                             match x1, y1 with
-                             | Num a, Num b -> B (a <= b)
-                             | Num a, Float b -> B (float a <= b)
-                             | Float a, Num b -> B (a <= float b)
-                             | Float a, Float b -> B (a <= b)
                              // a <= b = not (b < a)
-                             | _ -> evalBool (Not (RelationOp(y1, LT, x1))) memoryB memoryA
+                             try
+                                interopB (<=) x1 y1
+                             with _ -> Not (RelationOp(y1, LT, x1))
+                             
     | RelationOp(x,GT,y) -> let x1 = evalArith x memoryA
                             let y1 = evalArith y memoryA
-                            match x1, y1 with
-                            | Num a, Num b -> B (a > b)
-                            | Num a, Float b -> B (float a > b)
-                            | Float a, Num b -> B (a > float b)
-                            | Float a, Float b -> B (a > b)
                             // a > b = b < a
-                            | _ -> evalBool (RelationOp(y1, LT, x1)) memoryB memoryA
+                            try
+                                interopB (>) x1 y1
+                            with _ -> RelationOp(y1, LT, x1)
     | RelationOp(x,GTE,y) -> let x1 = evalArith x memoryA
                              let y1 = evalArith y memoryA
-                             match x1, y1 with
-                             | Num a, Num b -> B (a >= b)
-                             | Num a, Float b -> B (float a >= b)
-                             | Float a, Num b -> B (a >= float b)
-                             | Float a, Float b -> B (a >= b)
                              // a >= b = not (a < b)
-                             | _ -> evalBool (Not (RelationOp(x1, LT, y1))) memoryB memoryA
-    | Check _ -> expr
+                             try
+                                interopB (>=) x1 y1
+                             with _ -> Not (RelationOp(x1, LT, y1))
+    | Check(bit, NoClick) -> Not (Check(bit, Click))
 
 /// <summary>
 /// Function to optimize statement AST by reducing expressions and building memory

@@ -156,7 +156,9 @@ public class UnitCircuits
         Assert.That(Interpreter.Error, Is.EqualTo(AST.Error.Success));
         var generator = new Generator(circuit);
         var result = Generator.DestructCircuit();
-        Assert.That(result, Is.EqualTo(ast.Item1.Value));
+        var code2 = "Qalloc q; Calloc c; If (c |> Click) U (1,2,3) q;";
+        var ast2 = Handler.parseQuLang(code2);
+        Assert.That(result, Is.EqualTo(ast2.Item1.Value));
     }
 
     [Test]
