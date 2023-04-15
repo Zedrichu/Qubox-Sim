@@ -10,32 +10,67 @@
 
 <p>This component demonstrates the simulation of the provided circuit.</p>
 <div class="alert alert-danger" role="alert">
-    <b>Warning! </b>The simulation is not yet implemented. Coming soon!
+    <b>Warning! </b>The simulation is in an early phase of implementation. Updates coming soon!
 </div>
 
 <div class="info-body" style="justify-content: center; text-align: center">
     <p>@StateContainer.PrintState()</p>
     <h1 @onmouseover="@SimCircuit">Hover to simulate circuit!</h1>
 </div>
-<p>Here are the circuit simulation results:</p>
-<span>@DisplayResults(results)</span>
 
-<div class="music">
-<div class="bar"></div>
-<div class="bar"></div>
-<div class="bar"></div>
-<div class="bar"></div>
-<div class="bar"></div>
-<div class="bar"></div>
-<div class="bar"></div>
-<div class="bar"></div>
-<div class="bar"></div>
-<div class="bar"></div>
-</div>
+@{
+    if (state == null)
+    {
+        <div class="music">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        </div>
+    }
+    else
+    {
+        <p>Here are the circuit simulation results:</p>
+        <span style="display: flex; flex-direction: row; justify-content: space-between">
+            <span>
+                State Vector:
+                <ul>
+                    @{
+                        var i = 0;
+                        foreach (var x in state.StateVector)
+                        {
+                            <li> State |@Convert.ToString(i, 2)>: @x.ToString() </li>
+                            i++;
+                        }
+                    }
+                </ul>
+            </span>
+            <span>
+                Measurement Results (probabilities of each outcome):
+                <ul>
+                    @{
+                        var j = 0;
+                        foreach (var x in state.ProbeVector)
+                        {
+                            <li> State |@Convert.ToString(j, 2)>: @(x*100) %</li>
+                            j++;
+                        }
+                    }
+                </ul>
+            </span>
+        </span>        
+    }
+}
 
 
 @code {
-    private Vector<Complex>? results;
+    private State state;
 
     protected override void OnInitialized()
     {
@@ -55,12 +90,12 @@
             return;
         }
         var simulator = new Simulator(circuit);
-        results = simulator.Run();
+        state = simulator.Run();
         
         StateHasChanged();
     }
     
-    private string DisplayResults(Vector<Complex>? results )
+    private string DisplayResults(State results )
     {
         if (results == null)
         {
