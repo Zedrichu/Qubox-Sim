@@ -150,4 +150,29 @@ public class SimulatorTests
         Assert.That(state.ProbeVector[1], Is.EqualTo(0.109).Within(0.001));
         Assert.That(state.ProbeVector[3], Is.EqualTo(0.036).Within(0.001));
     }
+    
+    [Test]
+    public void CSHSOperatorPart()
+    {
+        var code =
+            "Qalloc q[3]; Calloc c[2]; H q[0]; CNOT q[0], q[1]; RY(-Pi/2) q[0]; CNOT q[1], q[2]; Measure q[0] -> c[0]; RY(-Pi/4) q[1]; Measure q[1] -> c[1];";
+        Interpreter.HandleLang(code);
+        var circuit = Interpreter.Interpret();
+        Assert.AreEqual(Interpreter.Error, AST.Error.Success);
+        var simulator = new Simulator(circuit);
+        var state = simulator.Run();
+        
+        // Check the resulting state vector
+        Console.WriteLine(state.StateVector);
+        Console.WriteLine(state.ProbeVector);
+
+        Assert.That(state.StateVector[0].Real, Is.EqualTo(0.923).Within(0.001));
+        Assert.That(state.StateVector[1].Real, Is.EqualTo(0.382).Within(0.001));
+        
+        // Check the resulting probabilities
+        foreach (var prob in state.ProbeVector)
+        {
+            Assert.That(prob, Is.EqualTo(0.25).Within(0.001));
+        }
+    }
 }

@@ -56,7 +56,7 @@ public class Simulator
                 supportGate.SupportState(_state);
                 if (supportGate.SupportType is SupportType.Measure)
                 {
-                    matrix = Matrix<Complex>.Build.DenseIdentity((_qubits - gate.TargetRange.Item1) * 2);
+                    matrix = Matrix<Complex>.Build.DenseIdentity((int) Math.Pow(2, _qubits - gate.TargetRange.Item1));
                     nom = false;
                 }
 

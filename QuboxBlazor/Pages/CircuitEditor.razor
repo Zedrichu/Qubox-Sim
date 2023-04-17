@@ -60,7 +60,7 @@
         StateContainer.OnChange += StateHasChanged;
     }
 
-    private void UpdateCircuit(MouseEventArgs e)
+    private async void UpdateCircuit(MouseEventArgs e)
     {
         Interpreter.HandleLang(Content);
         Console.WriteLine(Content);
@@ -71,6 +71,7 @@
             Console.WriteLine("Circuit is still missing!");
             return;
         }
+        await Task.Delay(300);
         _circuit = circuit;
         StateContainer.Property = _circuit;
     }

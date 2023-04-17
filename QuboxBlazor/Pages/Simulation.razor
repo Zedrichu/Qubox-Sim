@@ -58,7 +58,7 @@
                         var j = 0;
                         foreach (var x in state.ProbeVector)
                         {
-                            <li> State |@Convert.ToString(j, 2)>: @(x*100) %</li>
+                            <li> State |@Convert.ToString(j, 2)>: @Math.Round(x*100, 4) %</li>
                             j++;
                         }
                     }
@@ -82,7 +82,7 @@
         StateContainer.OnChange -= StateHasChanged;
     }
     
-    private void SimCircuit()
+    private async void SimCircuit()
     {
         var circuit = StateContainer.Property;
         if (circuit == null)
@@ -91,7 +91,8 @@
         }
         var simulator = new Simulator(circuit);
         state = simulator.Run();
-        
+
+        await Task.Delay(300);
         StateHasChanged();
     }
     
