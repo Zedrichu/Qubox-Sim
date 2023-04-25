@@ -2,8 +2,8 @@ module Tests.Analysis
 
 open Microsoft.FSharp.Core
 open NUnit.Framework
-open QuantumLanguage.Handler
-open QuantumLanguage.AST
+open QuLangProcessor.Handler
+open QuLangProcessor.AST
 
 [<Test>]
 let ``Test for invalid bit registers`` () =

@@ -13,7 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\QuantumLanguage\QuantumLanguage.fsproj" />
+      <ProjectReference Include="..\QuLangProcessor\QuLangProcessor.fsproj" />
     </ItemGroup>
   
 </Project>

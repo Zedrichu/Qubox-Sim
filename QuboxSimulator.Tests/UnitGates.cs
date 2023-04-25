@@ -1,7 +1,3 @@
-using QuantumLanguage;
-using QuboxSimulator;
-using QuboxSimulator.Gates;
-
 namespace QuboxSimulator.Tests;
 
 public class GateTests

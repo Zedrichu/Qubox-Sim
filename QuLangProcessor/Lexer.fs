@@ -1,4 +1,4 @@
-module internal QuantumLanguage.Lexer
+module internal QuLangProcessor.Lexer
 # 2 "Lexer.fsl"
  
 open FSharp.Text.Lexing

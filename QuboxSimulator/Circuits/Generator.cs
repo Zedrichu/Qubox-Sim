@@ -1,9 +1,9 @@
 using Microsoft.FSharp.Collections;
 using Microsoft.FSharp.Core;
-using QuantumLanguage;
+using QuLangProcessor;
 using QuboxSimulator.Gates;
-using static QuantumLanguage.AST;
-using static QuantumLanguage.Tags;
+using static QuLangProcessor.AST;
+using static QuLangProcessor.Tags;
 
 namespace QuboxSimulator.Circuits;
 

@@ -18,10 +18,10 @@
         <Compile Include="Tags.fs" />
         <Compile Include="AST.fs" />
         <FsYacc Include="Parser.fsy">
-            <OtherFlags>--module QuantumLanguage.Parser --internal</OtherFlags>
+            <OtherFlags>--module QuLangProcessor.Parser --internal</OtherFlags>
         </FsYacc>
         <FsLex Include="Lexer.fsl">
-            <OtherFlags>--module QuantumLanguage.Lexer --internal --unicode</OtherFlags>
+            <OtherFlags>--module QuLangProcessor.Lexer --internal --unicode</OtherFlags>
         </FsLex>
         <Compile Include="Parser.fsi" />
         <Compile Include="Parser.fs" />
@@ -37,7 +37,6 @@
         <Pack>True</Pack>
         <Link>qubox-logo.png</Link>
       </None>
-      <Compile Include="Tags.fs" />
     </ItemGroup>
 
 </Project>

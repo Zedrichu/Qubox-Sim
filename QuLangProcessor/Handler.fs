@@ -1,7 +1,7 @@
 ﻿/// <summary>
 /// Interface to library assisting the parsing/compilation process from QuLang user-input
 /// </summary>
-module public QuantumLanguage.Handler
+module public QuLangProcessor.Handler
 (* F#
  -*- coding: utf-8 -*-
 Quantum Language Handler
@@ -17,7 +17,7 @@ Description: Library to assist the parsing/compilation process from QuLang user-
 open System
 open FSharp.Text
 open Microsoft.FSharp.Core
-open QuantumLanguage.AST
+open QuLangProcessor.AST
 
 /// <summary>
 /// Interface method to parse QuLang code to circuit AST based on the grammar rules

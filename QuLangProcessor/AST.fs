@@ -1,7 +1,7 @@
 /// <summary>
 /// Declaration module containing the types required to build the abstract syntax tree of QuLang.
 /// </summary>
-module public QuantumLanguage.AST
+module public QuLangProcessor.AST
 
 (* F#
  -*- coding: utf-8 -*-
@@ -16,8 +16,8 @@ Description: Declaration module containing the types required to build the abstr
 @__Status --> DEV
 *)
 
-open QuantumLanguage.VisitorPattern
-open QuantumLanguage.Tags
+open QuLangProcessor.VisitorPattern
+open QuLangProcessor.Tags
 
 /// Disjoint union type of arithmetic operators
 type AOp = // Arithmetic operators

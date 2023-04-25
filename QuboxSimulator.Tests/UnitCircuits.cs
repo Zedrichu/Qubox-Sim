@@ -1,4 +1,3 @@
-using Newtonsoft.Json.Converters;
 using QuboxSimulator.Circuits;
 using QuboxSimulator.Gates;
 

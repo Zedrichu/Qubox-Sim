@@ -4,7 +4,7 @@ open System
 open Microsoft.FSharp.Core
 open NUnit.Framework
 
-open QuantumLanguage
+open QuLangProcessor
 open Handler
 open AST
 

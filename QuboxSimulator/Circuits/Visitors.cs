@@ -1,6 +1,6 @@
 using QuboxSimulator.Gates;
-using static QuantumLanguage.VisitorPattern;
-using static QuantumLanguage.AST;
+using static QuLangProcessor.VisitorPattern;
+using static QuLangProcessor.AST;
 
 namespace QuboxSimulator.Circuits;
 /* C#

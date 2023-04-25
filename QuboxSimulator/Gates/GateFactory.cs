@@ -1,6 +1,6 @@
 using MathNet.Numerics.LinearAlgebra;
 using Complex = System.Numerics.Complex;
-using static QuantumLanguage.Tags;
+using static QuLangProcessor.Tags;
 
 namespace QuboxSimulator.Gates;
 

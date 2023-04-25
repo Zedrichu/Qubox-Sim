@@ -1,5 +1,5 @@
-using static QuantumLanguage.AST;
-using static QuantumLanguage.Handler;
+using static QuLangProcessor.AST;
+using static QuLangProcessor.Handler;
 using QuboxSimulator.Circuits;
 
 namespace QuboxSimulator;

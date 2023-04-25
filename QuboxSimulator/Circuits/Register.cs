@@ -1,4 +1,4 @@
-using QuantumLanguage;
+using QuLangProcessor;
 
 namespace QuboxSimulator.Circuits;
 

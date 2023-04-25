@@ -1,7 +1,7 @@
 /// <summary>
 /// Compiler module handling the conversion from AST structure to Q# compiling code
 /// </summary>
-module public QuantumLanguage.Compiler
+module public QuLangProcessor.Compiler
 (* F#
  -*- coding: utf-8 -*-
 Q# Compiler from QuLang AST
@@ -16,7 +16,6 @@ Description: Compiler module handling the conversion from AST structure to Q# co
 *)
 
 open AST
-open QuantumLanguage.AST
 open Tags
 
 /// <summary>

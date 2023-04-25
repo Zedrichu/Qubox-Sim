@@ -1,7 +1,7 @@
 /// <summary>
 /// Module defining the interpretation/optimization of QuLang AST to a quantum circuit.
 /// </summary>
-module internal QuantumLanguage.Interpreter
+module internal QuLangProcessor.Interpreter
 (** F#
  -*- coding: utf-8 -*-
 QuLang Interpreter 
@@ -17,7 +17,7 @@ Includes expression evaluation and semantic analyzers.
 *)
 open Microsoft.FSharp.Core
 open Microsoft.FSharp.Collections
-open QuantumLanguage.AST
+open QuLangProcessor.AST
 
 module public Map =    
     /// Map union function

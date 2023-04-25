@@ -1,7 +1,7 @@
 /// <summary>
 /// Translator module handling the conversion from AST back to QuLang code definition.
 /// </summary>
-module internal QuantumLanguage.Translator
+module internal QuLangProcessor.Translator
 (* F#
  -*- coding: utf-8 -*-
 AST to QuLang Translator (reverse interpreter)
@@ -16,7 +16,6 @@ Description: Translator module handling the conversion from AST back to QuLang c
 *)
 
 open AST
-open QuantumLanguage.AST
 
 /// <summary>
 /// Function to translate quantum bit to QuLang declaration.

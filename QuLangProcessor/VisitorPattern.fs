@@ -1,4 +1,4 @@
-module public QuantumLanguage.VisitorPattern
+module public QuLangProcessor.VisitorPattern
 
 type IVisitor<'T, 'S> =
     abstract member Visit : 'T -> 'S

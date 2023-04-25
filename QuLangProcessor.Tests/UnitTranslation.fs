@@ -1,9 +1,9 @@
 module Tests.Translation
 
 open NUnit.Framework
-open QuantumLanguage.Handler
-open QuantumLanguage.Tags
-open QuantumLanguage.AST
+open QuLangProcessor.Handler
+open QuLangProcessor.Tags
+open QuLangProcessor.AST
 
 [<SetUp>]
 let Setup () =

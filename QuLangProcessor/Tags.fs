@@ -1,4 +1,4 @@
-module public QuantumLanguage.Tags
+module public QuLangProcessor.Tags
 
 /// Disjoint union type of unary gates
 type UTag =

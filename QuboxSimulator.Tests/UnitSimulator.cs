@@ -1,7 +1,3 @@
-using MathNet.Numerics.LinearAlgebra;
-using MathNet.Numerics.LinearAlgebra.Complex;
-using Complex = System.Numerics.Complex;
-
 namespace QuboxSimulator.Tests;
 
 public class SimulatorTests

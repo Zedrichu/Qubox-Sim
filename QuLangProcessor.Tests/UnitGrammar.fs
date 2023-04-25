@@ -2,7 +2,7 @@ module Tests.Grammar
 
 open NUnit.Framework
 
-open QuantumLanguage
+open QuLangProcessor
 open AST
 open Tags
 
