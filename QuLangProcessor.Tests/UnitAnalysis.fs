@@ -9,7 +9,7 @@ open QuLangProcessor.AST
 let ``Test for invalid bit registers`` () =
     let code = "Qalloc q; Calloc c, q; x:=a;"
     let ast, err = parseQuLang code
-    Assert.AreEqual(err, Success)
+    Assert.AreEqual(Success, err)
     let mem, err = ast |> Option.get |> analyzeSemantics
     match err with
         | Success -> Assert.Fail()
@@ -19,7 +19,7 @@ let ``Test for invalid bit registers`` () =
 let ``Test for invalid bit operation`` () =
     let code = "Qalloc q; Calloc c; x:=a; H x[2]; P(50) c;"
     let ast, err = parseQuLang code
-    Assert.AreEqual(err, Success)
+    Assert.AreEqual(Success, err)
     let mem, err = ast |> Option.get |> analyzeSemantics
     match err with
         | Success -> Assert.Fail()
@@ -29,15 +29,15 @@ let ``Test for invalid bit operation`` () =
 let ``Successful bit allocation and valid operators`` () =
     let code = "Qalloc q[2],r; Calloc c; ID q[0]; CNOT q[0], q[1]; RXX (Pi) q[0], r;"
     let ast, err = parseQuLang code
-    Assert.AreEqual(err, Success)
+    Assert.AreEqual(Success, err)
     let mem, err = ast |> Option.get |> analyzeSemantics
-    Assert.AreEqual(err, Success)
+    Assert.AreEqual(Success, err)
     
 [<Test>]
 let ``Test for invalid measurement #1`` () =
     let code = "Qalloc q[2],r; Calloc c; Measure c -> r;"
     let ast, err = parseQuLang code
-    Assert.AreEqual(err, Success)
+    Assert.AreEqual(Success, err)
     let mem, err = ast |> Option.get |> analyzeSemantics
     match err with
         | Success -> Assert.Fail()
@@ -47,7 +47,7 @@ let ``Test for invalid measurement #1`` () =
 let ``Test for invalid measurement #2`` () =
     let code = "Qalloc q[2],r; Calloc c; Measure r -> q[1];"
     let ast, err = parseQuLang code
-    Assert.AreEqual(err, Success)
+    Assert.AreEqual(Success, err)
     let mem, err = ast |> Option.get |> analyzeSemantics
     match err with
         | Success -> Assert.Fail()
@@ -57,7 +57,7 @@ let ``Test for invalid measurement #2`` () =
 let ``Overflow of register `` () =
     let code = "Qalloc q[2]; Calloc c; RX (Pi) q[2];"
     let ast, err = parseQuLang code
-    Assert.AreEqual(err, Success)
+    Assert.AreEqual(Success, err)
     let mem, err = ast |> Option.get |> analyzeSemantics
     match err with
         | Success -> Assert.Fail()
@@ -67,15 +67,15 @@ let ``Overflow of register `` () =
 let ``Test successful Toffoli and Conditional`` () =
     let code = "Qalloc q[2], r; Calloc c; If (c |> Click) CCX q[0], q[1], r;"
     let ast, err = parseQuLang code
-    Assert.AreEqual(err, Success)
+    Assert.AreEqual(Success, err)
     let mem, err = ast |> Option.get |> analyzeSemantics
-    Assert.AreEqual(err, Success)
+    Assert.AreEqual(Success, err)
     
 [<Test>]
 let ``Unsuccessful conditional & parametric`` () =
     let code = "Qalloc q[2], r; Calloc c; Reset q[0]; PhaseDisk; If (not (true) and r |> Click) Z q;"
     let ast, err = parseQuLang code
-    Assert.AreEqual(err, Success)
+    Assert.AreEqual(Success, err)
     let mem, err = ast |> Option.get |> analyzeSemantics
     match err with
         | Success -> Assert.Fail()

@@ -1,12 +1,13 @@
 ﻿/// <summary>
-/// Interface to library assisting the parsing/compilation process from QuLang user-input
+/// Interface to library assisting the compilation of QuLang input
 /// </summary>
 module public QuLangProcessor.Handler
 (* F#
  -*- coding: utf-8 -*-
 Quantum Language Handler
 
-Description: Library to assist the parsing/compilation process from QuLang user-input.
+Description: Facade of library assisting the compilation of QuLang input.
+Acts as an API for different functionalities of the library.
 
 @__Author --> Created by Adrian Zvizdenco aka Zedrichu
 @__Date & Time --> Created on 21/02/2023
@@ -88,26 +89,26 @@ let public parseArith (expr:string): ArithExpr option * Error =
               (None, SyntaxError(token, line, column))
 
 /// <summary>
-/// Interface method to translate generated circuit AST backwards to QuLang code
+/// Interface method to back-compile generated circuit AST to QuLang code
 /// </summary>
 /// <param name="circuit">Generated AST for translation(AST.Circuit)</param>
 /// <returns>QuLang string representation</returns>
-let rec public translateCircuit (circuit:Circuit) : string = 
+let rec public backCompileCircuit (circuit:Circuit) : string = 
     let AllocQC(q, c), Flow(flow) = circuit
-    $"Qalloc {Translator.transBit q};\nCalloc {Translator.transBit c};
-        \n\n{Translator.transFlow flow}"
+    $"Qalloc {BackCompiler.backCompileBit q};\nCalloc {BackCompiler.backCompileBit c};
+        \n\n{BackCompiler.backCompileFlow flow}"
    
     
 /// <summary>
-/// Interface method to compile generated AST to Q# code
+/// Interface method to translate generated AST to Q# code
 /// </summary>
 /// <param name="circuit">Generated circuit AST for compilation (AST.Circuit)</param>
 /// <returns>Q# string representation</returns>
-let public compileCircuit (circuit:Circuit):string =
+let public translateCircuit (circuit:Circuit):string =
     let AllocQC(q,c), Flow(flow) = circuit
-    let str = Compiler.compileAlloc q true + "\n" +
-              Compiler.compileAlloc c false + "\n\n"
-    str + Compiler.compileFlow flow
+    let str = Translator.translateAlloc q true + "\n" +
+              Translator.translateAlloc c false + "\n\n"
+    str + Translator.translateFlow flow
     
 let public wrapQSharp (compiled:string) : string =
     let header = "namespace Quantum.App {\n\n
@@ -129,9 +130,9 @@ let public wrapQSharp (compiled:string) : string =
 let public analyzeSemantics (ast:Circuit): Memory * Error =
     let reg, Flow ops = ast
     try
-        let quantumMap, classicMap = Interpreter.allocateBits reg
+        let quantumMap, classicMap = Compiler.allocateBits reg
         let memory = Memory.empty.SetQuantumClassic quantumMap classicMap
-        Interpreter.semanticAnalyzer ops memory
+        Compiler.semanticAnalyzer ops memory
         memory, Success        
     with e -> Memory.empty, SemanticError e.Message
 
@@ -145,7 +146,7 @@ let public optimizeAST (ast:Schema) (memory:Memory):
     Schema * Memory * Error =
     try
         let (Flow ops) = ast
-        let optimized = Interpreter.optimizeCircuit ops Map.empty Map.empty 0
+        let optimized = Compiler.optimizeCircuit ops Map.empty Map.empty 0
         let _, memA, memB, optAST = optimized
         let updMemory = (memory.SetArithmetic memA).SetBoolean memB
         Flow optAST, updMemory, Success
@@ -153,13 +154,13 @@ let public optimizeAST (ast:Schema) (memory:Memory):
 
 let public optimizeLogic (ast:BoolExpr) (memory:Memory) : BoolExpr * Memory * Error =
     try
-        let optimized = Interpreter.evalBool ast memory.Boolean memory.Arithmetic
+        let optimized = Compiler.evalBool ast memory.Boolean memory.Arithmetic
         optimized, memory, Success
     with e -> ast, memory, EvaluationError e.Message
 
 let public optimizeArithmetic (ast:ArithExpr) (memory:Memory) : ArithExpr * Memory * Error =
     try
-        let optimized = Interpreter.evalArith ast memory.Arithmetic
+        let optimized = Compiler.evalArith ast memory.Arithmetic
         optimized, memory, Success
     with e -> ast, memory, EvaluationError e.Message
 
@@ -202,10 +203,10 @@ let rec private execute (ast:Circuit) =
                  printfn $"Memory:%A{updMemory}"
                  printfn $"Status:%A{err}"
                  execute(ast)
-    | true, 3 -> let qSharp = compileCircuit ast
+    | true, 3 -> let qSharp = translateCircuit ast
                  printfn $"%A{qSharp}"
                  execute(ast)
-    | true, 4 -> let quLang = translateCircuit ast              
+    | true, 4 -> let quLang = backCompileCircuit ast              
                  printfn $"%A{quLang}"
                  execute(ast)
     | true, 5 -> ()
@@ -243,7 +244,7 @@ let rec mainMenu () =
     | true, 4 -> ()
     | _ -> mainMenu()
 
-// [<EntryPoint>]
-//     let main argv =
-//         mainMenu()
-//         0 // return an integer exit code
+[<EntryPoint>]
+    let main argv =
+        mainMenu()
+        0 // return an integer exit code

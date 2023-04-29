@@ -14,7 +14,6 @@
         <PackageReference Update="FSharp.Core" Version="7.0.200" />
         <PackageReference Include="FsLexYacc" Version="11.0.1" GeneratePathProperty="true" />
         <PackageReference Include="FsLexYacc.Runtime" Version="11.0.1" />
-        <Compile Include="VisitorPattern.fs" />
         <Compile Include="Tags.fs" />
         <Compile Include="AST.fs" />
         <FsYacc Include="Parser.fsy">
@@ -26,9 +25,9 @@
         <Compile Include="Parser.fsi" />
         <Compile Include="Parser.fs" />
         <Compile Include="Lexer.fs" />
-        <Compile Include="Interpreter.fs" />
-        <Compile Include="Translator.fs" />
         <Compile Include="Compiler.fs" />
+        <Compile Include="BackCompiler.fs" />
+        <Compile Include="Translator.fs" />
         <Compile Include="Handler.fs" />
     </ItemGroup>
 

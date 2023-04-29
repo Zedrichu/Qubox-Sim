@@ -1,5 +1,4 @@
 using QuboxSimulator.Gates;
-using static QuLangProcessor.VisitorPattern;
 using static QuLangProcessor.AST;
 
 namespace QuboxSimulator.Circuits;

@@ -16,8 +16,15 @@ Description: Declaration module containing the types required to build the abstr
 @__Status --> DEV
 *)
 
-open QuLangProcessor.VisitorPattern
 open QuLangProcessor.Tags
+
+/// Interface for the visitor (visitor design pattern)
+type IVisitor<'T, 'S> =
+    abstract member Visit : 'T -> 'S
+
+/// Interface for the visitable (visitor design pattern)
+type IVisitable<'T> =
+    abstract member Accept : IVisitor<'T, 'S> -> 'S
 
 /// Disjoint union type of arithmetic operators
 type AOp = // Arithmetic operators

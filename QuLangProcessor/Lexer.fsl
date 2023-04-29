@@ -18,7 +18,7 @@ let float       = (digit* '.' digit+ )
 let whitespace  = [' ' '\t']
 let newline     = "\n\r" | '\n' | '\r'
 let char        = ['a'-'z' 'A'-'Z']
-let variable    =  char ( char | digit | _ )*
+let variable    =  char ( char | digit )*
 let bool        = "true"|"false"
 //digit can also be \d+ 
 //whitespace can also be [\u00A0 \n \r \t]
@@ -69,7 +69,7 @@ rule tokenize = parse
 | '<'           { LESS }
 | "<="          { LESSEQ }
 
-// Operator expressions to TOKENs
+// Command expressions to TOKENs
 | "Qalloc"whitespace    { QUANTREG }
 | "Calloc"whitespace    { CLASSREG }
 | "=|"                  { BASSIGN }

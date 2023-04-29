@@ -1,4 +1,20 @@
+/// <summary>
+/// Declaration module containing the tags for different types of quantum gates
+/// </summary>
 module public QuLangProcessor.Tags
+(** F#
+ -*- coding: utf-8 -*-
+Tags
+
+Description: Quantum gate tags to distinguish types
+
+@__Author --> Created by Adrian Zvizdenco aka Zedrichu
+@__Date & Time --> Created on 11/04/2023
+@__Email --> adrzvizdencojr@gmail.com
+@__Version --> 1.0
+@__Status --> DEV
+*)
+
 
 /// Disjoint union type of unary gates
 type UTag =
@@ -16,4 +32,5 @@ type BPTag =
   
 /// Disjoint union type of unary-parametric gates
 type PTag =
-  | RX | RY | RZ | P 
+  | RX | RY | RZ | P
+  

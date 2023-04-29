@@ -87,7 +87,7 @@
     {   
         var generator = new Generator(_circuit);       
         var ast = Generator.DestructCircuit();
-        var compiled = Handler.compileCircuit(ast.Item1, ast.Item2);
+        var compiled = Handler.translateCircuit(ast.Item1, ast.Item2);
         var wrapped = Handler.wrapQSharp(compiled);
 
         var fileStream = new MemoryStream(Encoding.UTF8.GetBytes(wrapped));
