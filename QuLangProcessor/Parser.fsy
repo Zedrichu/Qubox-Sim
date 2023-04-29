@@ -153,7 +153,7 @@ boolean:
   | BVAR VARIABLE                       { VarB($2) }
 
 // Operator productions
-//O ::= x = a | y := b | Measure bit -> bit | Reset bit | If (b) C | 
+//O ::= x := a | b =| x | Measure bit -> bit | Reset bit | If (b) C | 
 //        Barrier bit | G bit | G bit, bit | G bit, bit, bit
 operator:
   | str ASSIGN arithmetic                       { Assign($1, $3) }
