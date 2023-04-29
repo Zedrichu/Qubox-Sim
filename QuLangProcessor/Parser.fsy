@@ -86,7 +86,7 @@ callocation:
   
 // The productions for expressions are grammar written in the yacc format:
 // Arithmetic productions
-//a ::= n | x | a + a | a - a | a * a | a / a | a ^ a | - a | (a)
+//a ::= n | x | a + a | a - a | a * a | a / a | a ^ a | - a | + a | (a)
 arithmetic:
   | arithmetic TIMES arithmetic     { BinaryOp($1, Mul, $3) }
   | arithmetic DIV arithmetic       { BinaryOp($1, Div, $3) }
