@@ -12,7 +12,7 @@ Description: Declaration module containing the types required to build the abstr
 @__Author --> Created by Adrian Zvizdenco aka Zedrichu
 @__Date & Time --> Created on 21/02/2023
 @__Email --> adrzvizdencojr@gmail.com
-@__Version --> 1.0
+@__Version --> 2.0
 @__Status --> DEV
 *)
 
