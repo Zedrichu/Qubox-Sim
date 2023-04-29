@@ -18,7 +18,7 @@ let float       = (digit* '.' digit+ )
 let whitespace  = [' ' '\t']
 let newline     = "\n\r" | '\n' | '\r'
 let char        = ['a'-'z' 'A'-'Z']
-let variable    =  char ( char | digit )*
+let variable    =  char ( char | digit | _ )*
 let bool        = "true"|"false"
 //digit can also be \d+ 
 //whitespace can also be [\u00A0 \n \r \t]
