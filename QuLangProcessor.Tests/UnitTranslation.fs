@@ -68,8 +68,6 @@ let ``Check Q# translation of circuit #5`` () =
                 Measure (BitA ("q", 1), BitS "c")]
     let str = translateCircuit ast
     Assert.IsNotEmpty str
-    let wrapped = wrapQSharp str
-    Assert.IsNotEmpty wrapped
 
 [<Test>]
 let ``Check QuLang back-compilation of circuit - (double parsing procedure) #1`` () =

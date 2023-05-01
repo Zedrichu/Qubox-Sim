@@ -34,7 +34,7 @@ public static class Interpreter
         _memory = sem.Item1;
         Console.WriteLine("Semantics Analyzed | Memory: " + _memory);
         
-        var optimal = optimizeAST(ast.Item2, _memory);
+        var optimal = optimizeAST(ast.Item1, ast.Item2, _memory);
         if (!optimal.Item3.Equals(Error.Success))
         {
             Error = optimal.Item3;
@@ -43,7 +43,7 @@ public static class Interpreter
         
         Error = Error.Success;
         _memory = optimal.Item2;
-        _circuit = new Tuple<Allocation, Schema>(ast.Item1, optimal.Item1);
+        _circuit = new Tuple<Allocation, Schema>(ast.Item1, optimal.Item1.Item2);
         
         Console.WriteLine("AST Optimized | AST: " + _circuit);
     }

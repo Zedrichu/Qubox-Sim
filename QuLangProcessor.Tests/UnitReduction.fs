@@ -20,9 +20,8 @@ let ``Test non-optimizable AST`` () =
     Assert.AreEqual (Success, err)
     let mem, err = ast |> Option.get |> analyzeSemantics
     Assert.AreEqual (Success, err)
-    let _, schema = ast.Value
-    let optimal, _, _ = optimizeAST schema mem
-    Assert.AreEqual (optimal, schema)
+    let optimal, _, _ = optimizeAST ast.Value mem
+    Assert.AreEqual (optimal, ast.Value)
     
 [<Test>]
 let ``Test undefined arithmetic variable in AST`` () =
@@ -31,8 +30,7 @@ let ``Test undefined arithmetic variable in AST`` () =
     Assert.AreEqual (Success, err)
     let mem, err = ast |> Option.get |> analyzeSemantics
     Assert.AreEqual (Success, err)
-    let _, schema = ast.Value
-    let _, _, err = optimizeAST schema mem
+    let _, _, err = optimizeAST ast.Value mem
     match err with
     | Success -> Assert.Fail()
     | EvaluationError _ -> Assert.Pass()
@@ -44,8 +42,7 @@ let ``Test undefined conditions/boolean variables in AST`` () =
     Assert.AreEqual (Success, err)
     let mem, err = ast |> Option.get |> analyzeSemantics
     Assert.AreEqual (Success, err)
-    let _, schema = ast.Value
-    let _, _, err = optimizeAST schema mem
+    let _, _, err = optimizeAST ast.Value mem
     Assert.AreEqual (Success, err)
     
 [<Test>]
@@ -55,8 +52,7 @@ let ``Test successful conditions/arithmetic variables in AST`` () =
     Assert.AreEqual (Success, err)
     let mem, err = ast |> Option.get |> analyzeSemantics
     Assert.AreEqual (Success, err)
-    let _, schema = ast.Value
-    let _, _, err = optimizeAST schema mem
+    let _, _, err = optimizeAST ast.Value mem
     Assert.AreEqual (Success, err)
     
 [<Test>]
@@ -132,8 +128,7 @@ let ``Test for undefined variable in parameter AST`` () =
     let ast, err = parseQuLang code
     Assert.AreEqual(err, Success)
     Console.WriteLine(ast |> Option.get)
-    let _, schema = ast |> Option.get
-    let _, _, err = optimizeAST schema Memory.empty
+    let _, _, err = optimizeAST ast.Value Memory.empty
     match err with
         | Success -> Assert.Fail()
         | EvaluationError _ -> Assert.Pass()

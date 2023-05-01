@@ -106,22 +106,19 @@ let rec public backCompileCircuit (circuit:Circuit) : string =
 /// <returns>Q# string representation</returns>
 let public translateCircuit (circuit:Circuit):string =
     let AllocQC(q,c), Flow(flow) = circuit
-    let str = Translator.translateAlloc q true + "\n" +
-              Translator.translateAlloc c false + "\n\n"
-    str + Translator.translateFlow flow
-    
-let public wrapQSharp (compiled:string) : string =
     let header = "namespace Quantum.App {\n\n
-    \topen Microsoft.Quantum.Canon;\n
-    \topen Microsoft.Quantum.Intrinsic;\n
-    \topen Microsoft.Quantum.Math;\n
-    
-    \t@EntryPoint()\n
-    \toperation SimulateCircuit() : Unit { \n
-        \t\t// Placeholder"
-    header + "\n" + compiled + "\n\t}\n}"
-    
-    
+        \topen Microsoft.Quantum.Canon;\n
+        \topen Microsoft.Quantum.Intrinsic;\n
+        \topen Microsoft.Quantum.Math;\n
+        
+        \t@EntryPoint()\n
+        \toperation SimulateCircuit() : Unit { \n
+            \t\t// Placeholder"
+    let str = Translator.translateAlloc q true + "\n" +
+              Translator.translateAlloc c false + "\n\n" +
+              Translator.translateFlow flow
+    header + "\n" + str + "\n\t}\n}"
+        
 /// <summary>
 /// Interface method to analyze the semantics of the generated circuit AST
 /// </summary>
@@ -142,27 +139,39 @@ let public analyzeSemantics (ast:Circuit): Memory * Error =
 /// <param name="ast">Generated AST for optimization</param>
 /// <param name="memory">Initialized circuit memory</param>
 /// <returns>Tuple of optimized AST, updated circuit memory and error tag</returns>
-let public optimizeAST (ast:Schema) (memory:Memory):
-    Schema * Memory * Error =
+let public optimizeAST (ast:Circuit) (memory:Memory):
+    Circuit * Memory * Error =
     try
-        let (Flow ops) = ast
+        let all, Flow ops = ast
         let optimized = Compiler.optimizeCircuit ops Map.empty Map.empty 0
         let _, memA, memB, optAST = optimized
         let updMemory = (memory.SetArithmetic memA).SetBoolean memB
-        Flow optAST, updMemory, Success
+        (all, Flow optAST), updMemory, Success
     with e -> ast, memory, EvaluationError e.Message
 
-let public optimizeLogic (ast:BoolExpr) (memory:Memory) : BoolExpr * Memory * Error =
+/// <summary>
+/// Interface method to optimize logical expressions with eager evaluation and reduction rules
+/// </summary>
+/// <param name="b">Generated boolean expression for optimization</param>
+/// <param name="memory">Initialized circuit memory</param>
+/// <returns>Tuple of optimized boolean expression, updated circuit memory and error tag</returns>
+let public optimizeLogic (b:BoolExpr) (memory:Memory) : BoolExpr * Memory * Error =
     try
-        let optimized = Compiler.evalBool ast memory.Boolean memory.Arithmetic
+        let optimized = Compiler.evalBool b memory.Boolean memory.Arithmetic
         optimized, memory, Success
-    with e -> ast, memory, EvaluationError e.Message
+    with e -> b, memory, EvaluationError e.Message
 
-let public optimizeArithmetic (ast:ArithExpr) (memory:Memory) : ArithExpr * Memory * Error =
+/// <summary>
+/// Interface method to optimize arithmetic expressions with eager evaluation and reduction rules
+/// </summary>
+/// <param name="a">Generated arithmetic expression for optimization</param>
+/// <param name="memory">Initialized circuit memory</param>
+/// <returns>Tuple of optimized arithmetic expression, updated circuit memory and error tag</returns>
+let public optimizeArithmetic (a:ArithExpr) (memory:Memory) : ArithExpr * Memory * Error =
     try
-        let optimized = Compiler.evalArith ast memory.Arithmetic
+        let optimized = Compiler.evalArith a memory.Arithmetic
         optimized, memory, Success
-    with e -> ast, memory, EvaluationError e.Message
+    with e -> a, memory, EvaluationError e.Message
 
 /// <summary>
 /// Internal method to get number of choice from user input
@@ -196,13 +205,11 @@ let rec private execute (ast:Circuit) =
                  printfn $"Memory:%A{memory}"
                  printfn $"Status:%A{err}"
                  execute(ast)
-    | true, 2 -> let reg, ops = ast
-                 let optimized, updMemory, err = optimizeAST ops Memory.empty
-                 let ast = (reg, optimized)
+    | true, 2 -> let optimized, updMemory, err = optimizeAST ast Memory.empty
                  printfn $"AST:%A{ast}" 
                  printfn $"Memory:%A{updMemory}"
                  printfn $"Status:%A{err}"
-                 execute(ast)
+                 execute(optimized)
     | true, 3 -> let qSharp = translateCircuit ast
                  printfn $"%A{qSharp}"
                  execute(ast)
@@ -244,7 +251,8 @@ let rec mainMenu () =
     | true, 4 -> ()
     | _ -> mainMenu()
 
-[<EntryPoint>]
-    let main argv =
-        mainMenu()
-        0 // return an integer exit code
+// Uncomment the following lines to run the program in the console
+// [<EntryPoint>]
+//     let main argv =
+//         mainMenu()
+//         0 // return an integer exit code
