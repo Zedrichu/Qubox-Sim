@@ -20,7 +20,7 @@ public abstract class ParametricGate: IMatrixGate
 }
 
 
-public class ParamSingleGate : ParametricGate
+internal class ParamSingleGate : ParametricGate
 {
     public PTag Tag { get; }
     public ParamSingleGate(Matrix<Complex> matrix, PTag tag, int target, Tuple<double, string> phase, string? condition = null)
@@ -34,7 +34,7 @@ public class ParamSingleGate : ParametricGate
     }
 }
 
-public class UnitaryGate : ParametricGate
+internal class UnitaryGate : ParametricGate
 {
     public Tuple<double, string> Phi { get; }
     public Tuple<double, string> Lambda { get; }
@@ -57,7 +57,7 @@ public class UnitaryGate : ParametricGate
     }
 }
 
-public class ParamDoubleGate : ParametricGate
+internal class ParamDoubleGate : ParametricGate
 {
     public Tuple<int, int> Control { get; set; }
     

@@ -8,7 +8,7 @@ public class Circuit
     
     public List<Tower> GateGrid { get; }
 
-    public Circuit(Register allocation)
+    internal Circuit(Register allocation)
     {
         Allocation = allocation;
         GateGrid = new List<Tower>{new (Allocation.QubitNumber + Allocation.CbitNumber)};
