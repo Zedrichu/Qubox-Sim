@@ -4,7 +4,7 @@ using static QuLangProcessor.Tags;
 
 namespace QuboxSimulator.Gates;
 
-public abstract class ParametricGate: IMatrixGate
+internal abstract class ParametricGate: IMatrixGate
 {
     public Matrix<Complex> Matrix { get; set; }
     
@@ -16,14 +16,14 @@ public abstract class ParametricGate: IMatrixGate
     
     public string? Condition { get; set; }
     
-    public Tuple<double, string> Theta { get; protected set; }
+    internal Tuple<double, string> Theta { get; set; }
 }
 
 
 internal class ParamSingleGate : ParametricGate
 {
-    public PTag Tag { get; }
-    public ParamSingleGate(Matrix<Complex> matrix, PTag tag, int target, Tuple<double, string> phase, string? condition = null)
+    internal PTag Tag { get; }
+    internal ParamSingleGate(Matrix<Complex> matrix, PTag tag, int target, Tuple<double, string> phase, string? condition = null)
     {
         Tag = tag;
         Matrix = matrix;
@@ -36,9 +36,9 @@ internal class ParamSingleGate : ParametricGate
 
 internal class UnitaryGate : ParametricGate
 {
-    public Tuple<double, string> Phi { get; }
-    public Tuple<double, string> Lambda { get; }
-    public UnitaryGate(Tuple<double, string>[] args, int target)
+    internal Tuple<double, string> Phi { get; }
+    internal Tuple<double, string> Lambda { get; }
+    internal UnitaryGate(Tuple<double, string>[] args, int target)
     {
         Theta = args[0];
         Phi = args[1];
@@ -59,11 +59,11 @@ internal class UnitaryGate : ParametricGate
 
 internal class ParamDoubleGate : ParametricGate
 {
-    public Tuple<int, int> Control { get; set; }
+    internal Tuple<int, int> Control { get; set; }
     
-    public BPTag Tag { get; }
+    internal BPTag Tag { get; }
     
-    public ParamDoubleGate(Matrix<Complex> matrix, BPTag tag, int target1, int target2, Tuple<double, string> phase)
+    internal ParamDoubleGate(Matrix<Complex> matrix, BPTag tag, int target1, int target2, Tuple<double, string> phase)
     {
         var min = Math.Min(target1, target2);
         var max = Math.Max(target1, target2);

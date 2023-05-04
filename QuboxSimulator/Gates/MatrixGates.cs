@@ -4,11 +4,6 @@ using static QuLangProcessor.Tags;
 
 namespace QuboxSimulator.Gates;
 
-public interface IMatrixGate : IGate
-{
-    public Matrix<Complex> Matrix { get; }
-}
-
 internal abstract class MatrixGate : IMatrixGate
 {
     public Matrix<Complex> Matrix { get; set; }

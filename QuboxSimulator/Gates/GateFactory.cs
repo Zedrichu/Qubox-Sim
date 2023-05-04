@@ -161,7 +161,7 @@ public static class GateFactory
         return new SingleQubitGate(SingleGates[token], token, target);
     }
     
-    public static ParametricGate CreateGate(PTag token, int target, Tuple<double, string> phase)
+    public static IMatrixGate CreateGate(PTag token, int target, Tuple<double, string> phase)
     {
         return new ParamSingleGate(ParamGates(phase.Item1)[token], token, target, phase);
     }
