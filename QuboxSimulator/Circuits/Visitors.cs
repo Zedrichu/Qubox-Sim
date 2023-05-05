@@ -19,12 +19,12 @@ Description: Implementation of the Visitor Pattern for the AST structure.
 /// <summary>
 /// Visitor class for the base operator type of the AST.
 /// </summary>
-public class StatementVisitor: IVisitor<Statement, IGate>
+internal class StatementVisitor: IVisitor<Statement, IGate>
 {
     private readonly Memory _memory; 
     private readonly ArithmeticVisitor _arithVisitor;
   
-    public StatementVisitor(Memory memory)
+    internal StatementVisitor(Memory memory)
     {
         // Establish the contextual memory
         _memory = memory;

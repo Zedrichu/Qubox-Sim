@@ -7,11 +7,11 @@ using static QuLangProcessor.Tags;
 
 namespace QuboxSimulator.Circuits;
 
-public class Generator
+internal class Generator
 {
-    public Register Reg { private get; set; } = new (Memory.empty);
-    public List<Tower> Towers { private get; set; } = new();
-    public Generator(Circuit circuit)
+    private Register Reg { get; set; } = new (Memory.empty);
+    private List<Tower> Towers { get; set; } = new();
+    internal Generator(Circuit circuit)
     {
         Reg = circuit.Allocation;
         Towers = circuit.GateGrid;
@@ -65,7 +65,7 @@ public class Generator
             kvp => FormAssign(kvp.Key, kvp.Value.Item1)
         ).ToList();
     }
-    public Tuple<Allocation, List<Statement>> DestructRegister() {
+    private Tuple<Allocation, List<Statement>> DestructRegister() {
         var qalloc = DestructBitRegister(Reg.Qubits);
         var calloc = DestructBitRegister(Reg.Cbits);
         var alloc = Allocation.NewAllocQC(new Tuple<Bit, Bit>(qalloc, calloc));
@@ -185,7 +185,7 @@ public class Generator
         var statements = tower.Gates.Select(DestructGate).Where(op => op != null);
         return statements.ToList();
     }
-    public Tuple<Allocation, Schema> DestructCircuit()
+    internal Tuple<Allocation, Schema> DestructCircuit()
     {
         var list = new List<Statement>();
         foreach (var tower in Towers)

@@ -15,9 +15,9 @@ Description: Factory for creating user-defined and configured circuits.
 */
 
 
-public static class CircuitFactory
+internal static class CircuitFactory
 {
-    public static Circuit BuildCircuit(List<IGate> gates, Register allocation)
+    internal static Circuit BuildCircuit(List<IGate> gates, Register allocation)
     {
         var circuit = new Circuit(allocation);
         foreach (var gate in gates)

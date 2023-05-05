@@ -4,7 +4,7 @@ using static QuLangProcessor.Tags;
 
 namespace QuboxSimulator.Gates;
 
-public static class GateFactory
+internal static class GateFactory
 {
     private static readonly Dictionary<UTag, Matrix<Complex>> SingleGates = new() {
         {
@@ -156,17 +156,17 @@ public static class GateFactory
         };
     }
 
-    public static IMatrixGate CreateGate(UTag token, int target)
+    internal static IMatrixGate CreateGate(UTag token, int target)
     {
         return new SingleQubitGate(SingleGates[token], token, target);
     }
     
-    public static IMatrixGate CreateGate(PTag token, int target, Tuple<double, string> phase)
+    internal static IMatrixGate CreateGate(PTag token, int target, Tuple<double, string> phase)
     {
         return new ParamSingleGate(ParamGates(phase.Item1)[token], token, target, phase);
     }
 
-    public static ISupportGate CreateGate(SupportType token, int target, int classic = -1)
+    internal static ISupportGate CreateGate(SupportType token, int target, int classic = -1)
     {
         return token switch
         {
@@ -178,22 +178,22 @@ public static class GateFactory
         };
     }
     
-    public static IMatrixGate CreateGate(BTag token, int target1, int target2)
+    internal static IMatrixGate CreateGate(BTag token, int target1, int target2)
     {
         return new DoubleQubitGate(DoubleGates[token], token, target1, target2);
     }
     
-    public static IMatrixGate CreateGate(BPTag token, int target1, int target2, Tuple<double, string> phase)
+    internal static IMatrixGate CreateGate(BPTag token, int target1, int target2, Tuple<double, string> phase)
     {
         return new ParamDoubleGate(DoubleParamGates(phase.Item1)[token], token, target1, target2, phase);
     }
     
-    public static IMatrixGate CreateGate(Tuple<double, string>[] args, int target)
+    internal static IMatrixGate CreateGate(Tuple<double, string>[] args, int target)
     {
         return new UnitaryGate(args, target);
     }
     
-    public static IMatrixGate CreateGate(int target1, int target2, int target3)
+    internal static IMatrixGate CreateGate(int target1, int target2, int target3)
     {
         return new ToffoliGate(target1, target2, target3);
     }
