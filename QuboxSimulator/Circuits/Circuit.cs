@@ -17,15 +17,14 @@ public class Circuit
     public void AddGate(IGate gate)
     {   
         var tower = GateGrid.FirstOrDefault(t => t.AcceptGate(gate));
-        
-        if (tower != null) return;
-            
-        
-        tower = new Tower(Allocation.QubitNumber + Allocation.CbitNumber);
-        tower.AcceptGate(gate);
-        GateGrid.Add(tower);
-        
-        if (gate.Id is "CNOT" or "CCX" or "RZZ" or "RXX" or "SWAP")
+
+        if (tower == null) {
+            tower = new Tower(Allocation.QubitNumber + Allocation.CbitNumber);
+            tower.AcceptGate(gate);
+            GateGrid.Add(tower);
+        }
+
+        if (gate.Type is GateType.Double or GateType.Toffoli or GateType.DoubleParam)
         {
             foreach (var t in GateGrid)
             {
@@ -34,7 +33,8 @@ public class Circuit
             } 
         }
 
-        if (gate.Type is GateType.Support && ((SupportGate) gate).SupportType is SupportType.Barrier)
+        if (gate.Type is GateType.Support &&
+            ((SupportGate) gate).SupportType is SupportType.Barrier)
         {
             foreach (var t in GateGrid)
             {

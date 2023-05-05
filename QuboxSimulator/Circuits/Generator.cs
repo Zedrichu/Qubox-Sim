@@ -9,29 +9,29 @@ namespace QuboxSimulator.Circuits;
 
 public class Generator
 {
-    public static Register Reg { private get; set; } = new (Memory.empty);
-    public static List<Tower> Towers { private get; set; } = new();
+    public Register Reg { private get; set; } = new (Memory.empty);
+    public List<Tower> Towers { private get; set; } = new();
     public Generator(Circuit circuit)
     {
         Reg = circuit.Allocation;
         Towers = circuit.GateGrid;
     }
-    private static Bit FormBit(KeyValuePair<string, Tuple<int, int>> triplet)
+    private Bit FormBit(KeyValuePair<string, Tuple<int, int>> triplet)
     {
         var id = triplet.Key;
         var num = triplet.Value.Item1;
         return num == 1 ? Bit.NewBitS(id) : 
             Bit.NewBitA(new Tuple<string, int>(id,num));
     }
-    private static Statement FormAssign(string s, ArithExpr exp)
+    private Statement FormAssign(string s, ArithExpr exp)
     {
         return Statement.NewAssign(new Tuple<string, ArithExpr>(s, exp));
     }
-    private static Statement FormAssign(string s, BoolExpr exp)
+    private Statement FormAssign(string s, BoolExpr exp)
     {
         return Statement.NewAssignB(new Tuple<string, BoolExpr>(s, exp));
     }
-    private static Bit DestructBitRegister(Dictionary<string, Tuple<int, int>> dict)
+    private Bit DestructBitRegister(Dictionary<string, Tuple<int, int>> dict)
     {
         var list = dict.ToList();
         list.Sort((kvp1, kvp2) => 
@@ -45,7 +45,7 @@ public class Generator
         }
         return bitList.First();
     }
-    private static IEnumerable<Statement> DestructArithmetic()
+    private IEnumerable<Statement> DestructArithmetic()
     {
         var dict = Reg.ArithVariables;
         var list = dict.ToList();
@@ -55,7 +55,7 @@ public class Generator
             kvp => FormAssign(kvp.Key, kvp.Value.Item1)
             ).ToList();
     }
-    private static IEnumerable<Statement> DestructBoolean()
+    private IEnumerable<Statement> DestructBoolean()
     {
         var dict = Reg.BoolVariables;
         var list = dict.ToList();
@@ -65,7 +65,7 @@ public class Generator
             kvp => FormAssign(kvp.Key, kvp.Value.Item1)
         ).ToList();
     }
-    public static Tuple<Allocation, List<Statement>> DestructRegister() {
+    public Tuple<Allocation, List<Statement>> DestructRegister() {
         var qalloc = DestructBitRegister(Reg.Qubits);
         var calloc = DestructBitRegister(Reg.Cbits);
         var alloc = Allocation.NewAllocQC(new Tuple<Bit, Bit>(qalloc, calloc));
@@ -74,7 +74,7 @@ public class Generator
         list.AddRange(DestructBoolean());
         return new Tuple<Allocation, List<Statement>>(alloc, list);
     }
-    private static Bit RecoverBit(int index) {
+    private Bit RecoverBit(int index) {
         KeyValuePair<string, Tuple<int, int>> goal;
         if (index < Reg.QubitNumber)
         {
@@ -96,7 +96,7 @@ public class Generator
         return Bit.NewBitA(new Tuple<string, int>(goal.Key, i));    
     }
 
-    private static Statement? DestructSupport(ISupportGate gate)
+    private Statement? DestructSupport(ISupportGate gate)
     {
         var bit1 = gate.TargetRange.Item1;
         var bit2 = gate.TargetRange.Item2;
@@ -116,7 +116,7 @@ public class Generator
         }
     }
 
-    private static Statement? DestructGate(IGate gate)
+    private Statement? DestructGate(IGate gate)
     {
         var bit1 = gate.TargetRange.Item1;
         var cond = gate.Condition;
@@ -180,12 +180,12 @@ public class Generator
         return Statement.NewCondition(
             new Tuple<BoolExpr, Statement?>(expr.Item1.Value, op));
     }
-    private static IEnumerable<Statement> DestructTower(Tower tower)
+    private IEnumerable<Statement> DestructTower(Tower tower)
     {
         var statements = tower.Gates.Select(DestructGate).Where(op => op != null);
         return statements.ToList();
     }
-    public static Tuple<Allocation, Schema> DestructCircuit()
+    public Tuple<Allocation, Schema> DestructCircuit()
     {
         var list = new List<Statement>();
         foreach (var tower in Towers)

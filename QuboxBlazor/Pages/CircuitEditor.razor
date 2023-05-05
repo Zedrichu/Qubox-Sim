@@ -85,9 +85,8 @@
 
     private Stream GetStreamData()
     {   
-        var generator = new Generator(_circuit);       
-        var ast = Generator.DestructCircuit();
-        var translated = Handler.translateCircuit(ast.Item1, ast.Item2);
+        Interpreter.DecomposeCircuit(_circuit);
+        var translated = Interpreter.TranslateQs();
 
         var fileStream = new MemoryStream(Encoding.UTF8.GetBytes(translated));
         return fileStream;

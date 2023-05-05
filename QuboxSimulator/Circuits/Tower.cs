@@ -21,7 +21,7 @@ public class Tower
 
     public bool IsEmpty()
     {
-        return Gates.All(gate => gate.Id == "None");
+        return Gates.All(gate => gate.Id == "NONE");
     }
     
     public bool AcceptGate(IGate gate)

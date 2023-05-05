@@ -1,6 +1,3 @@
-using MathNet.Numerics.LinearAlgebra;
-using Complex = System.Numerics.Complex;
-
 namespace QuboxSimulator.Gates;
 
 

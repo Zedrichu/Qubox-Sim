@@ -13,8 +13,8 @@ public class ConsoleDemo
         
         // Testing Generator
         if (circuit == null) return;
-        var _ = new Generator(circuit);
-        var ast = Generator.DestructCircuit();
+        var generator = new Generator(circuit);
+        var ast = generator.DestructCircuit();
         Console.WriteLine(ast.Item1);
         Console.WriteLine(ast.Item2);
         

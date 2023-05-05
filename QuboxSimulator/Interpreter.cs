@@ -1,6 +1,7 @@
 using static QuLangProcessor.AST;
 using static QuLangProcessor.Handler;
 using QuboxSimulator.Circuits;
+using QuLangProcessor;
 
 namespace QuboxSimulator;
 
@@ -9,6 +10,8 @@ public static class Interpreter
     private static Memory _memory = Memory.empty;
     
     private static Tuple<Allocation, Schema>? _circuit;
+
+    public static Circuit Circuit { get; set; }
 
     public static Error Error { get; private set; } = Error.Success;
     
@@ -56,7 +59,26 @@ public static class Interpreter
         var gates = _circuit.Item2.Item.Select(
                 statement => statement.Accept(visitor)).ToList();
         gates.RemoveAll(gate => gate == null);
-        return CircuitFactory.BuildCircuit(gates, register);
+        Circuit = CircuitFactory.BuildCircuit(gates, register);
+        return Circuit;
     }
-    
+
+    public static void DecomposeCircuit(Circuit circuit)
+    {
+        Generator generator = new Generator(circuit);
+        _circuit = generator.DestructCircuit();
+    }
+
+    public static string BackCompileAst()
+    {
+        if (_circuit == null) return "";
+        return backCompileCircuit(_circuit.Item1, _circuit.Item2);
+    }
+
+    public static string TranslateQs ()
+    {
+        if (_circuit == null) return "";
+        return translateCircuit(_circuit.Item1, _circuit.Item2);
+    }
+
 }
