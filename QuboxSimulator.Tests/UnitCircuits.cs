@@ -153,8 +153,7 @@ public class UnitCircuits
         Interpreter.HandleLang(code);
         var circuit = Interpreter.Interpret();
         Assert.That(Interpreter.Error, Is.EqualTo(AST.Error.Success));
-        Interpreter.DecomposeCircuit(circuit);
-        var result = Interpreter.Circuit;
+        var result = Interpreter.DecomposeCircuit(circuit);
         var code2 = "Qalloc q; Calloc c; If (c |> Click) U (1,2,3) q;";
         var ast2 = Handler.parseQuLang(code2);
         Assert.That(result, Is.EqualTo(ast2.Item1.Value));
@@ -167,8 +166,7 @@ public class UnitCircuits
         Interpreter.HandleLang(code);
         var circuit = Interpreter.Interpret();
         Assert.That(Interpreter.Error, Is.EqualTo(AST.Error.Success));
-        Interpreter.DecomposeCircuit(circuit);
-        var result = Interpreter.Circuit;
+        var result = Interpreter.DecomposeCircuit(circuit);
         var code2 = "Qalloc q[2]; Calloc c; x:=7.0; y:=9.0; Reset q[0]; X q[1]; RX(Pi+9) q[0]; CNOT q[0], q[1]; Measure q[0] -> c;";
         var ast = Handler.parseQuLang(code2);
         Assert.That(result, Is.EqualTo(ast.Item1.Value));
@@ -181,8 +179,7 @@ public class UnitCircuits
         Interpreter.HandleLang(code);
         var circuit = Interpreter.Interpret();
         Assert.That(Interpreter.Error, Is.EqualTo(AST.Error.Success));
-        Interpreter.DecomposeCircuit(circuit);
-        var result = Interpreter.Circuit;
+        var result = Interpreter.DecomposeCircuit(circuit);
         var code2 = "Qalloc q[2], r; Calloc c; true =| x; false =| y; If (true) CCX q[0], q[1], r;";
         var ast = Handler.parseQuLang(code2);
         Assert.That(result, Is.EqualTo(ast.Item1.Value));
@@ -195,8 +192,7 @@ public class UnitCircuits
         Interpreter.HandleLang(code);
         var circuit = Interpreter.Interpret();
         Assert.That(Interpreter.Error, Is.EqualTo(AST.Error.Success));
-        Interpreter.DecomposeCircuit(circuit);
-        var result = Interpreter.Circuit;
+        var result = Interpreter.DecomposeCircuit(circuit);
         var ast = Handler.parseQuLang(code);
         Assert.That(result, Is.EqualTo(ast.Item1.Value));
     }

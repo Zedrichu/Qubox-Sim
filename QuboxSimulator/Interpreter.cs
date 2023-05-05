@@ -63,10 +63,11 @@ public static class Interpreter
         return Circuit;
     }
 
-    public static void DecomposeCircuit(Circuit circuit)
+    public static Tuple<Allocation, Schema> DecomposeCircuit(Circuit circuit)
     {
         Generator generator = new Generator(circuit);
         _circuit = generator.DestructCircuit();
+        return _circuit;
     }
 
     public static string BackCompileAst()
