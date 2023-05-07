@@ -84,6 +84,7 @@
     
     private async void SimCircuit()
     {
+        await Task.Delay(500);
         var circuit = StateContainer.Property;
         if (circuit == null)
         {
@@ -92,7 +93,6 @@
         var simulator = new Simulator(circuit);
         state = simulator.Run();
 
-        await Task.Delay(300);
         StateHasChanged();
     }
     

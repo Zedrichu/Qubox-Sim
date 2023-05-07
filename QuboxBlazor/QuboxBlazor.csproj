@@ -24,4 +24,8 @@
       <None Include="wwwroot\grid.svg" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="ViewModels" />
+    </ItemGroup>
+
 </Project>

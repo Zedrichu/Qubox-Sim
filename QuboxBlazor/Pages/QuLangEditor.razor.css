@@ -9,7 +9,7 @@
 
 .info-body h1 {
     --s: 0.1em;   /* the thickness of the line */
-    --c: rgb(141,11,61); /* the color */
+    --c: rgb(135,21,57); /* the color */
 
     color: #0000;
     padding-bottom: var(--s);
@@ -33,11 +33,11 @@
     height: 90%;
     margin: auto;
     justify-content: center;
-    color: rgb(169,22,115);
+    color: rgb(135,21,57);
     font-weight: bold;
     place-content: center;
     border-radius: 20px;
-    background-color: rgb(255, 242, 189);
+    background-color: rgb(242,221,174);
     padding: 1rem 0;
     -moz-box-shadow: #0071c1;
 }

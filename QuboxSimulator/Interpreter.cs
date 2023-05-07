@@ -1,7 +1,6 @@
 using static QuLangProcessor.AST;
 using static QuLangProcessor.Handler;
 using QuboxSimulator.Circuits;
-using QuLangProcessor;
 
 namespace QuboxSimulator;
 

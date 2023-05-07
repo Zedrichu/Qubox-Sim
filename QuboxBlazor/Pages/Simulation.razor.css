@@ -1,7 +1,7 @@
 .music {
-    width: 500px;
+    width: 100%;
     height: 400px;
-    position: relative;
+    position: center;
     display: inline-flex;
     align-items: center;
     justify-content: space-between;
@@ -19,54 +19,54 @@
         height: 2px;
     }
     50% {
-        height: 80px;
+        height: 150px;
     }
 }
 
 .music .bar:nth-child(1) {
-    background: beige;
+    background: rgb(242,221,174);
     animation-delay: 1s;
 }
 .music .bar:nth-child(2) {
-    background: pink;
+    background: rgb(248,63,88);
     animation-delay: .8s;
 }
 .music .bar:nth-child(3) {
-    background: orange;
+    background: rgb(188,21,188);
     animation-delay: .6s;
 }
 .music .bar:nth-child(4) {
-    background: pink;
+    background: rgb(248,63,88);
     animation-delay: .4s;
 }
 .music .bar:nth-child(5) {
-    background: beige;
+    background: rgb(242,221,174);
     animation-delay: .2s;
 }
 .music .bar:nth-child(6) {
-    background: pink;
+    background: rgb(248,63,88);
     animation-delay: .2s;
 }
 .music .bar:nth-child(7) {
-    background: orange;
+    background: rgb(188,21,188);
     animation-delay: .4s;
 }
 .music .bar:nth-child(8) {
-    background: pink;
+    background: rgb(248,63,88);
     animation-delay: .6s;
 }
 .music .bar:nth-child(9) {
-    background: beige;
+    background: rgb(242,221,174);
     animation-delay: .8s;
 }
 .music .bar:nth-child(10) {
-    background: pink;
+    background: rgb(248,63,88);
     animation-delay: 1s;
 }
 
 .info-body h1 {
     --s: 0.1em;   /* the thickness of the line */
-    --c: rgb(141,11,61); /* the color */
+    --c: rgb(135,21,57); /* the color */
 
     color: #0000;
     padding-bottom: var(--s);

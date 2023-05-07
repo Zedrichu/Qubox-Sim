@@ -2,6 +2,7 @@
     position: relative;
     display: flex;
     flex-direction: column;
+    background-color: rgb(30,37,75);
 }
 
 main {
@@ -19,7 +20,7 @@ main {
 }
 
 .ab:visited {
-    color: rgb(255,236,69);
+    color: rgb(242,221,174);
 }
 
 .ab:hover {
@@ -27,13 +28,13 @@ main {
 }
 
 .content {
-    background-color: rgb(15,24,88);
-    color: rgb(255,236,69);
+    background-color: rgb(30,37,75);
+    color: rgb(242,221,174);
 }
 
 .top-row {
     background-color: rgb(15,24,88);
-    border-bottom: 2px solid rgb(255,236,69);
+    border-bottom: 2px solid rgb(248,63,88);
     justify-content: flex-end;
     height: 3.5rem;
     display: flex;
