@@ -6,4 +6,4 @@
 */Parser.fsi linguist-generated
 */Lexer.fs linguist-generated
 
-GrammarTestCoverage/** linguist-documentation
+CoverageReport/** linguist-documentation
