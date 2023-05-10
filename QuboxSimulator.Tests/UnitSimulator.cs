@@ -146,7 +146,24 @@ public class SimulatorTests
         Assert.That(state.ProbeVector[1], Is.EqualTo(0.109).Within(0.001));
         Assert.That(state.ProbeVector[3], Is.EqualTo(0.036).Within(0.001));
     }
-    
+
+    [Test]
+    public void GHZState()
+    {
+        var code = "Qalloc q[3]; Calloc c; Reset q[0]; Reset q[1]; Reset q[2];  H q[0]; CNOT q[0], q[1]; CNOT q[1], q[2];";
+        Interpreter.HandleLang(code);
+        var circuit = Interpreter.Interpret();
+        Assert.AreEqual(Interpreter.Error, AST.Error.Success);
+        var simulator = new Simulator(circuit);
+        var state = simulator.Run();
+        Console.WriteLine(state.StateVector);
+
+        // Check the resulting state vector
+        Assert.That(state.StateVector[0].Real, Is.EqualTo(0.707).Within(0.001));
+        Assert.That(state.StateVector[1].Real, Is.EqualTo(0).Within(0.001));
+        Assert.That(state.StateVector[7].Real, Is.EqualTo(0.707).Within(0.001));
+    }
+
     [Test]
     public void CSHSOperatorPart()
     {

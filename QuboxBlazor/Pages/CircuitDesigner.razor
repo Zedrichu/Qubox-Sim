@@ -1,4 +1,4 @@
-@page "/circuit-editor"
+@page "/circuit-designer"
 @using QuboxSimulator.Circuits
 @using System.IO
 @using System.Text
@@ -13,7 +13,8 @@
         align-content: center; background: rgb(30,37,75);">
         <h1>Circuit</h1>
         <div class="info-body">
-            <h1 @onmouseover="@UpdateCircuit">Hover to update circuit!</h1> <p>@StateContainer.PrintState()</p>
+            <h1 @onmouseover="@UpdateCircuit">Hover to update circuit!</h1>
+            <p>@StateContainer.PrintState()</p>
         </div>
         <blockquote>If representations match, event callback works!</blockquote>
         

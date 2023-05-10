@@ -2,6 +2,7 @@
 	<s:String x:Key="/Default/CodeInspection/PencilsConfiguration/ActualSeverity/@EntryValue">SUGGESTION</s:String>
 	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;
   &lt;Assembly Path="/Users/adrianzvizdenco/.nuget/packages/blazormonaco/3.0.0/lib/net6.0/BlazorMonaco.dll" /&gt;
+  &lt;Assembly Path="/Users/adrianzvizdenco/RiderProjects/QuboxSimulator/QuboxBlazor/obj/Debug/net6.0/QuboxBlazor.dll" /&gt;
 &lt;/AssemblyExplorer&gt;</s:String>
 	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=QuboxSimulator_003B_002A_003BQuboxSimulator_002EConsoleDemo_003B_002A/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/Environment/Filtering/ExcludeCoverageFilters/=QuboxSimulator_003B_002A_003BQuboxSimulator_002ESvgProvider_003B_002A/@EntryIndexedValue">True</s:Boolean>
