@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/adrianzvizdenco/RiderProjects/QuboxSimulator/QuboxSimulator/Circuits/Tower.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using QuboxSimulator.Gates;
+
+namespace QuboxSimulator.Circuits;
+
+public class Tower
+{
+    public int Height { get; }
+    public List&lt;IGate&gt; Gates { get; }
+
+    public Tuple&lt;int, int&gt; Locked { get; set; } = new (-1, -1);
+
+    public Tower(int height)
+    {
+        Height = height;
+        Gates = new List&lt;IGate&gt;();
+        for (var i = 0; i &lt; height; i++)
+        {
+            Gates.Add(new NoneGate(i));
+        }
+    }
+
+    public bool IsEmpty()
+    {
+        return Gates.All(gate =&gt; gate.Id == &quot;NONE&quot;);
+    }
+    
+    public bool AcceptGate(IGate gate)
+    {   
+        var compatible = Gates.All(g =&gt; _isCompatible(this, gate, g));
+        
+        if (compatible)
+        {
+            Gates.RemoveAll(g =&gt; _isSubstitute(gate, g));
+            Gates.Add(gate);
+            Gates.Sort((x, y) =&gt; x.TargetRange.Item1.CompareTo(y.TargetRange.Item1));
+            return true;
+        }
+        return false;
+    }
+
+
+    private readonly Func&lt;Tower, IGate, IGate, bool&gt; _isCompatible = (t, gate, free) =&gt; 
+        (t.Locked.Item1 &gt; gate.TargetRange.Item2 || t.Locked.Item2 &lt; gate.TargetRange.Item1) &amp;&amp;
+        (free.Id == &quot;NONE&quot; || free.TargetRange.Item2 &lt; gate.TargetRange.Item1 
+                          || free.TargetRange.Item1 &gt; gate.TargetRange.Item2);
+    
+    private readonly Func&lt;IGate, IGate, bool&gt; _isSubstitute = (gate, free) =&gt;
+        free.Id == &quot;NONE&quot; &amp;&amp; (free.TargetRange.Item1 &gt;= gate.TargetRange.Item1 &amp;&amp;
+                              free.TargetRange.Item2 &lt;= gate.TargetRange.Item2);
+
+    public override string ToString()
+    {
+        return Gates.Aggregate(&quot;&lt;&quot;, (current, gate) =&gt; gate.Id == &quot;NONE&quot;? 
+            current : current + &quot;_&quot; + gate) + &quot;&gt;&quot;;
+    }
+}
+
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[7,25,7,29,1],[8,32,8,36,1],[10,37,10,41,1],[10,42,10,46,1],[10,51,10,63,1],[12,5,12,29,1],[13,5,13,6,1],[14,9,14,25,1],[15,9,15,35,1],[16,14,16,23,1],[16,25,16,35,1],[16,37,16,40,1],[17,9,17,10,1],[18,13,18,40,1],[19,9,19,10,1],[20,5,20,6,1],[23,5,23,6,1],[24,9,24,34,1],[24,34,24,51,1],[24,51,24,53,1],[25,5,25,6,1],[28,5,28,6,1],[29,9,29,41,1],[29,41,29,69,1],[29,69,29,71,1],[31,9,31,24,1],[32,9,32,10,1],[33,13,33,34,1],[33,34,33,56,1],[33,56,33,58,1],[34,13,34,29,1],[35,13,35,34,1],[35,34,35,84,1],[35,84,35,86,1],[36,13,36,25,1],[38,9,38,22,1],[39,5,39,6,1],[42,5,43,9,1],[43,9,45,78,1],[45,78,45,79,1],[47,5,48,9,1],[48,9,49,80,1],[49,80,49,81,1],[52,5,52,6,1],[53,9,53,56,1],[53,56,54,43,1],[54,43,54,51,1],[55,5,55,6,1]]);
+    </script>
+  </body>
+</html>

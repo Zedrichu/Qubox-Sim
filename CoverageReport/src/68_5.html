@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/adrianzvizdenco/RiderProjects/QuboxSimulator/QuLangProcessor/BackCompiler.fs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+/// &lt;summary&gt;
+/// Back-compiler module handling the conversion from AST back to QuLang code definition.
+/// &lt;/summary&gt;
+module internal QuLangProcessor.BackCompiler
+(* F#
+ -*- coding: utf-8 -*-
+AST to QuLang Back-compiler (reverse compiler)
+
+Description: Back-compiler module handling the conversion from AST back to QuLang code definition.
+
+@__Author --&gt; Created by Adrian Zvizdenco aka Zedrichu
+@__Date &amp; Time --&gt; Created on 07/03/2023
+@__Email --&gt; adrzvizdencojr@gmail.com
+@__Version --&gt; 1.1
+@__Status --&gt; DEV
+*)
+
+open AST
+
+/// &lt;summary&gt;
+/// Function to translate quantum bit to QuLang declaration.
+/// &lt;/summary&gt;
+/// &lt;param name=&quot;bit&quot;&gt;Bit expression (AST.bit)&lt;/param&gt;
+/// &lt;returns&gt;QuLang string representation&lt;/returns&gt;
+let rec internal backCompileBit (bit:Bit):string =
+    match bit with
+    | BitA(s, i) -&gt; s + $&quot;[%i{i}]&quot;
+    | BitS s -&gt; s
+    | BitSeq(bit, bit_seq) -&gt; backCompileBit bit + &quot;, &quot; + backCompileBit bit_seq
+
+/// &lt;summary&gt;
+/// Function to translate quantum statements to QuLang declaration.
+/// &lt;/summary&gt;
+/// &lt;param name=&quot;st&quot;&gt;Statement AST to be translated&lt;/param&gt;
+/// &lt;returns&gt;QuLang string representation&lt;/returns&gt;
+let rec private backCompileStatement (st:Statement):string =
+    match st with
+    | Assign(var, value) -&gt; $&quot;{var} := {value};&quot;
+    | AssignB(var, value) -&gt; $&quot;{value} =| {var};&quot;
+    | Condition(b, op) -&gt; $&quot;If ( {b} ) {backCompileStatement op}&quot;
+    | Measure(q, c) -&gt; $&quot;Measure {backCompileBit q} -&gt; {backCompileBit c};&quot;
+    | Reset(bit) -&gt; $&quot;Reset {backCompileBit bit};&quot;
+    | Barrier(bit) -&gt; $&quot;Barrier {backCompileBit bit};&quot;
+    | PhaseDisk -&gt; &quot;PhaseDisk;&quot;
+    | UnaryGate(uTag, bit) -&gt; $&quot;{uTag} {backCompileBit bit};&quot;
+    | BinaryGate(bTag, bit1, bit2) -&gt; $&quot;{bTag} {backCompileBit bit1}, {backCompileBit bit2};&quot;
+    | ParamGate(pTag, theta, bit) -&gt; $&quot;{pTag} ({theta}) {backCompileBit bit};&quot;
+    | BinaryParamGate(bpTag, theta, bit1, bit2) -&gt;
+                $&quot;{bpTag} ({theta}) {backCompileBit bit1}, {backCompileBit bit2};&quot;
+    | Unitary(theta, phi, lambda, bit) -&gt;
+                $&quot;U ({theta}, {phi}, {lambda}) {backCompileBit bit};&quot;
+    | Toffoli(bit, bit1, bit2) -&gt;
+                $&quot;CCX {backCompileBit bit}, {backCompileBit bit1}, {backCompileBit bit2};&quot;
+
+/// Helper function to aggregate all statements in a flow.    
+let rec internal backCompileFlow (flow:Statement list) : string =
+    match flow with
+    | head::tail -&gt; $&quot;{backCompileStatement head}\n{backCompileFlow tail}&quot;          
+    | [] -&gt; &quot;&quot;
+    
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[26,5,26,19,1],[27,21,27,35,1],[28,17,28,18,1],[29,31,29,81,1],[37,5,37,18,1],[38,29,38,49,1],[39,30,39,50,1],[40,27,40,66,1],[41,24,41,76,1],[42,21,42,51,1],[43,23,43,55,1],[44,20,44,32,1],[45,31,45,62,1],[46,39,46,94,1],[47,38,47,79,1],[49,17,49,83,1],[51,17,51,70,1],[53,17,53,91,1],[57,5,57,20,1],[58,21,58,75,1],[59,13,59,15,1]]);
+    </script>
+  </body>
+</html>

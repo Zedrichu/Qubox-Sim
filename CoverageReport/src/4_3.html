@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/adrianzvizdenco/RiderProjects/QuboxSimulator/QuboxSimulator/Circuits/Register.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using QuLangProcessor;
+
+namespace QuboxSimulator.Circuits;
+
+public class Register
+{
+    public int QubitNumber { get; } = 0;
+    public int CbitNumber { get; } = 0;
+    
+    public Dictionary&lt;string, Tuple&lt;int, int&gt;&gt; Qubits { get; } = new();
+    
+    public Dictionary&lt;string, Tuple&lt;int, int&gt;&gt; Cbits { get; } = new();
+    
+    public Dictionary&lt;string, Tuple&lt;AST.BoolExpr, int&gt;&gt; BoolVariables { get; } = new();
+    
+    public Dictionary&lt;string, Tuple&lt;AST.ArithExpr, int&gt;&gt; ArithVariables { get; } = new();
+
+    public Register(AST.Memory memory)
+    {
+        QubitNumber = memory.CountQuantum;
+        CbitNumber = memory.CountClassical;
+
+        Qubits = new Dictionary&lt;string, Tuple&lt;int, int&gt;&gt;(memory.Quantum);
+        Cbits = new Dictionary&lt;string, Tuple&lt;int, int&gt;&gt;(memory.Classical);
+
+        BoolVariables = new Dictionary&lt;string, Tuple&lt;AST.BoolExpr, int&gt;&gt;(memory.Boolean);
+        ArithVariables = new Dictionary&lt;string, Tuple&lt;AST.ArithExpr, int&gt;&gt;(memory.Arithmetic);
+    }
+
+    private static string StringifyDictionary&lt;T&gt;(Dictionary&lt;string, T&gt; dictionary)
+    {
+        return dictionary.Aggregate(&quot;&quot;, (current, pair) =&gt; current + $&quot;{pair.Key} {pair.Value} \n&quot;);
+    }
+
+    public string GetBitName(int index)
+    {
+        KeyValuePair&lt;string, Tuple&lt;int, int&gt;&gt; goal;
+        if (index &lt; QubitNumber)
+        {
+            goal = Qubits.FirstOrDefault(kvp =&gt;
+                index &lt; kvp.Value.Item1 + kvp.Value.Item2);
+        }
+        else
+        {
+            index -= QubitNumber;
+            goal = Cbits.FirstOrDefault(kvp =&gt;
+                index &lt; kvp.Value.Item1 + kvp.Value.Item2);
+        }
+
+        if (goal.Value.Item1 == 1)
+        {
+            return goal.Key;
+        }
+        return $&quot;{goal.Key}[{index - goal.Value.Item2}]&quot;;
+
+    }
+    
+    public override string ToString()
+    {
+        return $&quot;Qubits: {QubitNumber} Bits: {CbitNumber} \n&quot; +
+                $&quot;{StringifyDictionary(Qubits)} {StringifyDictionary(Cbits)} \n&quot; +
+                $&quot;{StringifyDictionary(BoolVariables)} {StringifyDictionary(ArithVariables)}&quot;;
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[7,30,7,34,1],[7,39,7,40,1],[8,29,8,33,1],[8,38,8,39,1],[10,57,10,61,1],[10,66,10,71,1],[12,56,12,60,1],[12,65,12,70,1],[14,73,14,77,1],[14,82,14,87,1],[16,75,16,79,1],[16,84,16,89,1],[18,5,18,39,1],[19,5,19,6,1],[20,9,20,43,1],[21,9,21,44,1],[23,9,23,74,1],[24,9,24,75,1],[26,9,26,90,1],[27,9,27,95,1],[28,5,28,6,1],[31,5,31,6,1],[32,9,32,60,1],[32,60,32,99,1],[32,99,32,101,1],[33,5,33,6,1],[36,5,36,6,1],[38,9,38,33,1],[39,9,39,10,1],[40,13,41,17,1],[41,17,41,58,1],[41,58,41,60,1],[42,9,42,10,1],[44,9,44,10,1],[45,13,45,34,1],[46,13,47,17,1],[47,17,47,58,1],[47,58,47,60,1],[48,9,48,10,1],[50,9,50,35,1],[51,9,51,10,1],[52,13,52,29,1],[54,9,54,58,1],[56,5,56,6,1],[59,5,59,6,1],[60,9,62,95,1],[63,5,63,6,1]]);
+    </script>
+  </body>
+</html>

@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>/Users/adrianzvizdenco/RiderProjects/QuboxSimulator/QuantumLanguage/Lexer.fsl</title>
+    <title>/Users/adrianzvizdenco/RiderProjects/QuboxSimulator/QuLangProcessor/Lexer.fsl</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
@@ -23,9 +23,9 @@ System.Globalization.CultureInfo.CurrentCulture &lt;- new System.Globalization.C
 // Define macros for some regular expressions used later
 let digit       = [&#39;0&#39;-&#39;9&#39;] 
 let num         = digit+
-let float       = [&#39;-&#39; &#39;+&#39;]? (digit* &#39;.&#39; digit+ )
+let float       = (digit* &#39;.&#39; digit+ )
 //let float       = digit+ ( &#39;.&#39; digit+ | &#39;E&#39; (&#39;+&#39;|&#39;-&#39;)? digit+ )+
-let whitespace  = [&#39; &#39; &#39;\t&#39; &#39;\r&#39; &#39;\n&#39;]
+let whitespace  = [&#39; &#39; &#39;\t&#39;]
 let newline     = &quot;\n\r&quot; | &#39;\n&#39; | &#39;\r&#39;
 let char        = [&#39;a&#39;-&#39;z&#39; &#39;A&#39;-&#39;Z&#39;]
 let variable    =  char ( char | digit )*
@@ -50,6 +50,8 @@ rule tokenize = parse
 | &#39;/&#39;               { DIV }
 | &#39;+&#39;               { PLUS }
 | &#39;-&#39;               { MINUS }
+| &#39;^&#39;               { POW }
+| &#39;%&#39;               { MOD }    
 | &quot;Pi&quot;              { MATHPI }
 | &#39;(&#39;               { LPAR }
 | &#39;)&#39;               { RPAR }
@@ -64,9 +66,11 @@ rule tokenize = parse
 // Boolean expression to TOKENs
 | &quot;and&quot;         { AND }
 | &quot;or&quot;          { OR }
+| &quot;xor&quot;         { XOR }
 | &quot;&amp;&amp;&quot;          { SAND }
 | &quot;||&quot;          { SOR }
 | &quot;not&quot;         { NEG }
+| &#39;~&#39;           { BVAR }      
 | &quot;==&quot;          { EQUAL }
 | &quot;|&gt;&quot;          { ISQ }
 | &quot;!=&quot;          { NOTEQ }
@@ -75,13 +79,13 @@ rule tokenize = parse
 | &#39;&lt;&#39;           { LESS }
 | &quot;&lt;=&quot;          { LESSEQ }
 
-// Operator expressions to TOKENs
+// Command expressions to TOKENs
 | &quot;Qalloc&quot;whitespace    { QUANTREG }
 | &quot;Calloc&quot;whitespace    { CLASSREG }
 | &quot;=|&quot;                  { BASSIGN }
 | &quot;:=&quot;                  { ASSIGN }
-| &#39;;&#39;                   { ORDER }
-| &#39;,&#39;                   { COMMA }
+| &#39;;&#39;                   { DEL }
+| &#39;,&#39;                   { SEP }
 | &quot;Measure&quot;whitespace   { MEASURE }
 | &quot;-&gt;&quot;                  { MESHOST }
 | &quot;Reset&quot;whitespace     { RESET }
@@ -107,9 +111,12 @@ rule tokenize = parse
 | &quot;RX&quot;                  { RXGATE }
 | &quot;U&quot;                   { UNITARY }
 | &quot;CNOT&quot;whitespace      { CTRLNOT }
+| &quot;CH&quot;whitespace        { CTRLH }
+| &quot;CS&quot;whitespace        { CTRLS }
 | &quot;CCX&quot;whitespace       { TOFFOLI }
 | &quot;SWAP&quot;whitespace      { SWAP }
 | &quot;RZZ&quot;                 { SYMMRZZ }
+| &quot;RYY&quot;                 { SYMMRYY }
 | &quot;RXX&quot;                 { SYMMRXX }
 
 // String definitions
@@ -117,7 +124,7 @@ rule tokenize = parse
 
     </pre>
     <script type="text/javascript">
-      highlightRanges([[10,1,10,97,1],[13,1,331,7,1],[332,1,332,830,1],[333,1,333,75,1]]);
+      highlightRanges([[10,1,10,97,1],[13,1,349,7,1],[350,1,350,873,1],[351,1,351,75,1]]);
     </script>
   </body>
 </html>

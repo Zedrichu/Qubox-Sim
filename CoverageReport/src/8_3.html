@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/adrianzvizdenco/RiderProjects/QuboxSimulator/QuboxSimulator/Gates/GateFactory.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using MathNet.Numerics.LinearAlgebra;
+using Complex = System.Numerics.Complex;
+using static QuLangProcessor.Tags;
+
+namespace QuboxSimulator.Gates;
+
+internal static class GateFactory
+{
+    private static readonly Dictionary&lt;UTag, Matrix&lt;Complex&gt;&gt; SingleGates = new() {
+        {
+            UTag.H, Matrix&lt;Complex&gt;.Build.DenseOfArray(
+                new Complex[,]
+                {
+                    { 1, 1 },
+                    { 1, -1 }
+                }) / Math.Sqrt(2) }, 
+        { UTag.ID, Matrix&lt;Complex&gt;.Build.DenseIdentity(2, 2) }, {
+            UTag.X, Matrix&lt;Complex&gt;.Build.DenseOfArray(
+                new Complex[,]
+                {
+                    { 0, 1 },
+                    { 1, 0 }
+                }) }, {
+            UTag.Y, Matrix&lt;Complex&gt;.Build.DenseOfArray(
+                new[,]
+                {
+                    { 0, -Complex.ImaginaryOne },
+                    { Complex.ImaginaryOne, 0 }
+                }) }, {
+            UTag.Z,  Matrix&lt;Complex&gt;.Build.DenseOfArray(
+                new Complex[,]
+                {
+                    { 1, 0 },
+                    { 0, -1 }
+                }) }, {
+            UTag.S,  Matrix&lt;Complex&gt;.Build.DenseOfArray(
+                new[,]
+                {
+                    { 1, 0 },
+                    { 0, Complex.ImaginaryOne }
+                }) }, {
+            UTag.SDG, Matrix&lt;Complex&gt;.Build.DenseOfArray(
+                new[,]
+                {
+                    { 1, 0 },
+                    { 0, -Complex.ImaginaryOne }
+                }) }, {
+            UTag.T, Matrix&lt;Complex&gt;.Build.DenseOfArray(
+                new[,]
+                {
+                    { 1, 0 },
+                    { 0, Complex.Exp(Complex.ImaginaryOne * Math.PI / 4) }
+                }) }, {
+            UTag.TDG, Matrix&lt;Complex&gt;.Build.DenseOfArray(
+                new[,]
+                {
+                    { 1, 0 },
+                    { 0, Complex.Exp(Complex.ImaginaryOne * -Math.PI / 4) }
+                }) }, {
+            UTag.SX, Matrix&lt;Complex&gt;.Build.DenseOfArray(
+                new[,]
+                {
+                    { 1 + Complex.ImaginaryOne, 1 - Complex.ImaginaryOne },
+                    { 1 - Complex.ImaginaryOne, 1 + Complex.ImaginaryOne }
+                }) / 2 }, {
+            UTag.SXDG, Matrix&lt;Complex&gt;.Build.DenseOfArray(
+                new[,]
+                {
+                    { 1 - Complex.ImaginaryOne, 1 + Complex.ImaginaryOne },
+                    { 1 + Complex.ImaginaryOne, 1 - Complex.ImaginaryOne }
+                }) / 2 },
+    };
+
+    private static Dictionary&lt;PTag, Matrix&lt;Complex&gt;&gt; ParamGates(double phase)
+    {
+        return new Dictionary&lt;PTag, Matrix&lt;Complex&gt;&gt;
+        {
+            { PTag.P, Matrix&lt;Complex&gt;.Build.DenseOfArray(new[,]
+            {
+                {1,0},
+                {0, Complex.Exp(Complex.ImaginaryOne * phase)}
+            }) },
+            {PTag.RX, Matrix&lt;Complex&gt;.Build.DenseOfArray(new[,]
+            {
+                {Complex.Cos(phase / 2), -Complex.ImaginaryOne * Complex.Sin(phase / 2)},
+                {-Complex.ImaginaryOne * Complex.Sin(phase / 2), Complex.Cos(phase / 2)}
+            }) },
+            {PTag.RY, Matrix&lt;Complex&gt;.Build.DenseOfArray(new[,]
+            {
+                {Complex.Cos(phase / 2), -Complex.Sin(phase / 2)},
+                {Complex.Sin(phase / 2), Complex.Cos(phase / 2)}
+            }) },
+            {PTag.RZ, Matrix&lt;Complex&gt;.Build.DenseOfArray(new[,]
+            {
+                {Complex.Exp(-Complex.ImaginaryOne * phase / 2), 0},
+                {0, Complex.Exp(Complex.ImaginaryOne * phase / 2)}
+            }) }
+        };
+    }
+
+    private static readonly Dictionary&lt;BTag, Matrix&lt;Complex&gt;&gt; DoubleGates = new() {
+        { BTag.CNOT, Matrix&lt;Complex&gt;.Build.DenseOfArray(
+            new Complex[,]{
+                { 1, 0, 0, 0 },
+                { 0, 1, 0, 0 },
+                { 0, 0, 0, 1 },
+                { 0, 0, 1, 0 }
+            })},
+        { BTag.SWAP, Matrix&lt;Complex&gt;.Build.DenseOfArray(
+            new Complex[,]
+            {
+                { 1, 0, 0, 0 },
+                { 0, 0, 1, 0 },
+                { 0, 1, 0, 0 },
+                { 0, 0, 0, 1 }
+            })},
+        { BTag.CH, Matrix&lt;Complex&gt;.Build.DenseOfArray(
+            new [,] {
+                { 1, 0, 0, 0 },
+                { 0, 1, 0, 0 },
+                { 0, 0, 1, 0 },
+                { 0, 0, 0, Complex.ImaginaryOne }
+            })},
+        { BTag.CS, Matrix&lt;Complex&gt;.Build.DenseOfArray(
+            new [,] {
+                { 1, 0, 0, 0 },
+                { 0, 1, 0, 0 },
+                { 0, 0, 1/Complex.Sqrt(2), 1/Complex.Sqrt(2) },
+                { 0, 0, 1/Complex.Sqrt(2), -1/Complex.Sqrt(2) }
+            })},
+    };
+    
+    private static Dictionary&lt;BPTag, Matrix&lt;Complex&gt;&gt; DoubleParamGates(double phase)
+    {
+        return new Dictionary&lt;BPTag, Matrix&lt;Complex&gt;&gt;
+        {
+            { BPTag.RXX, Matrix&lt;Complex&gt;.Build.DenseOfArray(new [,] {
+                {Complex.Cos(phase/2), Complex.Zero, Complex.Zero, -Complex.ImaginaryOne * Complex.Sin(phase/2)},
+                {Complex.Zero, Complex.Cos(phase/2), -Complex.ImaginaryOne * Complex.Sin(phase/2), Complex.Zero},
+                {Complex.Zero, -Complex.ImaginaryOne * Complex.Sin(phase/2), Complex.Cos(phase/2), Complex.Zero},
+                {-Complex.ImaginaryOne * Complex.Sin(phase/2), Complex.Zero, Complex.Zero, Complex.Cos(phase/2)}
+            }) },
+            { BPTag.RYY, Matrix&lt;Complex&gt;.Build.DenseOfArray(new [,] {
+                {Complex.Cos(phase/2), Complex.Zero, Complex.Zero, Complex.ImaginaryOne * Complex.Sin(phase/2)},
+                {Complex.Zero, Complex.Cos(phase/2), -Complex.ImaginaryOne * Complex.Sin(phase/2), Complex.Zero},
+                {Complex.Zero, -Complex.ImaginaryOne * Complex.Sin(phase/2), Complex.Cos(phase/2), Complex.Zero},
+                {Complex.ImaginaryOne * Complex.Sin(phase/2), Complex.Zero, Complex.Zero, Complex.Cos(phase/2)}
+            }) },
+            { BPTag.RZZ, Matrix&lt;Complex&gt;.Build.DenseOfArray(new [,] {
+                {Complex.Exp(-Complex.ImaginaryOne*phase/2), Complex.Zero, Complex.Zero, Complex.Zero},
+                {Complex.Zero, Complex.Exp(Complex.ImaginaryOne*phase/2), Complex.Zero, Complex.Zero},
+                {Complex.Zero, Complex.Zero, Complex.Exp(Complex.ImaginaryOne*phase/2), Complex.Zero},
+                {Complex.Zero, Complex.Zero, Complex.Zero, Complex.Exp(-Complex.ImaginaryOne*phase/2)}
+            }) }
+            
+        };
+    }
+
+    internal static IMatrixGate CreateGate(UTag token, int target)
+    {
+        return new SingleQubitGate(SingleGates[token], token, target);
+    }
+    
+    internal static IMatrixGate CreateGate(PTag token, int target, Tuple&lt;double, string&gt; phase)
+    {
+        return new ParamSingleGate(ParamGates(phase.Item1)[token], token, target, phase);
+    }
+
+    internal static ISupportGate CreateGate(SupportType token, int target, int classic = -1)
+    {
+        return token switch
+        {
+            SupportType.None =&gt; new NoneGate(target),
+            SupportType.Barrier =&gt; new BarrierGate(target),
+            SupportType.Reset =&gt; new ResetGate(target),
+            SupportType.Measure =&gt; new MeasureGate(target, classic),
+            SupportType.PhaseDisk =&gt; new PhaseDisk(target),
+        };
+    }
+    
+    internal static IMatrixGate CreateGate(BTag token, int target1, int target2)
+    {
+        return new DoubleQubitGate(DoubleGates[token], token, target1, target2);
+    }
+    
+    internal static IMatrixGate CreateGate(BPTag token, int target1, int target2, Tuple&lt;double, string&gt; phase)
+    {
+        return new ParamDoubleGate(DoubleParamGates(phase.Item1)[token], token, target1, target2, phase);
+    }
+    
+    internal static IMatrixGate CreateGate(Tuple&lt;double, string&gt;[] args, int target)
+    {
+        return new UnitaryGate(args, target);
+    }
+    
+    internal static IMatrixGate CreateGate(int target1, int target2, int target3)
+    {
+        return new ToffoliGate(target1, target2, target3);
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[9,5,72,7,1],[75,5,75,6,1],[76,9,98,11,1],[99,5,99,6,1],[101,5,131,7,1],[134,5,134,6,1],[135,9,156,11,1],[157,5,157,6,1],[160,5,160,6,1],[161,9,161,71,1],[162,5,162,6,1],[165,5,165,6,1],[166,9,166,90,1],[167,5,167,6,1],[170,5,170,6,1],[171,9,173,33,1],[173,33,173,53,1],[173,53,174,36,1],[174,36,174,59,1],[174,59,175,34,1],[175,34,175,55,1],[175,55,176,36,1],[176,36,176,68,1],[176,68,177,38,1],[177,38,177,59,1],[177,59,178,11,1],[179,5,179,6,1],[182,5,182,6,1],[183,9,183,81,1],[184,5,184,6,1],[187,5,187,6,1],[188,9,188,106,1],[189,5,189,6,1],[192,5,192,6,1],[193,9,193,46,1],[194,5,194,6,1],[197,5,197,6,1],[198,9,198,59,1],[199,5,199,6,1]]);
+    </script>
+  </body>
+</html>

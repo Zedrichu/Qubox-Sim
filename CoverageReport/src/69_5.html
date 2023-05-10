@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/adrianzvizdenco/RiderProjects/QuboxSimulator/QuLangProcessor/Translator.fs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+/// &lt;summary&gt;
+/// Translator module handling the conversion from AST structure to Q# compiling code
+/// &lt;/summary&gt;
+module public QuLangProcessor.Translator
+(* F#
+ -*- coding: utf-8 -*-
+Q# Translator from QuLang AST
+
+Description: Translator module handling the conversion from AST structure to Q# compiling code
+
+@__Author --&gt; Created by Adrian Zvizdenco aka Zedrichu
+@__Date &amp; Time --&gt; Created on 06/03/2023
+@__Email --&gt; adrzvizdencojr@gmail.com
+@__Version --&gt; 1.1
+@__Status --&gt; DEV
+*)
+
+open AST
+open Tags
+
+/// &lt;summary&gt;
+/// Function to compile the quantum results to Q# syntax.
+/// &lt;/summary&gt;
+/// &lt;param name=&quot;result&quot;&gt;Result expression (AST.Result)&lt;/param&gt;
+/// &lt;returns&gt;Q# string representation&lt;/returns&gt;
+let rec private translateResult (result:Result):string =
+    match result with
+    | Click -&gt; &quot;Zero&quot;
+    | NoClick -&gt; &quot;One&quot;
+
+/// &lt;summary&gt;
+/// Function to translate bit structures to Q# syntax.
+/// &lt;/summary&gt;
+/// &lt;param name=&quot;expr&quot;&gt;Bit expression (sequence, array-like or single)&lt;/param&gt;
+/// &lt;param name=&quot;flag&quot;&gt;True for qubits, false for classical bits&lt;/param&gt;
+/// &lt;returns&gt;Q# string representation&lt;/returns&gt;
+let rec internal translateAlloc (expr:Bit) (flag:bool):string =
+    match flag with
+    | true -&gt;
+        match expr with
+        | BitA(q, i) -&gt; $&quot;use {q}[%i{i}] = Qubit [%i{i}];&quot;
+        | BitS(q) -&gt; $&quot;use {q} = Qubit();&quot;
+        | BitSeq(q,q_seq) -&gt; translateAlloc q true + &quot;\n&quot; + translateAlloc q_seq true
+    | false -&gt;
+        match expr with
+        | BitA(s, i) -&gt; $&quot;mutable {s}[%i{i}] = new Result[%i{i}];&quot;
+        | BitS(s) -&gt; $&quot;mutable {s} = new Result;&quot;
+        | BitSeq(q,q_seq) -&gt; translateAlloc q false + &quot;\n&quot; + translateAlloc q_seq false
+
+/// &lt;summary&gt;
+/// Function to translate a single bit to Q# syntax.
+/// &lt;/summary&gt;
+/// &lt;param name=&quot;bit&quot;&gt;Q# bit representation&lt;/param&gt;
+let rec private translateBit (bit:Bit) : string =
+    match bit with
+    | BitA(b,i) -&gt; $&quot;{b}[%i{i}]&quot; 
+    | BitS b -&gt; b
+
+/// &lt;summary&gt;
+/// Function to translate arithmetic expressions to Q# syntax.
+/// Recursive on the structure of type arithExpr.
+/// &lt;/summary&gt;
+/// &lt;param name=&quot;expr&quot;&gt;Arithmetic expression (AST.ArithExpr)&lt;/param&gt;
+/// &lt;returns&gt;Q# string representation&lt;/returns&gt;
+let rec private translateArith (expr:ArithExpr):string = 
+    match expr with
+    | VarA x -&gt; x
+    | Num x -&gt; $&quot;%f{(float x)}&quot;
+    | Float x -&gt; $&quot;%f{x}&quot;
+    | Pi -&gt; &quot;PI()&quot;
+    | UnaryOp(op, x) -&gt; &quot;(&quot;+op.ToString()+(translateArith x)+&quot;)&quot;
+    | BinaryOp(x, op, y) -&gt; &quot;(&quot;+(translateArith x)+op.ToString()+(translateArith y)+&quot;)&quot;
+   
+/// &lt;summary&gt;
+/// Function to translate boolean expressions to Q# syntax.
+/// Recursive on the structure of type boolExpr
+/// &lt;/summary&gt;
+/// &lt;param name=&quot;expr&quot;&gt;Boolean expression (AST.boolExpr)&lt;/param&gt;
+/// &lt;returns&gt;Q# string representation&lt;/returns&gt;
+let rec private translateBool (expr:BoolExpr):string = 
+    match expr with 
+    | B x -&gt; let t = x.ToString()
+             t.ToLower()
+    | VarB s -&gt; s
+    | LogicOp(x,And,y) -&gt; &quot;&quot;+(translateBool x)+&quot; and &quot;+(translateBool y)+&quot;&quot;
+    | LogicOp(x,Or,y) -&gt; &quot;&quot;+(translateBool x)+&quot; or &quot;+(translateBool y)+&quot;&quot;
+    | LogicOp(x,Xor,y) -&gt; &quot;(&quot;+(translateBool x)+&quot; and not &quot;+(translateBool y)+&quot;) or (&quot;
+                             + (translateBool y)+&quot; and not &quot;+(translateBool x)+&quot;)&quot;    
+    | Not x -&gt; $&quot;(not {translateBool x})&quot;
+    | Check(bit, res) -&gt; &quot;(&quot;+translateBit bit+&quot; == &quot;+(translateResult res)+&quot;)&quot;
+    | RelationOp(x,op,y) -&gt; $&quot;{translateArith x} {op} {translateArith y}&quot;
+
+
+/// &lt;summary&gt;
+/// Function to translate statement to Q# syntax.
+/// Recursive on the Flow structure.
+/// &lt;/summary&gt;
+/// &lt;param name=&quot;expr&quot;&gt;Statement expression (AST.Statement)&lt;/param&gt;
+/// &lt;returns&gt;Q# string representation&lt;/returns&gt;
+let rec private translateStatement (expr:Statement):string =
+    match expr with
+    | Assign(var, value) -&gt; &quot;let &quot;+var+&quot; = &quot;+translateArith value
+    | AssignB(var, value) -&gt; &quot;let &quot;+var+&quot; = &quot;+translateBool value
+    | Condition(b, st) -&gt; &quot;if (&quot;+translateBool b+&quot;) {&quot;+translateStatement st+&quot;}&quot;
+    | Measure(q_bit, BitA(s, i)) -&gt; $&quot;set {s} /= {i} &lt;- M(&quot;+ translateBit q_bit+&quot;);&quot;
+    | Measure(q_bit, BitS s) -&gt; $&quot;let {s} = M(&quot;+ translateBit q_bit+&quot;);&quot;
+    | Reset(BitS(q)) -&gt; &quot;Reset(&quot;+q+&quot;);&quot;
+    | Reset(BitA(q, _)) -&gt; &quot;ResetAll(&quot;+q+&quot;);&quot;
+    | UnaryGate(TDG, bit) -&gt; &quot;Rz(-PI()/4.0, &quot;+translateBit bit+&quot;);&quot; // T†
+    | UnaryGate(SDG, bit) -&gt; &quot;Rz(-PI()/2.0, &quot;+translateBit bit+&quot;);&quot; // S†
+    | UnaryGate(SX, bit) -&gt; &quot;Rx(PI()/2.0, &quot;+translateBit bit+&quot;);&quot; // Global phase 
+    | UnaryGate(SXDG, bit) -&gt; &quot;Rx(-PI()/2.0, &quot;+translateBit bit+&quot;);&quot; // Global phase
+    | UnaryGate(tag, bit) -&gt; $&quot;{tag}({translateBit bit});&quot;
+    | ParamGate(P, phase, bit) -&gt; &quot;Rz(&quot;+(translateArith phase).ToString()+&quot;, &quot;+translateBit bit+&quot;);&quot; // up to global phase
+    | ParamGate(RZ, angle, bit) -&gt; &quot;Rz(&quot;+(translateArith angle).ToString()+&quot;, &quot;+translateBit bit+&quot;);&quot;
+    | ParamGate(RY, angle, bit) -&gt; &quot;Ry(&quot;+(translateArith angle).ToString()+&quot;, &quot;+translateBit bit+&quot;);&quot;
+    | ParamGate(RX, angle, bit) -&gt; &quot;Rx(&quot;+(translateArith angle).ToString()+&quot;, &quot;+translateBit bit+&quot;);&quot;
+    //| U(exp1, exp2, exp3, bit) -&gt; #TODO! Find equivalent of unitary in Q# syntax
+    | BinaryGate(CNOT, bit1, bit2) -&gt; &quot;CNOT(&quot;+translateBit bit1+&quot;, &quot;+translateBit bit2+&quot;);&quot;
+    | BinaryGate(SWAP,bit1, bit2) -&gt; &quot;SWAP(&quot;+translateBit bit1+&quot;, &quot;+translateBit bit2+&quot;);&quot;
+    //| BinaryGate(CH, bit1, bit2) -&gt; #TODO! Find equivalent Q#
+    //| BinaryGate(CS, bit1, bit2) -&gt; #TODO! Find equivalent Q#
+    | BinaryParamGate(RXX, theta, bit1, bit2) -&gt; &quot;Rxx(&quot;+(translateArith theta).ToString()+&quot;, &quot;+translateBit bit1+&quot;, &quot;+translateBit bit2+&quot;);&quot;
+    | BinaryParamGate(RYY, theta, bit1, bit2) -&gt; &quot;Ryy(&quot;+(translateArith theta).ToString()+&quot;, &quot;+translateBit bit1+&quot;, &quot;+translateBit bit2+&quot;);&quot;
+    | BinaryParamGate(RZZ, theta, bit1, bit2) -&gt; &quot;Rzz(&quot;+(translateArith theta).ToString()+&quot;, &quot;+translateBit bit1+&quot;, &quot;+translateBit bit2+&quot;);&quot;
+    | Toffoli(bit1, bit2, bit3) -&gt; &quot;CCNOT(&quot;+translateBit bit1+&quot;, &quot;+translateBit bit2+&quot;, &quot;+translateBit bit3+&quot;);&quot;
+    | _ -&gt; &quot;&quot;
+
+/// Helper to aggregate translated statements in a flow    
+let rec internal translateFlow (flow:Statement list):string =
+    match flow with
+    | head::tail -&gt; translateStatement head + &quot;\n\t&quot; + translateFlow tail
+    | [] -&gt; &quot;&quot;
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[27,5,27,22,1],[28,16,28,22,1],[29,18,29,23,1],[38,5,38,20,1],[40,9,40,24,1],[41,25,41,59,1],[42,22,42,43,1],[43,30,43,86,1],[45,9,45,24,1],[46,25,46,67,1],[47,22,47,50,1],[48,30,48,88,1],[55,5,55,19,1],[56,20,56,33,1],[57,17,57,18,1],[66,5,66,20,1],[67,17,67,18,1],[68,16,68,32,1],[69,18,69,26,1],[70,13,70,19,1],[71,25,71,65,1],[72,29,72,88,1],[81,5,81,20,1],[82,14,82,34,1],[83,14,83,25,1],[84,17,84,18,1],[85,27,85,76,1],[86,26,86,74,1],[87,27,88,83,1],[89,16,89,42,1],[90,26,90,79,1],[91,29,91,74,1],[101,5,101,20,1],[102,29,102,66,1],[103,30,103,66,1],[104,27,104,81,1],[105,37,105,85,1],[106,33,106,73,1],[107,25,107,40,1],[108,28,108,46,1],[109,30,109,68,1],[110,30,110,68,1],[111,29,111,66,1],[112,31,112,69,1],[113,30,113,59,1],[114,35,114,101,1],[115,36,115,102,1],[116,36,116,102,1],[117,36,117,102,1],[119,39,119,92,1],[120,38,120,91,1],[123,50,123,141,1],[124,50,124,141,1],[125,50,125,141,1],[126,36,126,113,1],[127,12,127,14,1],[131,5,131,20,1],[132,21,132,74,1],[133,13,133,15,1]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/adrianzvizdenco/RiderProjects/QuboxSimulator/QuLangProcessor/Handler.fs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+/// &lt;summary&gt;
+/// Interface to library assisting the compilation of QuLang input
+/// &lt;/summary&gt;
+module public QuLangProcessor.Handler
+(* F#
+ -*- coding: utf-8 -*-
+Quantum Language Handler
+
+Description: Facade of library assisting the compilation of QuLang input.
+Acts as an API for different functionalities of the library.
+
+@__Author --&gt; Created by Adrian Zvizdenco aka Zedrichu
+@__Date &amp; Time --&gt; Created on 21/02/2023
+@__Email --&gt; adrzvizdencojr@gmail.com
+@__Version --&gt; 1.2
+@__Status --&gt; DEV
+*)
+open System
+open FSharp.Text
+open Microsoft.FSharp.Core
+open QuLangProcessor.AST
+
+/// &lt;summary&gt;
+/// Interface method to parse QuLang code to circuit AST based on the grammar rules
+/// &lt;/summary&gt;
+/// &lt;param name=&quot;code&quot;&gt;String in QuLang format awaiting parsing&lt;/param&gt;
+/// &lt;returns&gt;Tuple of AST for allocation and operation and error tag&lt;/returns&gt;
+let public parseQuLang (code:string) : Circuit Option * Error =
+    let lexbuffer = Lexing.LexBuffer&lt;_&gt;.FromString code // Create an input stream
+    try
+        // Create a TOKEN stream using the Lexer rules on the input stream
+        // Pass the TOKEN stream to the Parser to obtain the AST
+        let ast = Parser.start Lexer.tokenize lexbuffer
+        (ast, Success)
+    //Undefined string TOKEN encountered - syntax analyzer 
+    with e -&gt;
+              // Collect error triggers and information
+              let line = lexbuffer.EndPos.pos_lnum + 1
+              let column = lexbuffer.EndPos.pos_cnum - lexbuffer.EndPos.pos_bol
+              let token = Lexing.LexBuffer&lt;_&gt;.LexemeString lexbuffer
+              printfn $&quot;Parse error in program at : Line %i{line}, %i{column}, Unexpected token: %A{token}&quot;
+              // Return an empty AST and the syntax error
+              (None, SyntaxError(token, line, column))
+
+/// &lt;summary&gt;
+/// Interface method to parse boolean expression from string format to AST
+/// /// &lt;/summary&gt;
+/// &lt;param name=&quot;expr&quot;&gt;String awaiting parsing&lt;/param&gt;
+/// &lt;returns&gt;Tuple of boolean AST and error tag&lt;/returns&gt;
+let public parseBool (expr:string): BoolExpr Option * Error =
+    let lexbuffer = Lexing.LexBuffer&lt;_&gt;.FromString expr // Create an input stream
+    try
+        // Create a TOKEN stream using the Lexer rules on the input stream
+        // Pass the TOKEN stream to the Parser to obtain the AST
+        let ast = Parser.startBool Lexer.tokenize lexbuffer
+        (ast, Success)
+    //Undefined string TOKEN encountered - syntax analyzer 
+    with e -&gt;
+              // Collect error triggers and information
+              let line = lexbuffer.EndPos.pos_lnum + 1
+              let column = lexbuffer.EndPos.pos_cnum - lexbuffer.EndPos.pos_bol
+              let token = Lexing.LexBuffer&lt;_&gt;.LexemeString lexbuffer
+              printfn $&quot;Parse error in program at : Line %i{line},
+                %i{column}, Unexpected token: %A{token}&quot;
+              // Return an empty AST and the syntax error
+              (None, SyntaxError(token, line, column))
+              
+/// &lt;summary&gt;
+/// Interface method to parse arithmetic expression from string format to AST
+/// &lt;/summary&gt;
+/// &lt;param name=&quot;expr&quot;&gt;String awaiting parsing&lt;/param&gt;
+/// &lt;returns&gt;Tuple of arithmetic AST and error tag&lt;/returns&gt;
+let public parseArith (expr:string): ArithExpr option * Error =
+    let lexbuffer = Lexing.LexBuffer&lt;_&gt;.FromString expr // Create an input stream
+    try
+        // Create a TOKEN stream using the Lexer rules on the input stream
+        // Pass the TOKEN stream to the Parser to obtain the AST
+        let ast = Parser.startArith Lexer.tokenize lexbuffer
+        (ast, Success)
+    //Undefined string TOKEN encountered - syntax analyzer 
+    with e -&gt;
+              // Collect error triggers and information
+              let line = lexbuffer.EndPos.pos_lnum + 1
+              let column = lexbuffer.EndPos.pos_cnum - lexbuffer.EndPos.pos_bol
+              let token = Lexing.LexBuffer&lt;_&gt;.LexemeString lexbuffer
+              printfn $&quot;Parse error in program at : Line %i{line},
+                %i{column}, Unexpected token: %A{token}&quot;
+              // Return an empty AST and the syntax error
+              (None, SyntaxError(token, line, column))
+
+/// &lt;summary&gt;
+/// Interface method to back-compile generated circuit AST to QuLang code
+/// &lt;/summary&gt;
+/// &lt;param name=&quot;circuit&quot;&gt;Generated AST for translation(AST.Circuit)&lt;/param&gt;
+/// &lt;returns&gt;QuLang string representation&lt;/returns&gt;
+let rec public backCompileCircuit (circuit:Circuit) : string = 
+    let AllocQC(q, c), Flow(flow) = circuit
+    $&quot;Qalloc {BackCompiler.backCompileBit q};\nCalloc {BackCompiler.backCompileBit c};
+        \n\n{BackCompiler.backCompileFlow flow}&quot;
+   
+    
+/// &lt;summary&gt;
+/// Interface method to translate generated AST to Q# code
+/// &lt;/summary&gt;
+/// &lt;param name=&quot;circuit&quot;&gt;Generated circuit AST for compilation (AST.Circuit)&lt;/param&gt;
+/// &lt;returns&gt;Q# string representation&lt;/returns&gt;
+let public translateCircuit (circuit:Circuit):string =
+    let AllocQC(q,c), Flow(flow) = circuit
+    let header = &quot;namespace Quantum.App {\n\n
+        \topen Microsoft.Quantum.Canon;\n
+        \topen Microsoft.Quantum.Intrinsic;\n
+        \topen Microsoft.Quantum.Math;\n
+        
+        \t@EntryPoint()\n
+        \toperation SimulateCircuit() : Unit { \n
+            \t\t// Placeholder&quot;
+    let str = Translator.translateAlloc q true + &quot;\n&quot; +
+              Translator.translateAlloc c false + &quot;\n\n&quot; +
+              Translator.translateFlow flow
+    header + &quot;\n&quot; + str + &quot;\n\t}\n}&quot;
+        
+/// &lt;summary&gt;
+/// Interface method to analyze the semantics of the generated circuit AST
+/// &lt;/summary&gt;
+/// &lt;param name=&quot;ast&quot;&gt;Generated circuit AST for analysis&lt;/param&gt;
+/// &lt;returns&gt;Tuple of circuit memory and error tag&lt;/returns&gt;
+let public analyzeSemantics (ast:Circuit): Memory * Error =
+    let reg, Flow ops = ast
+    try
+        let quantumMap, classicMap = Compiler.allocateBits reg
+        let memory = Memory.empty.SetQuantumClassic quantumMap classicMap
+        Compiler.semanticAnalyzer ops memory
+        memory, Success        
+    with e -&gt; Memory.empty, SemanticError e.Message
+
+/// &lt;summary&gt;
+/// Interface method to optimize the generated AST with eager evaluation and reduction rules
+/// &lt;/summary&gt;
+/// &lt;param name=&quot;ast&quot;&gt;Generated AST for optimization&lt;/param&gt;
+/// &lt;param name=&quot;memory&quot;&gt;Initialized circuit memory&lt;/param&gt;
+/// &lt;returns&gt;Tuple of optimized AST, updated circuit memory and error tag&lt;/returns&gt;
+let public optimizeAST (ast:Circuit) (memory:Memory):
+    Circuit * Memory * Error =
+    try
+        let all, Flow ops = ast
+        let optimized = Compiler.optimizeCircuit ops Map.empty Map.empty 0
+        let _, memA, memB, optAST = optimized
+        let updMemory = (memory.SetArithmetic memA).SetBoolean memB
+        (all, Flow optAST), updMemory, Success
+    with e -&gt; ast, memory, EvaluationError e.Message
+
+/// &lt;summary&gt;
+/// Interface method to optimize logical expressions with eager evaluation and reduction rules
+/// &lt;/summary&gt;
+/// &lt;param name=&quot;b&quot;&gt;Generated boolean expression for optimization&lt;/param&gt;
+/// &lt;param name=&quot;memory&quot;&gt;Initialized circuit memory&lt;/param&gt;
+/// &lt;returns&gt;Tuple of optimized boolean expression, updated circuit memory and error tag&lt;/returns&gt;
+let public optimizeLogic (b:BoolExpr) (memory:Memory) : BoolExpr * Memory * Error =
+    try
+        let optimized = Compiler.evalBool b memory.Boolean memory.Arithmetic
+        optimized, memory, Success
+    with e -&gt; b, memory, EvaluationError e.Message
+
+/// &lt;summary&gt;
+/// Interface method to optimize arithmetic expressions with eager evaluation and reduction rules
+/// &lt;/summary&gt;
+/// &lt;param name=&quot;a&quot;&gt;Generated arithmetic expression for optimization&lt;/param&gt;
+/// &lt;param name=&quot;memory&quot;&gt;Initialized circuit memory&lt;/param&gt;
+/// &lt;returns&gt;Tuple of optimized arithmetic expression, updated circuit memory and error tag&lt;/returns&gt;
+let public optimizeArithmetic (a:ArithExpr) (memory:Memory) : ArithExpr * Memory * Error =
+    try
+        let optimized = Compiler.evalArith a memory.Arithmetic
+        optimized, memory, Success
+    with e -&gt; a, memory, EvaluationError e.Message
+
+/// &lt;summary&gt;
+/// Internal method to get number of choice from user input
+/// &lt;/summary&gt;
+/// &lt;returns&gt;Tuple of success bool value and choice value&lt;/returns&gt;
+let private getMenuInput() = Int32.TryParse(Console.ReadLine())
+
+/// &lt;summary&gt;
+/// Internal method to get user input as string
+/// &lt;/summary&gt;
+/// &lt;returns&gt;String of user input&lt;/returns&gt;
+let private getInputCode() = Console.ReadLine()
+
+let private printInnerMenu() =
+    printfn &quot;Menu:&quot;
+    printfn &quot;1. Semantic Analysis&quot;
+    printfn &quot;2. Optimize AST&quot;
+    printfn &quot;3. Compiler Q#&quot;
+    printfn &quot;4. Translator QuLang (Prettify)&quot;
+    printfn &quot;5. Back to main menu&quot;
+    printf &quot;Enter your choice:&quot;
+
+/// &lt;summary&gt;
+/// Internal method to execute tools on initial parsed AST
+/// &lt;/summary&gt;
+/// &lt;param name=&quot;ast&quot;&gt;AST&lt;/param&gt;
+let rec private execute (ast:Circuit) =
+    printInnerMenu()
+    match getMenuInput() with
+    | true, 1 -&gt; let memory, err = analyzeSemantics ast
+                 printfn $&quot;Memory:%A{memory}&quot;
+                 printfn $&quot;Status:%A{err}&quot;
+                 execute(ast)
+    | true, 2 -&gt; let optimized, updMemory, err = optimizeAST ast Memory.empty
+                 printfn $&quot;AST:%A{ast}&quot; 
+                 printfn $&quot;Memory:%A{updMemory}&quot;
+                 printfn $&quot;Status:%A{err}&quot;
+                 execute(optimized)
+    | true, 3 -&gt; let qSharp = translateCircuit ast
+                 printfn $&quot;%A{qSharp}&quot;
+                 execute(ast)
+    | true, 4 -&gt; let quLang = backCompileCircuit ast              
+                 printfn $&quot;%A{quLang}&quot;
+                 execute(ast)
+    | true, 5 -&gt; ()
+    | _ -&gt; execute(ast)
+    
+
+let private printMainMenu() =
+    printfn &quot;Menu: &quot;
+    printfn &quot;1. Parse QuLang circuit&quot;
+    printfn &quot;2. Parse boolean expression&quot;
+    printfn &quot;3. Parse arithmetic expression&quot;
+    printfn &quot;4. Quit&quot;
+    printf &quot;Enter your choice:&quot;
+    
+    
+let rec mainMenu () =
+    printfn &quot;&quot;
+    printMainMenu()
+    match getMenuInput() with
+    | true, 1 -&gt; let code = Console.ReadLine()
+                 let ast, err = parseQuLang code
+                 match ast with
+                 | None -&gt; printfn $&quot;{err}&quot;
+                 | Some circ -&gt; printfn $&quot;%A{circ} Status:%A{err}&quot;
+                                execute(circ)
+                 mainMenu()
+    | true, 2 -&gt; let expr = Console.ReadLine()
+                 let ast, err = parseBool expr
+                 printfn $&quot;%A{ast} Status:%A{err}&quot;
+                 mainMenu()
+    | true, 3 -&gt; let expr = Console.ReadLine()
+                 let ast, err = parseArith expr
+                 printfn $&quot;%A{ast} Status:%A{err}&quot;
+                 mainMenu()
+    | true, 4 -&gt; ()
+    | _ -&gt; mainMenu()
+
+// Uncomment the following lines to run the program in the console
+// [&lt;EntryPoint&gt;]
+//     let main argv =
+//         mainMenu()
+//         0 // return an integer exit code
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[29,5,29,56,1],[30,5,30,8,1],[33,9,33,56,1],[33,32,33,46,1],[34,10,34,22,1],[36,5,36,9,1],[38,15,38,55,1],[39,15,39,80,1],[40,15,40,69,1],[41,15,41,108,1],[43,16,43,54,1],[51,5,51,56,1],[52,5,52,8,1],[55,9,55,60,1],[55,36,55,50,1],[56,10,56,22,1],[58,5,58,9,1],[60,15,60,55,1],[61,15,61,80,1],[62,15,62,69,1],[63,15,64,57,1],[66,16,66,54,1],[74,5,74,56,1],[75,5,75,8,1],[78,9,78,61,1],[78,37,78,51,1],[79,10,79,22,1],[81,5,81,9,1],[83,15,83,55,1],[84,15,84,80,1],[85,15,85,69,1],[86,15,87,57,1],[89,16,89,54,1],[97,5,97,44,1],[98,5,99,49,1],[108,5,108,43,1],[109,5,116,32,1],[117,5,119,44,1],[120,5,120,37,1],[128,5,128,28,1],[129,5,129,8,1],[130,9,130,63,1],[131,9,131,74,1],[132,9,132,45,1],[133,9,133,24,1],[134,5,134,9,1],[134,15,134,52,1],[144,5,144,8,1],[145,9,145,32,1],[146,9,146,75,1],[147,9,147,46,1],[148,9,148,68,1],[149,9,149,47,1],[150,5,150,9,1],[150,15,150,53,1],[159,5,159,8,1],[160,9,160,77,1],[161,9,161,35,1],[162,5,162,9,1],[162,15,162,51,1],[171,5,171,8,1],[172,9,172,63,1],[173,9,173,35,1],[174,5,174,9,1],[174,15,174,51,1]]);
+    </script>
+  </body>
+</html>

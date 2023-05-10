@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/adrianzvizdenco/RiderProjects/QuboxSimulator/QuLangProcessor/Compiler.fs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+/// &lt;summary&gt;
+/// Module defining the compilation of QuLang AST to a quantum circuit.
+/// &lt;/summary&gt;
+module internal QuLangProcessor.Compiler
+(** F#
+ -*- coding: utf-8 -*-
+QuLang Interpreter 
+
+Description: Module defining the compilation of QuLang AST to a quantum circuit.
+Includes expression evaluation and semantic analyzers. 
+
+@__Author --&gt; Created by Adrian Zvizdenco aka Zedrichu
+@__Date &amp; Time --&gt; Created on 24/02/2023
+@__Email --&gt; adrzvizdencojr@gmail.com
+@__Version --&gt; 1.4
+@__Status --&gt; DEV
+*)
+open Microsoft.FSharp.Core
+open Microsoft.FSharp.Collections
+open QuLangProcessor.AST
+
+module public Map =    
+    /// Map union function
+    let union map1 map2 = Map.fold (fun acc key value -&gt; Map.add key value acc) map1 map2
+    
+    /// Map intersect function
+    let intersect map1 map2 =
+        (Map.empty, map1) ||&gt; Map.fold (fun acc k v1 -&gt;
+            (acc, Map.tryFind k map2) ||&gt; Option.fold
+                (fun acc v2 -&gt; Map.add k (v1,v2) acc) )
+
+/// &lt;summary&gt;
+/// Function to collect bit identifiers from AST structure to map
+/// &lt;/summary&gt;
+/// &lt;param name=&quot;bit&quot;&gt;Bit structure (array form/single/sequenced)&lt;/param&gt;
+/// &lt;param name=&quot;acc&quot;&gt;Accumulator map of identifier/number pairs&lt;/param&gt;
+/// &lt;param name=&quot;no&quot;&gt;Current bit number&lt;/param&gt;
+/// &lt;returns&gt;Map of identifier/number pairs initialized&lt;/returns&gt;
+let rec private unwrapBit (bit:Bit) (acc:Map&lt;string,int * int&gt;) (no:int): Map&lt;string,int * int&gt; * int =
+    match bit with
+    | BitA(s, i) -&gt; let map = Map.add s (i, no) acc
+                    (map, no + i)
+    | BitS s -&gt; let map = Map.add s (1, no) acc
+                (map, no + 1)    
+    | BitSeq(bit1, bit2) -&gt; let acc1, newNo = unwrapBit bit1 acc no
+                            unwrapBit bit2 acc1 newNo
+
+/// &lt;summary&gt;
+/// Function to collect allocated Quantum bits and Classical bits in 2 map structures.
+/// &lt;/summary&gt;
+/// &lt;param name=&quot;alloc&quot;&gt;Allocation structure in the AST.operator type&lt;/param&gt;
+/// &lt;exception cref=&quot;System.Exception&quot;&gt;Invalid allocation (identifier already used for quantum)&lt;/exception&gt;
+/// &lt;returns&gt;Tuple of quantum bit mapping and classical bit mapping&lt;/returns&gt;
+let internal allocateBits (alloc:Allocation):Map&lt;string,int * int&gt; * Map&lt;string,int * int&gt; =
+    let (AllocQC (qbit, cbit)) = alloc
+    let qlist, _ = unwrapBit qbit Map.empty 0 
+    let clist, _ = unwrapBit cbit Map.empty 0
+    // Check if there are common bits between quantum and classical (semantic error)
+    let common = Map.intersect qlist clist
+    if not (Map.isEmpty common) then
+        let var, _ = List.head (Map.toList common)
+        failwith $&quot;Invalid allocation of classical register {var} (already allocated as quantum).&quot;
+        else (qlist, clist)
+
+
+/// Helper functions to aid reductions
+let interopB op a b =
+    match a,b with
+    | Num a, Num b -&gt; B (op (float a) (float b) )
+    | Num a, Float b -&gt; B (op (float a) b)
+    | Float a, Num b -&gt; B (op a (float b))
+    | Float a, Float b -&gt; B (op a b)    
+    | _ -&gt; failwith &quot;Non-atomic expressions&quot;
+    
+let interopA op a b =
+    match a,b with
+    | Num a, Num b -&gt; Num (int (op (float a) (float b)) )
+    | Num a, Float b -&gt; Float (op (float a) b)
+    | Float a, Num b -&gt; Float (op a (float b))
+    | Float a, Float b -&gt; Float (op a b)
+    | _ -&gt; failwith &quot;Non-atomic expressions&quot;
+
+/// &lt;summary&gt;
+/// Function to eager evaluate arithmetic expressions with reduction rules.
+/// &lt;/summary&gt;
+/// &lt;param name=&quot;expr&quot;&gt;Arithmetic expression to be reduced&lt;/param&gt;
+/// &lt;param name=&quot;memory&quot;&gt;Mapping of arithmetic variables to expressions&lt;/param&gt;
+/// &lt;exception cref=&quot;System.Exception&quot;&gt;Arithmetic invalid variable access, division by zero&lt;/exception&gt;
+/// &lt;returns&gt;Reduced evaluation of AST arithmetic expression&lt;/returns&gt;
+let rec internal evalArith (expr:ArithExpr) (memory:Map&lt;string, ArithExpr * int&gt;) : ArithExpr =
+    match expr with
+    | VarA s -&gt; try
+                    let a, _ = Map.find s memory
+                    evalArith a memory
+                with _ -&gt; failwith $&quot;Unknown variable in expression - {s} has not been declared!&quot;    
+    | BinaryOp(x,Mul, y) -&gt;  let x1 = evalArith x memory
+                             let y1 = evalArith y memory
+                             match x1, y1 with
+                             | Num 0, _ | _, Num 0 -&gt; Num 0
+                             | Float 0.0, _ | _, Float 0.0 -&gt; Float 0.0
+                             | Num 1, _ | Float 1.0, _ -&gt; y1
+                             | _, Num 1 | _, Float 1.0 -&gt; x1
+                             | BinaryOp(a, Div, c), Num b -&gt;
+                                 evalArith (BinaryOp(a, Mul, BinaryOp(Num b, Div, c))) memory
+                             | Pi, c -&gt; BinaryOp(c, Mul, Pi)
+                             | _ -&gt; try
+                                        interopA (*) x1 y1
+                                    with _ -&gt; BinaryOp(x1, Mul, y1)
+    | BinaryOp(x,Div,y) -&gt; let x1 = evalArith x memory
+                           let y1 = evalArith y memory
+                           match x1, y1 with
+                           | Num 0, _ -&gt; Num 0
+                           | Float 0.0, _ -&gt; Float 0.0
+                           | _, Num 0 | _, Float 0.0 -&gt; failwith $&quot;Invalid division by zero - undefined!&quot;
+                           | _, Num 1 | _, Float 1.0 -&gt; x1
+                           | c, d when c=d -&gt; Num 1
+                           | BinaryOp(a, Mul, c), Num b -&gt;
+                               evalArith (BinaryOp(BinaryOp(a, Div, Num b), Mul, c)) memory
+                           | UnaryOp (Minus, a), _ -&gt; evalArith (UnaryOp (Minus,BinaryOp(a,Div,y1))) memory
+                           | _ -&gt; try
+                                    interopA (/) x1 y1
+                                  with _ -&gt; BinaryOp(x1, Div, y1)
+    | BinaryOp(x,Add, y) -&gt; let x1 = evalArith x memory
+                            let y1 = evalArith y memory
+                            match x1, y1 with
+                            | _, Num 0 | _, Float 0.0 -&gt; x1
+                            | Num 0, _ | Float 0.0, _ -&gt; y1
+                            | BinaryOp(a, Add, c), Num b -&gt;
+                                evalArith (BinaryOp(a, Add, BinaryOp(c, Add, Float b))) memory
+                            | c, d when c=d -&gt; BinaryOp(Num 2, Mul, x1)
+                            | UnaryOp (Minus, a), _ -&gt; evalArith (BinaryOp(a, Sub, y1)) memory
+                            | c, Pi -&gt; evalArith (BinaryOp(Pi, Add, c)) memory
+                            | _ -&gt; try
+                                       interopA (+) x1 y1
+                                   with _ -&gt; BinaryOp(x1, Add, y1)  
+    | BinaryOp(x,Sub, y) -&gt;  let x1 = evalArith x memory
+                             let y1 = evalArith y memory
+                             match x1, y1 with
+                             | c , d when c=d -&gt; Num 0
+                             | Num 0, _ | Float 0.0, _ -&gt;
+                                    evalArith (UnaryOp (Minus, y1)) memory
+                             | _, Num 0 | _, Float 0.0 -&gt; x1
+                             | _ -&gt; try
+                                        interopA (-) x1 y1
+                                    with _ -&gt; BinaryOp(x1, Sub, y1)
+    | UnaryOp(Minus,x) -&gt; let x1 = evalArith x memory
+                          match x1 with
+                          | Num a -&gt; Num (-a)
+                          | Float a -&gt; Float (-a)
+                          | UnaryOp (Minus, a) -&gt; a
+                          | _ -&gt; UnaryOp(Minus,x1)
+    | UnaryOp (Plus, x) -&gt; evalArith x memory
+    | BinaryOp(x,Pow,y) -&gt; let x1 = evalArith x memory
+                           let y1 = evalArith y memory
+                           match x1, y1 with
+                           | Num 0, _ -&gt; Num 0
+                           | _, Num 0 | Num 1, _ -&gt; Num 1
+                           | Float 0.0, _ -&gt; Float 0.0
+                           | _, Float 0.0 | Float 1.0, _ -&gt; Float 1.0
+                           | _, Num 1 | _, Float 1.0 -&gt; x1
+                           | _ -&gt; try
+                                        interopA ( ** ) x1 y1
+                                  with _ -&gt; BinaryOp(x1, Pow, y1)
+    | BinaryOp(x,Mod,y) -&gt; let x1 = evalArith x memory
+                           let y1 = evalArith y memory
+                           match x1, y1 with
+                           | Num 0, _ -&gt; Num 0
+                           | Float 0.0, _ -&gt; Float 0.0
+                           | _, Num 0 | _, Float 0.0 -&gt; failwith $&quot;Invalid modulo by zero - undefined!&quot;
+                           | _ -&gt; try
+                                        interopA (%) x1 y1
+                                  with _ -&gt; BinaryOp(x1, Mod, y1)
+    | _ -&gt; expr
+
+    
+
+/// &lt;summary&gt;
+/// Function to eager evaluate boolean expressions with reduction rules
+/// &lt;/summary&gt;
+/// &lt;param name=&quot;expr&quot;&gt;Boolean expression to be reduced&lt;/param&gt;
+/// &lt;param name=&quot;memoryB&quot;&gt;Boolean mapping of identifiers&lt;/param&gt;
+/// &lt;param name=&quot;memoryA&quot;&gt;Arithmetic mapping of identifiers&lt;/param&gt;
+/// &lt;exception cref=&quot;System.Exception&quot;&gt;Boolean invalid variable access&lt;/exception&gt;
+/// &lt;returns&gt;Reduced evaluation of AST boolean expression&lt;/returns&gt;
+let rec internal evalBool (expr:BoolExpr) (memoryB:Map&lt;string, BoolExpr * int&gt;)
+    (memoryA:Map&lt;string, ArithExpr * int&gt;) : BoolExpr =
+    match expr with 
+    | Check(_, Click) | B _ -&gt; expr
+    | VarB s -&gt; try
+                    let b, _ = Map.find s memoryB
+                    evalBool b memoryB memoryA
+                with _ -&gt; failwith $&quot;Unknown variable in expression - {s} has not been declared!&quot;    
+    | LogicOp(x, And, Not(y)) when x=y -&gt; B false
+    | LogicOp(x, And, y) -&gt;  let x1 = evalBool x memoryB memoryA
+                             let y1 = evalBool y memoryB memoryA
+                             match x1, y1 with
+                             | B x, B y -&gt; B (x &amp;&amp; y)
+                             | c,d when c=d -&gt; x1
+                             | B false, _ | _, B false -&gt; B false   
+                             | B true, _ -&gt; y1
+                             | Not(c), d | d, Not(c) when c=d -&gt; B false
+                             | Check (b, r), d -&gt;
+                                 evalBool (LogicOp(d, And, Check (b,r))) memoryB memoryA
+                             | _ -&gt; LogicOp(x1, And, y1)
+    | LogicOp(x,Or,y) -&gt; let x1 = evalBool x memoryB memoryA
+                         let y1 = evalBool y memoryB memoryA
+                         match x1, y1 with
+                         | B a, B b -&gt; B (a || b)
+                         | B true, _ | _, B true -&gt; B true
+                         | _, B false -&gt; x1
+                         | c,d when c=d -&gt; x1
+                         | c, Not(d) | Not(d), c when c=d -&gt; B true
+                         | _ -&gt; LogicOp(x1, Or, y1)
+    | LogicOp(x,Xor,y) -&gt; let x1 = evalBool x memoryB memoryA
+                          let y1 = evalBool y memoryB memoryA
+                          match x1, y1 with
+                          | B a, B b -&gt; B (a &lt;&gt; b)
+                          | c,d when c=d -&gt; B false
+                          | _ -&gt; LogicOp(x1, Xor, y1)
+    | Not x -&gt;  let x1 = evalBool x memoryB memoryA
+                match x1 with
+                | B a -&gt; B (not a)
+                | Not a -&gt; a
+                | _ -&gt; Not(x)
+    | RelationOp(x,EQ,y) -&gt; let x1 = evalArith x memoryA
+                            let y1 = evalArith y memoryA
+                            match x1, y1 with
+                            | c, d when c=d -&gt; B true
+                            | _ -&gt; try
+                                       interopB (=) x1 y1
+                                   with _ -&gt; RelationOp(x1, EQ, y1)
+    | RelationOp(x,NEQ,y)-&gt; let x1 = evalArith x memoryA
+                            let y1 = evalArith y memoryA
+                            match x1, y1 with
+                            | c, d when c=d -&gt; B false
+                            | _ -&gt; try
+                                        interopB (&lt;&gt;) x1 y1
+                                   with _ -&gt;
+                                       Not(RelationOp(x1, EQ, y1))
+    | RelationOp(x,LT,y) -&gt; let x1 = evalArith x memoryA
+                            let y1 = evalArith y memoryA
+                            try
+                                interopB (&lt;) x1 y1
+                            with _ -&gt;
+                                RelationOp(x1, LT, y1)
+                            
+    | RelationOp(x,LTE,y) -&gt; let x1 = evalArith x memoryA
+                             let y1 = evalArith y memoryA
+                             // a &lt;= b = not (b &lt; a)
+                             try
+                                interopB (&lt;=) x1 y1
+                             with _ -&gt; Not (RelationOp(y1, LT, x1))
+                             
+    | RelationOp(x,GT,y) -&gt; let x1 = evalArith x memoryA
+                            let y1 = evalArith y memoryA
+                            // a &gt; b = b &lt; a
+                            try
+                                interopB (&gt;) x1 y1
+                            with _ -&gt; RelationOp(y1, LT, x1)
+    | RelationOp(x,GTE,y) -&gt; let x1 = evalArith x memoryA
+                             let y1 = evalArith y memoryA
+                             // a &gt;= b = not (a &lt; b)
+                             try
+                                interopB (&gt;=) x1 y1
+                             with _ -&gt; Not (RelationOp(x1, LT, y1))
+    | Check(bit, NoClick) -&gt; Not (Check(bit, Click))
+
+/// &lt;summary&gt;
+/// Function to optimize statement AST by reducing expressions and building memory
+/// &lt;/summary&gt;
+/// &lt;param name=&quot;st&quot;&gt;Abstract Syntax Tree of Statement for optimization (AST.Statement)&lt;/param&gt;
+/// &lt;param name=&quot;memArith&quot;&gt;Initial arithmetic variable memory&lt;/param&gt;
+/// &lt;param name=&quot;memBool&quot;&gt;Initial boolean variable memory&lt;/param&gt;
+/// &lt;param name=&quot;no&quot;&gt;Ordering of assignments in circuit&lt;/param&gt;
+/// &lt;returns&gt;Tuple of arithmetic and boolean variable memories and optimized Statement&lt;/returns&gt;    
+let rec private optimizeStatement (st:Statement) (memArith:Map&lt;string, ArithExpr * int&gt;)
+    (memBool:Map&lt;string, BoolExpr * int&gt;) (no:int) : int * Map&lt;string, ArithExpr * int&gt;
+    * Map&lt;string, BoolExpr * int&gt; * Statement =
+    match st with
+    | Assign(s, value) -&gt; let value1 = evalArith value memArith
+                          (no+1), memArith.Add(s, (value1, no)), memBool, Assign(s, value1)
+    | AssignB(s, value) -&gt; let value1 = evalBool value memBool memArith
+                           (no+1), memArith, memBool.Add(s, (value1, no)), AssignB(s, value1)
+    | Condition(b, statement) -&gt; let b1 = evalBool b memBool memArith
+                                 let no1, memArith1, memBool1, statement1 = optimizeStatement statement memArith memBool no
+                                 no1, memArith1, memBool1, Condition(b1, statement1)
+    | ParamGate(pTag, expr, bit) -&gt; let expr1 = evalArith expr memArith
+                                    no, memArith, memBool, ParamGate(pTag, expr1, bit)
+    | BinaryParamGate(bpTag, expr, bit1, bit2) -&gt; let expr1 = evalArith expr memArith
+                                                  no, memArith, memBool, BinaryParamGate(bpTag, expr1, bit1, bit2)                                
+    | _ -&gt; no, memArith, memBool, st
+    
+/// &lt;summary&gt;
+/// Function to optimize the flow AST by reducing each statement in the list
+/// &lt;/summary&gt;
+/// &lt;param name=&quot;expr&quot;&gt;Abstract Syntax Tree of circuit flow for optimization (AST.Elements)&lt;/param&gt;
+/// &lt;param name=&quot;memArith&quot;&gt;Initial arithmetic variable memory&lt;/param&gt;
+/// &lt;param name=&quot;memBool&quot;&gt;Initial boolean variable memory&lt;/param&gt;
+/// &lt;param name=&quot;no&quot;&gt;Ordering of assignments in circuit&lt;/param&gt;
+/// &lt;returns&gt;Tuple of arithmetic and boolean variable memories and optimized Flow&lt;/returns&gt;
+let rec internal optimizeCircuit (expr:Statement list) (memArith:Map&lt;string, ArithExpr * int&gt;)
+    (memBool:Map&lt;string, BoolExpr * int&gt;) (no:int) : int * Map&lt;string, ArithExpr * int&gt;
+    * Map&lt;string, BoolExpr * int&gt; * Statement list =     
+    match expr with
+    | head::tail -&gt; let no1, memArith1, memBool1, head1 = optimizeStatement head memArith memBool no
+                    let no2, memArith2, memBool2, tail1 = optimizeCircuit tail memArith1 memBool1 no1
+                    no2, memArith2, memBool2, head1::tail1
+    | [] -&gt; no, memArith, memBool, []
+    
+    
+/// &lt;summary&gt;
+/// Function to validate the target register of quantum operators.
+/// &lt;/summary&gt;
+/// &lt;param name=&quot;bit&quot;&gt;Target register to be validated&lt;/param&gt;
+/// &lt;param name=&quot;flag&quot;&gt;Type of register expected&lt;/param&gt;
+/// &lt;param name=&quot;memory&quot;&gt;Memory mapping of corresponding types&lt;/param&gt;
+/// &lt;exception cref=&quot;System.Exception&quot;&gt;Invalid allocation of register&lt;/exception&gt;
+let rec private validateRegister (bit:Bit) (flag:string) (memory:Map&lt;string, int * int&gt;):unit =
+    match bit with
+    | BitA(s, i) -&gt;
+                try
+                    let alloc, _ = Map.find s memory
+                    if (i&lt;0 || alloc &lt;= i) then failwith &quot;Overflow of register&quot;
+                with _ -&gt; 
+                    failwith $&quot;{flag} bit register {s}[{i}] has not been allocated!&quot;
+    | BitS s -&gt; if Map.containsKey s memory then ()
+                else failwith $&quot;{flag} bit register {s} has not been allocated!&quot;
+
+/// &lt;summary&gt;
+/// Function to peek inside boolean expression and extract classical registers used.
+/// &lt;/summary&gt;
+/// &lt;param name=&quot;b&quot;&gt;Boolean expression&lt;/param&gt;
+/// &lt;param name=&quot;acc&quot;&gt;Accumulator set of bits&lt;/param&gt;
+let rec private peekRegister (b:BoolExpr) (acc:Set&lt;Bit&gt;):Set&lt;Bit&gt; =
+    match b with
+    | LogicOp(b1, _, b2) -&gt;
+                        let acc2 = peekRegister b1 acc
+                        peekRegister b2 acc2
+    | Not b -&gt; peekRegister b acc
+    | Check(bit, _) -&gt; Set.add bit acc
+    | _ -&gt; Set.empty 
+
+/// &lt;summary&gt;
+/// Function to analyze the semantics of a Statement AST. Operators have to
+/// be applied on quantum registers only, the measurement result is stored on classical register.
+/// &lt;/summary&gt;
+/// &lt;param name=&quot;st&quot;&gt;Statement to be analyzed semantically (AST.Statement)&lt;/param&gt;
+/// &lt;param name=&quot;memory&quot;&gt;Record mappings of defined identifiers&lt;/param&gt;
+/// &lt;exception cref=&quot;System.Exception&quot;&gt;Invalid register definition (semantic)&lt;/exception&gt;
+let rec analyseStatement (st:Statement) (memory:Memory):unit =
+    match st with
+    | Condition(b, st) -&gt;
+              // Find used classical registers
+              let c_set = peekRegister b Set.empty
+              // Validate the found set of registers
+              Set.iter (fun x -&gt;
+                    validateRegister x &quot;Classical&quot; memory.Classical) c_set
+              // Analyze the following statement
+              analyseStatement st memory
+    | Measure(q, s) -&gt;
+                validateRegister q &quot;Quantum&quot; memory.Quantum
+                validateRegister s &quot;Classical&quot; memory.Classical
+    | Reset q | Barrier q | Unitary(_, _, _, q)-&gt; validateRegister q &quot;Quantum&quot; memory.Quantum
+    | UnaryGate(_, q) -&gt; validateRegister q &quot;Quantum&quot; memory.Quantum
+    | ParamGate(_, _, q) -&gt; validateRegister q &quot;Quantum&quot; memory.Quantum
+    | BinaryGate(_, q1, q2) -&gt; validateRegister q1 &quot;Quantum&quot; memory.Quantum
+                               validateRegister q2 &quot;Quantum&quot; memory.Quantum
+    | BinaryParamGate(_, _, q1, q2) -&gt;
+                validateRegister q1 &quot;Quantum&quot; memory.Quantum
+                validateRegister q2 &quot;Quantum&quot; memory.Quantum
+    | Toffoli(q1, q2, q3) -&gt;
+                validateRegister q1 &quot;Quantum&quot; memory.Quantum
+                validateRegister q2 &quot;Quantum&quot; memory.Quantum
+                validateRegister q3 &quot;Quantum&quot; memory.Quantum
+    | _ -&gt; ()     
+
+/// &lt;summary&gt;
+/// Function to analyze the semantics of the defined flow AST (iterating statements)
+/// &lt;/summary&gt;
+/// &lt;param name=&quot;ast&quot;&gt;Flow AST to be analyzed semantically&lt;/param&gt;
+/// &lt;param name=&quot;memory&quot;&gt;Record mappings of defined identifiers&lt;/param&gt;
+/// &lt;exception cref=&quot;System.Exception&quot;&gt;Invalid register definition (semantic)&lt;/exception&gt;
+let rec internal semanticAnalyzer (ast:Statement list) (memory:Memory):unit =
+    match ast with
+    | head::tail -&gt;
+                // Analyze the first operator
+                analyseStatement head memory
+                // Analyze the rest of the list
+                semanticAnalyzer tail memory
+    | [] -&gt; ()
+            
+            
+    
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[28,10,28,19,1],[28,21,28,25,1],[28,31,30,56,1],[29,14,29,17,1],[29,19,29,37,1],[29,43,30,54,1],[30,32,30,53,1],[40,5,40,19,1],[41,21,41,52,1],[42,22,42,33,1],[43,17,43,48,1],[44,18,44,29,1],[45,29,45,68,1],[46,29,46,54,1],[55,5,55,39,1],[56,5,56,46,1],[57,5,57,46,1],[59,5,59,43,1],[60,5,60,37,1],[61,9,61,51,1],[62,9,62,99,1],[63,15,63,27,1],[68,5,68,19,1],[69,23,69,50,1],[70,25,70,43,1],[71,25,71,43,1],[72,27,72,37,1],[73,12,73,45,1],[76,5,76,19,1],[77,23,77,58,1],[78,25,78,47,1],[79,25,79,47,1],[80,27,80,41,1],[81,12,81,45,1],[91,5,91,20,1],[92,17,92,20,1],[93,21,93,49,1],[94,21,94,39,1],[95,17,95,21,1],[95,27,95,98,1],[96,30,96,57,1],[97,30,97,57,1],[98,30,98,47,1],[99,55,99,60,1],[100,63,100,72,1],[101,59,101,61,1],[102,59,102,61,1],[104,34,104,94,1],[105,41,105,61,1],[106,37,106,40,1],[107,41,107,59,1],[107,50,107,53,1],[108,37,108,41,1],[108,47,108,68,1],[109,28,109,55,1],[110,28,110,55,1],[111,28,111,45,1],[112,42,112,47,1],[113,46,113,55,1],[114,57,114,106,1],[115,57,115,59,1],[116,40,116,43,1],[116,47,116,52,1],[118,32,118,92,1],[119,55,119,108,1],[120,35,120,38,1],[121,37,121,55,1],[121,47,121,48,1],[122,35,122,39,1],[122,45,122,66,1],[123,29,123,56,1],[124,29,124,56,1],[125,29,125,46,1],[126,58,126,60,1],[127,58,127,60,1],[129,33,129,95,1],[130,41,130,44,1],[130,48,130,72,1],[131,56,131,95,1],[132,40,132,79,1],[133,36,133,39,1],[134,40,134,58,1],[134,50,134,51,1],[135,36,135,40,1],[135,46,135,67,1],[136,30,136,57,1],[137,30,137,57,1],[138,30,138,47,1],[139,43,139,46,1],[139,50,139,55,1],[141,37,141,75,1],[142,59,142,61,1],[143,37,143,40,1],[144,41,144,59,1],[144,51,144,52,1],[145,37,145,41,1],[145,47,145,68,1],[146,27,146,54,1],[147,27,147,40,1],[148,38,148,46,1],[149,40,149,50,1],[150,51,150,52,1],[151,34,151,51,1],[152,28,152,46,1],[153,28,153,55,1],[154,28,154,55,1],[155,28,155,45,1],[156,42,156,47,1],[157,53,157,58,1],[158,46,158,55,1],[159,61,159,70,1],[160,57,160,59,1],[161,35,161,38,1],[162,41,162,62,1],[162,52,162,54,1],[163,35,163,39,1],[163,45,163,66,1],[164,28,164,55,1],[165,28,165,55,1],[166,28,166,45,1],[167,42,167,47,1],[168,46,168,55,1],[169,57,169,104,1],[170,35,170,38,1],[171,41,171,59,1],[171,51,171,52,1],[172,35,172,39,1],[172,45,172,66,1],[173,12,173,16,1],[187,5,187,20,1],[188,32,188,36,1],[189,17,189,20,1],[190,21,190,50,1],[191,21,191,47,1],[192,17,192,21,1],[192,27,192,98,1],[193,36,193,39,1],[193,43,193,50,1],[194,30,194,65,1],[195,30,195,65,1],[196,30,196,47,1],[197,44,197,54,1],[198,41,198,44,1],[198,48,198,50,1],[199,59,199,66,1],[200,45,200,47,1],[201,59,201,62,0],[201,66,201,73,1],[203,34,203,89,1],[204,37,204,57,1],[205,26,205,61,1],[206,26,206,61,1],[207,26,207,43,1],[208,40,208,50,1],[209,53,209,59,1],[210,42,210,44,1],[211,37,211,40,1],[211,44,211,46,1],[212,55,212,58,0],[212,62,212,68,1],[213,33,213,52,0],[214,27,214,62,1],[215,27,215,62,1],[216,27,216,44,1],[217,41,217,51,1],[218,38,218,41,1],[218,45,218,52,1],[219,34,219,54,0],[220,17,220,52,1],[221,17,221,30,1],[222,26,222,35,1],[223,28,223,29,1],[224,24,224,30,1],[225,29,225,57,1],[226,29,226,57,1],[227,29,227,46,1],[228,41,228,44,1],[228,48,228,54,1],[229,36,229,39,1],[230,40,230,58,1],[230,50,230,51,1],[231,36,231,40,1],[231,46,231,68,1],[232,29,232,57,1],[233,29,233,57,1],[234,29,234,46,1],[235,41,235,44,1],[235,48,235,55,1],[236,36,236,39,1],[237,41,237,60,1],[237,51,237,53,1],[238,36,238,40,1],[239,40,239,67,1],[240,29,240,57,1],[241,29,241,57,1],[242,29,242,32,1],[243,33,243,51,1],[243,43,243,44,1],[244,29,244,33,1],[245,33,245,55,1],[247,30,247,58,1],[248,30,248,58,1],[250,30,250,33,1],[251,33,251,52,1],[251,43,251,45,1],[252,30,252,34,1],[252,40,252,68,1],[254,29,254,57,1],[255,29,255,57,1],[257,29,257,32,1],[258,33,258,51,1],[258,43,258,44,1],[259,29,259,33,1],[259,39,259,61,1],[260,30,260,58,1],[261,30,261,58,1],[263,30,263,33,1],[264,33,264,52,1],[264,43,264,45,1],[265,30,265,34,1],[265,40,265,68,1],[266,30,266,53,1],[279,5,279,18,1],[280,27,280,64,1],[281,27,281,92,1],[282,28,282,72,1],[283,28,283,94,1],[284,34,284,70,1],[285,34,285,124,1],[286,34,286,85,1],[287,37,287,72,1],[288,37,288,87,1],[289,51,289,86,1],[290,51,290,115,1],[291,12,291,37,1],[304,5,304,20,1],[305,21,305,101,1],[306,21,306,102,1],[307,21,307,59,1],[308,13,308,38,1],[319,5,319,19,1],[321,17,321,20,1],[322,21,322,53,1],[323,21,323,48,1],[323,49,323,80,1],[324,17,324,21,1],[325,21,325,85,1],[326,17,326,49,1],[326,50,326,52,1],[327,22,327,81,1],[335,5,335,17,1],[337,25,337,55,1],[338,25,338,45,1],[339,16,339,34,1],[340,24,340,39,1],[341,12,341,21,1],[351,5,351,18,1],[354,15,354,51,1],[356,15,357,75,1],[357,21,357,68,1],[359,15,359,41,1],[361,17,361,60,1],[362,17,362,64,1],[363,51,363,94,1],[364,26,364,69,1],[365,29,365,72,1],[366,32,366,76,1],[367,32,367,76,1],[369,17,369,61,1],[370,17,370,61,1],[372,17,372,61,1],[373,17,373,61,1],[374,17,374,61,1],[375,12,375,14,1],[384,5,384,19,1],[387,17,387,45,1],[389,17,389,45,1],[390,13,390,15,1]]);
+    </script>
+  </body>
+</html>

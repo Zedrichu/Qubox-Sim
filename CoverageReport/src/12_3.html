@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/adrianzvizdenco/RiderProjects/QuboxSimulator/QuboxSimulator/Gates/ParametricGates.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Numerics;
+using MathNet.Numerics.LinearAlgebra;
+using static QuLangProcessor.Tags;
+
+namespace QuboxSimulator.Gates;
+
+internal abstract class ParametricGate: IMatrixGate
+{
+    public Matrix&lt;Complex&gt; Matrix { get; set; }
+    
+    public Tuple&lt;int, int&gt; TargetRange { get; set; }
+    
+    public string Id { get; set; }
+
+    public GateType Type { get; set; } = GateType.Param;
+    
+    public string? Condition { get; set; }
+    
+    internal Tuple&lt;double, string&gt; Theta { get; set; }
+}
+
+
+internal class ParamSingleGate : ParametricGate
+{
+    internal PTag Tag { get; }
+    internal ParamSingleGate(Matrix&lt;Complex&gt; matrix, PTag tag, int target, Tuple&lt;double, string&gt; phase, string? condition = null)
+    {
+        Tag = tag;
+        Matrix = matrix;
+        TargetRange = new Tuple&lt;int, int&gt;(target, target);
+        Id = tag.ToString();
+        Condition = condition;
+        Theta = phase;
+    }
+}
+
+internal class UnitaryGate : ParametricGate
+{
+    internal Tuple&lt;double, string&gt; Phi { get; }
+    internal Tuple&lt;double, string&gt; Lambda { get; }
+    internal UnitaryGate(Tuple&lt;double, string&gt;[] args, int target)
+    {
+        Theta = args[0];
+        Phi = args[1];
+        Lambda = args[2];
+        Type = GateType.Unitary;
+        Id = &quot;U&quot;;
+        var theta = args[0].Item1;
+        var phi = args[1].Item1;
+        var lambda = args[2].Item1;
+        Matrix = Matrix&lt;Complex&gt;.Build.DenseOfArray(
+            new [,]{
+                { Complex.Cos(phi / 2), -Complex.Exp(Complex.ImaginaryOne * lambda) * Complex.Sin(phi / 2) },
+                { Complex.Exp(Complex.ImaginaryOne * phi) * Complex.Sin(phi / 2), Complex.Exp(Complex.ImaginaryOne * (phi + lambda)) * Complex.Cos(phi / 2)}
+            });
+        TargetRange = new Tuple&lt;int, int&gt;(target, target);
+    }
+}
+
+internal class ParamDoubleGate : ParametricGate
+{
+    internal Tuple&lt;int, int&gt; Control { get; set; }
+    
+    internal BPTag Tag { get; }
+    
+    internal ParamDoubleGate(Matrix&lt;Complex&gt; matrix, BPTag tag, int target1, int target2, Tuple&lt;double, string&gt; phase)
+    {
+        var min = Math.Min(target1, target2);
+        var max = Math.Max(target1, target2);
+        TargetRange = new Tuple&lt;int, int&gt;(min, max);
+        Tag = tag;
+        Control = new(target1, target2);
+        Id = tag.ToString();
+        Type = GateType.DoubleParam;
+        Theta = phase;
+        Matrix = matrix;
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[9,37,9,41,1],[9,42,9,46,1],[11,42,11,46,1],[11,47,11,51,1],[13,24,13,28,1],[13,29,13,33,1],[15,28,15,32,1],[15,33,15,37,1],[15,42,15,56,1],[17,32,17,36,1],[17,37,17,41,1],[19,44,19,48,1],[19,49,19,53,1],[25,25,25,29,1],[26,5,26,130,1],[27,5,27,6,1],[28,9,28,19,1],[29,9,29,25,1],[30,9,30,59,1],[31,9,31,29,1],[32,9,32,31,1],[33,9,33,23,1],[34,5,34,6,1],[39,42,39,46,1],[40,45,40,49,1],[41,5,41,67,1],[42,5,42,6,1],[43,9,43,25,1],[44,9,44,23,1],[45,9,45,26,1],[46,9,46,33,1],[47,9,47,18,1],[48,9,48,35,1],[49,9,49,33,1],[50,9,50,36,1],[51,9,55,16,1],[56,9,56,59,1],[57,5,57,6,1],[62,40,62,44,1],[62,45,62,49,1],[64,26,64,30,1],[66,5,66,119,1],[67,5,67,6,1],[68,9,68,46,1],[69,9,69,46,1],[70,9,70,53,1],[71,9,71,19,1],[72,9,72,41,1],[73,9,73,29,1],[74,9,74,37,1],[75,9,75,23,1],[76,9,76,25,1],[77,5,77,6,1]]);
+    </script>
+  </body>
+</html>

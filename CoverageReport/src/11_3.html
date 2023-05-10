@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/adrianzvizdenco/RiderProjects/QuboxSimulator/QuboxSimulator/Gates/MatrixGates.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System.Numerics;
+using MathNet.Numerics.LinearAlgebra;
+using static QuLangProcessor.Tags;
+
+namespace QuboxSimulator.Gates;
+
+internal abstract class MatrixGate : IMatrixGate
+{
+    public Matrix&lt;Complex&gt; Matrix { get; set; }
+    
+    public Tuple&lt;int, int&gt; TargetRange { get; set; }
+    
+    public string Id { get; set; }
+    
+    public GateType Type { get; set; }
+
+    public string Condition { get; set; } = &quot;&quot;;
+
+    public override string ToString()
+    {
+        return $&quot;Gate:{Id} Target: {TargetRange}&quot;;
+    }
+}
+
+internal class SingleQubitGate : MatrixGate
+{
+    public UTag Tag { get; }
+    
+    public SingleQubitGate(Matrix&lt;Complex&gt; matrix, UTag tag, int target, string? condition = null)
+    {
+        Type = GateType.Single;
+        base.Matrix = matrix;
+        Id = tag.ToString();
+        Tag = tag;
+        TargetRange = new Tuple&lt;int, int&gt;(target, target);
+        Condition = condition ?? &quot;&quot;;
+    }    
+}
+
+internal class DoubleQubitGate : MatrixGate
+{
+    public BTag Tag { get; }
+    public Tuple&lt;int,int&gt; Control { get; }
+    
+    public DoubleQubitGate(Matrix&lt;Complex&gt; matrix, BTag tag, int control, int target)
+    {
+        Matrix = matrix;
+        TargetRange = new Tuple&lt;int, int&gt;(control &lt; target? control : target, 
+                                            control &lt; target? target : control);
+        Control =  new Tuple&lt;int, int&gt;(control, target);
+        Tag = tag;
+        Id = tag.ToString();
+        Type = GateType.Double;
+    }
+}
+
+internal class ToffoliGate : MatrixGate
+{
+    public Tuple&lt;int, int, int&gt; Control { get; }
+    
+    public ToffoliGate(int control1, int control2, int target)
+    {
+        Matrix = Matrix&lt;Complex&gt;.Build.DenseOfArray(
+            new Complex[,]{
+                { 1, 0, 0, 0, 0, 0, 0, 0 },
+                { 0, 1, 0, 0, 0, 0, 0, 0 },
+                { 0, 0, 1, 0, 0, 0, 0, 0 },
+                { 0, 0, 0, 1, 0, 0, 0, 0 },
+                { 0, 0, 0, 0, 1, 0, 0, 0 },
+                { 0, 0, 0, 0, 0, 1, 0, 0 },
+                { 0, 0, 0, 0, 0, 0, 0, 1 },
+                { 0, 0, 0, 0, 0, 0, 1, 0 }
+            });
+        var min = Math.Min(control1, Math.Min(control2, target));
+        var max = Math.Max(control1, Math.Max(control2, target));
+        Control = new Tuple&lt;int, int, int&gt;(control1, control2, target);
+        TargetRange = new Tuple&lt;int, int&gt;(min, max);
+        Id = &quot;CCX&quot;;
+        Type = GateType.Toffoli;
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[9,37,9,41,1],[9,42,9,46,1],[11,42,11,46,1],[11,47,11,51,1],[13,24,13,28,1],[13,29,13,33,1],[15,28,15,32,1],[15,33,15,37,1],[17,31,17,35,1],[17,36,17,40,1],[17,45,17,47,1],[20,5,20,6,1],[21,9,21,51,1],[22,5,22,6,1],[27,23,27,27,1],[29,5,29,99,1],[30,5,30,6,1],[31,9,31,32,1],[32,9,32,30,1],[33,9,33,29,1],[34,9,34,19,1],[35,9,35,59,1],[36,9,36,37,1],[37,5,37,6,1],[42,23,42,27,1],[43,37,43,41,1],[45,5,45,86,1],[46,5,46,6,1],[47,9,47,25,1],[48,9,49,81,1],[50,9,50,57,1],[51,9,51,19,1],[52,9,52,29,1],[53,9,53,32,1],[54,5,54,6,1],[59,43,59,47,1],[61,5,61,63,1],[62,5,62,6,1],[63,9,73,16,1],[74,9,74,66,1],[75,9,75,66,1],[76,9,76,72,1],[77,9,77,53,1],[78,9,78,20,1],[79,9,79,33,1],[80,5,80,6,1]]);
+    </script>
+  </body>
+</html>

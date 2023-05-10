@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/adrianzvizdenco/RiderProjects/QuboxSimulator/QuboxSimulator/Circuits/CircuitFactory.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using QuboxSimulator.Gates;
+
+namespace QuboxSimulator.Circuits;
+/* C#
+ -*- coding: utf-8 -*-
+CircuitFactory
+
+Description: Factory for creating user-defined and configured circuits.
+
+@__Author --&gt; Created by Adrian Zvizdenco aka Zedrichu
+@__Date &amp; Time --&gt; Created on 24/03/2023
+@__Email --&gt; adrzvizdencojr@gmail.com
+@__Version --&gt; 1.0
+@__Status --&gt; DEV
+*/
+
+
+internal static class CircuitFactory
+{
+    internal static Circuit BuildCircuit(List&lt;IGate&gt; gates, Register allocation)
+    {
+        var circuit = new Circuit(allocation);
+        foreach (var gate in gates)
+        {
+            circuit.AddGate(gate);
+        }
+
+        return circuit;
+    }
+}
+
+internal enum CircuitType
+{
+    CSHS, 
+    BellState,
+    GHZState,
+    WState,
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[21,5,21,6,1],[22,9,22,47,1],[23,9,23,16,1],[23,18,23,26,1],[23,27,23,29,1],[23,30,23,35,1],[24,9,24,10,1],[25,13,25,35,1],[26,9,26,10,1],[28,9,28,24,1],[29,5,29,6,1]]);
+    </script>
+  </body>
+</html>
