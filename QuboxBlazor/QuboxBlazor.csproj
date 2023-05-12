@@ -18,7 +18,7 @@
         <PackageReference Include="SkiaSharp.Svg" Version="1.60.0" />
         <PackageReference Include="SkiaSharp.Views.Blazor" Version="2.88.3" />
         <ProjectReference Include="..\QuLangProcessor\QuLangProcessor.fsproj" />
-        <ProjectReference Include="..\QuboxSimulator\QuboxSimulator.csproj" />
+        <ProjectReference Include="..\QuBoxEngine\QuBoxEngine.csproj" />
     </ItemGroup>
 
     <ItemGroup>

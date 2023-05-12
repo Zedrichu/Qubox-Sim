@@ -1,6 +1,6 @@
 using QuLangProcessor;
 
-namespace QuboxSimulator.Circuits;
+namespace QuBoxEngine.Circuits;
 
 public class Register
 {

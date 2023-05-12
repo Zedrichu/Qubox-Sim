@@ -2,7 +2,7 @@ using MathNet.Numerics.LinearAlgebra;
 using Complex = System.Numerics.Complex;
 using static QuLangProcessor.Tags;
 
-namespace QuboxSimulator.Gates;
+namespace QuBoxEngine.Gates;
 
 internal static class GateFactory
 {

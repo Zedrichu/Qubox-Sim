@@ -1,5 +1,5 @@
-using QuboxSimulator;
-using QuboxSimulator.Gates;
+using QuBoxEngine;
+using QuBoxEngine.Gates;
 
 namespace QuBoxEngine.Tests;
 

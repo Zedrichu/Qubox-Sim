@@ -1,11 +1,11 @@
 
-using QuboxSimulator.Gates;
-using QuboxSimulator.Circuits;
+using QuBoxEngine.Gates;
+using QuBoxEngine.Circuits;
 using SkiaSharp;
 
-namespace QuboxSimulator;
+namespace QuBoxEngine;
 
-public class SvgProvider
+public static class SvgProvider
 {
     private const int InterGatePadding = 20;
     

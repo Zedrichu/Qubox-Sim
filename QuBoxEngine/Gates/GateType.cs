@@ -1,4 +1,4 @@
-namespace QuboxSimulator.Gates;
+namespace QuBoxEngine.Gates;
 
 public enum GateType
 {

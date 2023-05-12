@@ -1,11 +1,11 @@
 using Microsoft.FSharp.Collections;
 using Microsoft.FSharp.Core;
+using QuBoxEngine.Gates;
 using QuLangProcessor;
-using QuboxSimulator.Gates;
 using static QuLangProcessor.AST;
 using static QuLangProcessor.Tags;
 
-namespace QuboxSimulator.Circuits;
+namespace QuBoxEngine.Circuits;
 
 internal class Generator
 {

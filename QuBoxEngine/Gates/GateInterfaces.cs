@@ -1,6 +1,6 @@
 using System.Numerics;
 using MathNet.Numerics.LinearAlgebra;
-namespace QuboxSimulator.Gates;
+namespace QuBoxEngine.Gates;
 
 /* C#
  -*- coding: utf-8 -*-

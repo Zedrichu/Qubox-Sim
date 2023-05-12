@@ -1,8 +1,8 @@
 using static QuLangProcessor.AST;
 using static QuLangProcessor.Handler;
-using QuboxSimulator.Circuits;
+using QuBoxEngine.Circuits;
 
-namespace QuboxSimulator;
+namespace QuBoxEngine;
 
 public static class Interpreter
 {

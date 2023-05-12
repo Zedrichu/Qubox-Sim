@@ -2,7 +2,7 @@ using System.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using static QuLangProcessor.Tags;
 
-namespace QuboxSimulator.Gates;
+namespace QuBoxEngine.Gates;
 
 internal abstract class ParametricGate: IMatrixGate
 {

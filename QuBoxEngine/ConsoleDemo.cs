@@ -1,5 +1,5 @@
-using QuboxSimulator.Circuits;
-namespace QuboxSimulator;
+using QuBoxEngine.Circuits;
+namespace QuBoxEngine;
 
 public class ConsoleDemo
 {

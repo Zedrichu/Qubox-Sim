@@ -1,6 +1,6 @@
-using QuboxSimulator;
-using QuboxSimulator.Circuits;
-using QuboxSimulator.Gates;
+using QuBoxEngine;
+using QuBoxEngine.Circuits;
+using QuBoxEngine.Gates;
 
 namespace QuBoxEngine.Tests;
 

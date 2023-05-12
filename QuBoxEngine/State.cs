@@ -2,7 +2,7 @@ using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using Complex = System.Numerics.Complex;
 
-namespace QuboxSimulator;
+namespace QuBoxEngine;
 
 public class State
 {

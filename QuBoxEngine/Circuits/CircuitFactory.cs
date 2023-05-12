@@ -1,6 +1,6 @@
-using QuboxSimulator.Gates;
+using QuBoxEngine.Gates;
 
-namespace QuboxSimulator.Circuits;
+namespace QuBoxEngine.Circuits;
 /* C#
  -*- coding: utf-8 -*-
 CircuitFactory

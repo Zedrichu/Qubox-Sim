@@ -1,7 +1,7 @@
-using QuboxSimulator.Gates;
+using QuBoxEngine.Gates;
 using static QuLangProcessor.AST;
 
-namespace QuboxSimulator.Circuits;
+namespace QuBoxEngine.Circuits;
 /* C#
  -*- coding: utf-8 -*-
 AST Structure Visitors

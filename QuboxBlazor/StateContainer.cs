@@ -1,4 +1,4 @@
-using QuboxSimulator.Circuits;
+using QuBoxEngine.Circuits;
 
 namespace QuboxBlazor;
 
