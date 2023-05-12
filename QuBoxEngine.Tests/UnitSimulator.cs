@@ -1,6 +1,8 @@
-namespace QuboxSimulator.Tests;
+using QuboxSimulator;
 
-public class SimulatorTests
+namespace QuBoxEngine.Tests;
+
+public class IntegrationTestingSimulator
 {
     [SetUp]
     public void Setup()

@@ -98,10 +98,9 @@
             svg.DrawText(Circuit.Allocation.GetBitName(i), 5, p+5, 
                 new SKFont(SKTypeface.FromFile("cascadiaFont.otf"), 16F), bluePaint);
         }
-        
-        SvgProvider.DrawTowerGrid(Circuit.GateGrid, _areaWidth/10, 
-                                    _areaHeight, _areaWidth, svg);
-        svg.Scale(2,2);
+
+        SvgProvider.DrawTowerGrid(Circuit.GateGrid, _areaWidth / 10,
+            _areaHeight, _areaWidth, svg);
     }   
     
 }

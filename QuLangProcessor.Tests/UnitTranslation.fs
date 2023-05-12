@@ -1,4 +1,4 @@
-module Tests.Translation
+module Tests.UnitTestingTranslation
 
 open NUnit.Framework
 open QuLangProcessor.Handler

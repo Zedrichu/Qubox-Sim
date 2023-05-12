@@ -1,10 +1,11 @@
+using QuboxSimulator;
 using QuboxSimulator.Circuits;
 using QuboxSimulator.Gates;
 
-namespace QuboxSimulator.Tests;
+namespace QuBoxEngine.Tests;
 
 
-public class UnitCircuits
+public class IntegrationTestingCircuit
 {
     [SetUp]
     public void Setup()

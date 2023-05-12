@@ -45,7 +45,7 @@
                         var i = 0;
                         foreach (var x in state.StateVector)
                         {
-                            <li> State |@Convert.ToString(i, 2)>: @x.ToString() </li>
+                            <li> State |@Convert.ToString(i, 2)>: @Math.Round(x.Real,4) + i×@Math.Round(x.Imaginary,4)</li>
                             i++;
                         }
                     }

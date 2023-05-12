@@ -17,6 +17,11 @@ internal abstract class ParametricGate: IMatrixGate
     public string? Condition { get; set; }
     
     internal Tuple<double, string> Theta { get; set; }
+
+    public override string ToString()
+    {
+        return $"Gate:{Id} Target: {TargetRange} Theta: {Theta.Item1}";
+    }
 }
 
 

@@ -1,4 +1,4 @@
-module Tests.Analysis
+module Tests.UnitTestingAnalysis
 
 open Microsoft.FSharp.Core
 open NUnit.Framework

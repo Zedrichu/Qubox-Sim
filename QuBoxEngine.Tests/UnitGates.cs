@@ -1,6 +1,9 @@
-namespace QuboxSimulator.Tests;
+using QuboxSimulator;
+using QuboxSimulator.Gates;
 
-public class GateTests
+namespace QuBoxEngine.Tests;
+
+public class UnitTestingGates
 {
     [SetUp]
     public void Setup()
@@ -35,5 +38,33 @@ public class GateTests
         var circuit = Interpreter.Interpret();
         Assert.AreEqual(Interpreter.Error, AST.Error.Success);
         Assert.That(circuit.GateGrid[0].Gates[0].Condition is not null);
+    }
+    
+    [Test]
+    public void TestGateFactory2()
+    {
+        var code = "Qalloc q[2]; Calloc c; alpha := -Pi/4; beta := -Pi/2; H q[0]; RY(2*alpha) q[0]; RY(2*beta) q[1];";
+        Interpreter.HandleLang(code);
+        var circuit = Interpreter.Interpret();
+        Assert.AreEqual(Interpreter.Error, AST.Error.Success);
+        var ry = circuit.GateGrid[1].Gates[0];
+        Assert.That(ry.Type, Is.EqualTo(GateType.Param));
+        var ry2 = circuit.GateGrid[0].Gates[1];
+        Console.WriteLine(ry);
+        Console.WriteLine(ry2);
+    }
+    
+    [Test]
+    public void TestGateFactory3()
+    {
+        var code = "Qalloc q[2]; Calloc c; alpha := 0; beta := 3*Pi/8; H q[0]; RY(2*alpha) q[0]; RY(2*beta) q[1];";
+        Interpreter.HandleLang(code);
+        var circuit = Interpreter.Interpret();
+        Assert.AreEqual(Interpreter.Error, AST.Error.Success);
+        var ry = circuit.GateGrid[1].Gates[0];
+        Assert.That(ry.Type, Is.EqualTo(GateType.Param));
+        var ry2 = circuit.GateGrid[0].Gates[1];
+        Console.WriteLine(ry);
+        Console.WriteLine(ry2);
     }
 }

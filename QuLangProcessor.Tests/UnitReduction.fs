@@ -1,4 +1,4 @@
-module Tests.Optimization
+module Tests.IntegrationTestingOptimization
 
 open System
 open Microsoft.FSharp.Core
@@ -157,7 +157,16 @@ let ``Test arithmetic reductions for exponentiation`` () =
     Assert.AreEqual (Success, err)
     let optimal, _, err = optimizeArithmetic (Option.get ast) Memory.empty
     Assert.AreEqual (Success, err)
-    Assert.AreEqual (Float 1.0, optimal)    
+    Assert.AreEqual (Float 1.0, optimal)
+    
+[<Test>]
+let ``Test arithmetic reduction #1`` () =
+    let code = "3*Pi/8"
+    let ast, err = parseArith code
+    Assert.AreEqual (Success, err)
+    let optimal, _, err = optimizeArithmetic (Option.get ast) Memory.empty
+    Assert.AreEqual (Success, err)
+    Assert.AreNotEqual (Num 0, optimal)
     
 [<Test>]
 let ``Test undefined boolean variable solely`` () =

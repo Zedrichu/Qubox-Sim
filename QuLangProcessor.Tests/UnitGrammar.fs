@@ -1,4 +1,4 @@
-module Tests.Grammar
+module Tests.UnitTestingGrammar
 
 open NUnit.Framework
 

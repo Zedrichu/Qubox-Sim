@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "QuLangProcessor", "QuLangProcessor\QuLangProcessor.fsproj", "{75AB5B95-C7BC-4B6F-BC59-9DB0614AE9CF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuboxSimulator.Tests", "QuboxSimulator.Tests\QuboxSimulator.Tests.csproj", "{6388E92A-0B11-4682-BC15-9FA6CB6D91A4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuBoxEngine.Tests", "QuBoxEngine.Tests\QuBoxEngine.Tests.csproj", "{6388E92A-0B11-4682-BC15-9FA6CB6D91A4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuboxSimulator", "QuboxSimulator\QuboxSimulator.csproj", "{74D2D2BB-7608-4A32-86D4-5B34CE4998A5}"
 EndProject
