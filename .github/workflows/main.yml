@@ -15,6 +15,7 @@ jobs:
         with:
           dotnet-version: 6.0.x
           include-prerelease: true
+      - run: dotnet workload install wasm-tools-net6
       
       # publishes Blazor project to the release-folder
       - name: Publish .NET Core Project
