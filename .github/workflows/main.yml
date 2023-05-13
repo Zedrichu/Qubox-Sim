@@ -1,4 +1,6 @@
 name: QuBox Deployment to GitHub Pageson 
+env:
+  PUBLISH_DIR: QuboxBlazor/bin/Release/net6.0/publish/wwwroot
 on: 
   push:
     branches: [main]
@@ -26,7 +28,7 @@ jobs:
         uses: SteveSandersonMS/ghaction-rewrite-base-href@v1
         with:
           html_path: ${{ env.PUBLISH_DIR }}/index.html
-          base_href: /BlazorOnGitHubPages/
+          base_href: /Qubox-Sim/
       
       # Commit static resources to GH Pages
       - name: GitHub Pages
