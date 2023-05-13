@@ -17,14 +17,23 @@ jobs:
           include-prerelease: true
       - run: dotnet workload install wasm-tools-net6
       
-      # publishes Blazor project to the release-folder
+      # Publish the project in Release mode
       - name: Publish .NET Core Project
-        run: dotnet publish QuboxBlazor/QuboxBlazor.csproj -c Release -o release --nologo
+        run: dotnet publish QuboxBlazor/QuboxBlazor.csproj -c Release
       
-      # Deploy static page
-      - name: Commit wwwroot to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@3.7.1
+      # Fix the base href issue
+      - name: Rewrite base href
+        uses: SteveSandersonMS/ghaction-rewrite-base-href@v1
         with:
+          html_path: ${{ env.PUBLISH_DIR }}/index.html
+          base_href: /BlazorOnGitHubPages/
+      
+      # Commit static resources to GH Pages
+      - name: GitHub Pages
+        if: success()
+        uses: crazy-max/ghaction-github-pages@v1.5.1
+        with:
+          target_branch: gh-pages
+          build_dir: ${{ env.PUBLISH_DIR }}
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: gh-pages
-          FOLDER: release/wwwroot
