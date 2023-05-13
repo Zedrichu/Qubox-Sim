@@ -116,11 +116,11 @@ let rec internal evalArith (expr:ArithExpr) (memory:Map<string, ArithExpr * int>
                            | _, Num 1 | _, Float 1.0 -> x1
                            | c, d when c=d -> Num 1
                            | BinaryOp(a, Mul, c), Num b ->
-                               evalArith (BinaryOp(BinaryOp(a, Div, Num b), Mul, c)) memory
+                               evalArith (BinaryOp(BinaryOp(a, Div, Float b), Mul, c)) memory
                            | UnaryOp (Minus, a), _ -> evalArith (UnaryOp (Minus,BinaryOp(a,Div,y1))) memory
-                           | Num w, _ -> try
-                                            interopA (/) (Float w) y1
-                                         with _ -> BinaryOp(x1, Div, y1)
+                           | _, _ -> try 
+                                        interopA (/) x1 y1
+                                     with _ -> BinaryOp(x1, Div, y1)
     | BinaryOp(x,Add, y) -> let x1 = evalArith x memory
                             let y1 = evalArith y memory
                             match x1, y1 with
