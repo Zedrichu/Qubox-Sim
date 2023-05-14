@@ -2,7 +2,7 @@
 /// Interface to library assisting the compilation of QuLang input
 /// </summary>
 module public QuLangProcessor.Handler
-(* F#
+(** F#
  -*- coding: utf-8 -*-
 Quantum Language Handler
 

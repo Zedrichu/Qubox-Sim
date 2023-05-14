@@ -1,6 +1,18 @@
-using QuBoxEngine;
-
 namespace QuBoxEngine.Tests;
+/* C#
+ -*- coding: utf-8 -*-
+IntegrationTestingSimulator
+
+Description: Module implementing the integration testing of the
+                 simulator in synthesis with the interpreter.
+
+@__Author --> Created by Adrian Zvizdenco aka Zedrichu
+@__Date & Time --> Created on 09/04/2023
+@__Email --> adrzvizdencojr@gmail.com
+@__Version --> 1.0
+@__Status --> TEST
+*/
+
 
 public class IntegrationTestingSimulator
 {

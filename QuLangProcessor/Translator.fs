@@ -2,7 +2,7 @@
 /// Translator module handling the conversion from AST structure to Q# compiling code
 /// </summary>
 module public QuLangProcessor.Translator
-(* F#
+(** F#
  -*- coding: utf-8 -*-
 Q# Translator from QuLang AST
 

@@ -3,7 +3,7 @@
 /// </summary>
 module public QuLangProcessor.AST
 
-(* F#
+(** F#
  -*- coding: utf-8 -*-
 Quantum Abstract Syntax Tree
 

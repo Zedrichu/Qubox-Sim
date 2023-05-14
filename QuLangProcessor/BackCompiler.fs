@@ -2,7 +2,7 @@
 /// Back-compiler module handling the conversion from AST back to QuLang code definition.
 /// </summary>
 module internal QuLangProcessor.BackCompiler
-(* F#
+(** F#
  -*- coding: utf-8 -*-
 AST to QuLang Back-compiler (reverse compiler)
 

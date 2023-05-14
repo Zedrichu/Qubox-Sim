@@ -1,9 +1,17 @@
-using QuBoxEngine;
-using QuBoxEngine.Circuits;
-using QuBoxEngine.Gates;
-
 namespace QuBoxEngine.Tests;
+/* C#
+ -*- coding: utf-8 -*-
+IntegrationTestingCircuit
 
+Description: Module implementing the integration tests of the circuit 
+                with the interpreter facade methods
+
+@__Author --> Created by Adrian Zvizdenco aka Zedrichu
+@__Date & Time --> Created on 09/04/2023
+@__Email --> adrzvizdencojr@gmail.com
+@__Version --> 1.0
+@__Status --> DEV
+*/
 
 public class IntegrationTestingCircuit
 {
