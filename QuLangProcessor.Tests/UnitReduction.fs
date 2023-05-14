@@ -1,5 +1,17 @@
 module Tests.IntegrationTestingOptimization
+(** F#
+ -*- coding: utf-8 -*-
+IntegrationTestingOptimization
 
+Description: Module implementing integration tests for parsing and 
+                optimizing AST through Handler calls.
+
+@__Author --> Created by Adrian Zvizdenco aka Zedrichu
+@__Date & Time --> Created on 29/03/2023
+@__Email --> adrzvizdencojr@gmail.com
+@__Version --> 1.0 
+@__Status --> TEST
+*)
 open System
 open Microsoft.FSharp.Core
 open NUnit.Framework

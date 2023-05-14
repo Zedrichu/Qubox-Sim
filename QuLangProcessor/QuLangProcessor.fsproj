@@ -7,6 +7,7 @@
         <PackageIcon>qubox-logo.png</PackageIcon>
         <Company>Qubox</Company>
         <NeutralLanguage>en</NeutralLanguage>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
     <ItemGroup>
@@ -32,8 +33,11 @@
 
     <ItemGroup>
       <None Include="..\QuboxBlazor\wwwroot\qubox-logo.png">
-        <Pack>True</Pack>
         <Link>qubox-logo.png</Link>
+      </None>
+      <None Include="qubox-logo.png">
+        <Pack>True</Pack>
+        <PackagePath></PackagePath>
       </None>
     </ItemGroup>
 

@@ -1,5 +1,16 @@
 module Tests.UnitTestingAnalysis
+(** F#
+ -*- coding: utf-8 -*-
+UnitTestingAnalysis
 
+Description: Unit testing of the semantic analysis of QuLang
+
+@__Author --> Created by Adrian Zvizdenco aka Zedrichu
+@__Date & Time --> Created on 19/03/2023
+@__Email --> adrzvizdencojr@gmail.com
+@__Version --> 1.0
+@__Status --> TEST
+*)
 open Microsoft.FSharp.Core
 open NUnit.Framework
 open QuLangProcessor.Handler

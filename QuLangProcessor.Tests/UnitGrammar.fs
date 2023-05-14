@@ -1,5 +1,17 @@
 module Tests.UnitTestingGrammar
+(** F#
+ -*- coding: utf-8 -*-
+UnitTestingGrammar
 
+Description: Module implementing unit tests on the grammar 
+                productions & parsing of QuLang
+
+@__Author --> Created by Adrian Zvizdenco aka Zedrichu
+@__Date & Time --> Created on 27/03/2023
+@__Email --> adrzvizdencojr@gmail.com
+@__Version --> 1.0
+@__Status --> TEST
+*)
 open NUnit.Framework
 
 open QuLangProcessor
@@ -7,8 +19,7 @@ open AST
 open Tags
 
 type testResult =
-        | Pass
-        | Fail
+    | Pass | Fail
 
 [<SetUp>]
 let Setup () =

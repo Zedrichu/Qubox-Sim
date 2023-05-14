@@ -1,4 +1,17 @@
 module Tests.UnitTestingTranslation
+(** F#
+ -*- coding: utf-8 -*-
+UnitTestingTranslation
+
+Description: Module implementing unit tests for the translation and
+              back-compilation of abstract syntax tree intermediate
+
+@__Author --> Created by Adrian Zvizdenco aka Zedrichu
+@__Date & Time --> Created on 30/03/2023
+@__Email --> adrzvizdencojr@gmail.com
+@__Version --> 1.0
+@__Status --> TEST
+*)
 
 open NUnit.Framework
 open QuLangProcessor.Handler
