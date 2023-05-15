@@ -1,0 +1,737 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>QuBoxEngine</name>
+    </assembly>
+    <members>
+        <member name="T:QuBoxEngine.Circuits.Circuit">
+            <summary>
+            Class modelling the information contained in the quantum circuit.
+            </summary>
+        </member>
+        <member name="P:QuBoxEngine.Circuits.Circuit.Allocation">
+            <summary>
+            Memory allocation object containing information about declared registers and variables.
+            </summary>
+        </member>
+        <member name="P:QuBoxEngine.Circuits.Circuit.GateGrid">
+            <summary>
+            Grid of gates represented as a list of gate columns called towers.
+            </summary>
+        </member>
+        <member name="M:QuBoxEngine.Circuits.Circuit.#ctor(QuBoxEngine.Circuits.Register)">
+            <summary>
+            Constructor of circuit object from a register (memory). By default the circuit includes only gate placeholders.
+            </summary>
+            <param name="allocation" cref="T:QuBoxEngine.Circuits.Register">Memory allocation formed during compilation</param>
+        </member>
+        <member name="M:QuBoxEngine.Circuits.Circuit.AddGate(QuBoxEngine.Gates.IGate)">
+            <summary>
+            Method for adding a new gate to the circuit.
+            </summary>
+            <param name="gate" cref="T:QuBoxEngine.Gates.IGate">Gate to be included in the circuit grid</param>
+        </member>
+        <member name="M:QuBoxEngine.Circuits.Circuit.ToString">
+            <summary>
+            Overriden method to stringify the circuit object in a meaningful way for debugging.
+            </summary>
+            <returns>String representation of circuit object</returns>
+        </member>
+        <member name="T:QuBoxEngine.Circuits.CircuitFactory">
+            <summary>
+            Factory class handling the creation of user-defined and configured circuits.
+            </summary>
+        </member>
+        <member name="M:QuBoxEngine.Circuits.CircuitFactory.BuildCircuit(System.Collections.Generic.List{QuBoxEngine.Gates.IGate},QuBoxEngine.Circuits.Register)">
+            <summary>
+            Factory method to build a circuit from a given list of gates and formed register.
+            </summary>
+            <param name="gates">List of IGate objects to be placed on the circuit grid</param>
+            <param name="allocation" cref="T:QuBoxEngine.Circuits.Register">Memory allocation object giving context to the circuit</param>
+            <returns cref="T:QuBoxEngine.Circuits.Circuit">Built and configured circuit object</returns>
+        </member>
+        <member name="T:QuBoxEngine.Circuits.Generator">
+            <summary>
+            Class implementing the destructuring logic of the circuit into the AST structure.
+            </summary>
+        </member>
+        <member name="M:QuBoxEngine.Circuits.Generator.#ctor(QuBoxEngine.Circuits.Circuit)">
+            <summary>
+            Constructor of the generator object.
+            </summary>
+            <param name="circuit" cref="T:QuBoxEngine.Circuits.Circuit">Target circuit for destruction</param>
+        </member>
+        <member name="M:QuBoxEngine.Circuits.Generator.FormBit(System.Collections.Generic.KeyValuePair{System.String,System.Tuple{System.Int32,System.Int32}})">
+            <summary>
+            Method to decompose a bit into AST representation.
+            </summary>
+            <param name="triplet" cref="T:System.Collections.Generic.KeyValuePair">Information about the bit from the memory allocation</param>
+            <returns cref="T:QuLangProcessor.AST.Bit">Bit typed structure in the AST</returns>
+        </member>
+        <member name="M:QuBoxEngine.Circuits.Generator.FormAssign(System.String,QuLangProcessor.AST.ArithExpr)">
+            <summary>
+            Method to perform the decomposition of an arithmetic assignment command.
+            </summary>
+            <param name="s">Variable on the LHS of the assignment</param>
+            <param name="exp">Arithmetic expression AST to be assigned</param>
+            <returns cref="T:QuLangProcessor.AST.Statement">AST representation of assignment statement</returns>
+        </member>
+        <member name="M:QuBoxEngine.Circuits.Generator.FormAssign(System.String,QuLangProcessor.AST.BoolExpr)">
+            <summary>
+            Method to perform the decomposition of an logical assignment command.
+            </summary>
+            <param name="s">Variable on the LHS of the assignment</param>
+            <param name="exp">Logical expression AST to be assigned</param>
+            <returns cref="T:QuLangProcessor.AST.Statement">AST representation of assignment statement</returns>
+        </member>
+        <member name="M:QuBoxEngine.Circuits.Generator.DestructBitRegister(System.Collections.Generic.Dictionary{System.String,System.Tuple{System.Int32,System.Int32}})">
+            <summary>
+            Method to obtain the quantum/classical register allocation into AST
+            </summary>
+            <param name="dict">Dictionary of register information</param>
+            <returns cref="T:QuLangProcessor.AST.Bit">Bit typed AST</returns>
+        </member>
+        <member name="M:QuBoxEngine.Circuits.Generator.DestructArithmetic">
+            <summary>
+            Method to destruct the arithmetic variables recorded in memory into AST
+            </summary>
+            <returns>List of statements obtained in AST format</returns>
+        </member>
+        <member name="M:QuBoxEngine.Circuits.Generator.DestructBoolean">
+            <summary>
+            Method to destruct the logical variables recorded in memory into AST
+            </summary>
+            <returns>List of statements obtained in AST format</returns>
+        </member>
+        <member name="M:QuBoxEngine.Circuits.Generator.DestructRegister">
+            <summary>
+            Method to completely decompose the register object within the circuit.
+            </summary>
+            <returns>Tuple of AST allocation and schema</returns>
+        </member>
+        <member name="M:QuBoxEngine.Circuits.Generator.RecoverBit(System.Int32)">
+            <summary>
+            Method to recover the bit information from the register object.
+            </summary>
+            <param name="index">Index of bit the query is for</param>
+            <returns cref="T:QuLangProcessor.AST.Bit">Bit typed AST</returns>
+        </member>
+        <member name="M:QuBoxEngine.Circuits.Generator.DestructSupport(QuBoxEngine.Gates.ISupportGate)">
+            <summary>
+            Method to decompose the support gate into AST representation.
+            </summary>
+            <param name="gate" cref="T:QuBoxEngine.Gates.ISupportGate">Target support gate for decomposition</param>
+            <returns cref="T:QuLangProcessor.AST.Statement">Statement type in the AST</returns>
+        </member>
+        <member name="M:QuBoxEngine.Circuits.Generator.DestructGate(QuBoxEngine.Gates.IGate)">
+            <summary>
+            Method to decompose the generic gates into AST representation.
+            </summary>
+            <param name="gate" cref="T:QuBoxEngine.Gates.IGate">Target quantum gate to be decomposed</param>
+            <returns cref="T:QuLangProcessor.AST.Statement">Statement type in the AST</returns>
+        </member>
+        <member name="M:QuBoxEngine.Circuits.Generator.DestructTower(QuBoxEngine.Circuits.Tower)">
+            <summary>
+            Method to deconstruct an entire tower structure into AST representation.
+            </summary>
+            <param name="tower" cref="T:QuBoxEngine.Circuits.Tower">Target tower within circuit to be decomposed</param>
+            <returns>List of statements to be included in the schema AST</returns>
+        </member>
+        <member name="M:QuBoxEngine.Circuits.Generator.DestructCircuit">
+            <summary>
+            Method to deconstruct the entire circuit into AST representation. Interface method for the generator, accessible only within the package.
+            </summary>
+            <returns cref="T:System.Tuple`2">Complete AST structure formed from allocation and schema types</returns>
+        </member>
+        <member name="T:QuBoxEngine.Circuits.Register">
+            <summary>
+            Class that models the memory context for which the circuit is defined.
+            </summary>
+        </member>
+        <member name="M:QuBoxEngine.Circuits.Register.#ctor(QuLangProcessor.AST.Memory)">
+            <summary>
+            Constructor for the register class given a memory type obtained during compilation.
+            </summary>
+            <param name="memory" cref="T:QuLangProcessor.AST.Memory">Memory type from the QuLangProcessor package</param>
+        </member>
+        <member name="M:QuBoxEngine.Circuits.Register.GetBitName(System.Int32)">
+            <summary>
+            Method to retrieve the name string for a given index of the bit.
+            </summary>
+            <param name="index">Index of bit the query is for</param>
+            <returns>String name of the queried bit index</returns>
+        </member>
+        <member name="M:QuBoxEngine.Circuits.Register.ToString">
+            <summary>
+            Method to stringify the register class for debugging purposes.
+            </summary>
+            <returns>String representation of the register object</returns>
+        </member>
+        <member name="T:QuBoxEngine.Circuits.Tower">
+            <summary>
+            Class modelling the column of gates defined in a single circuit step.
+            </summary>
+        </member>
+        <member name="P:QuBoxEngine.Circuits.Tower.Height">
+            <summary>
+            Height of the tower.
+            </summary>
+        </member>
+        <member name="P:QuBoxEngine.Circuits.Tower.Gates">
+            <summary>
+            List of quantum gates contained in the tower.
+            </summary>
+        </member>
+        <member name="P:QuBoxEngine.Circuits.Tower.Locked">
+            <summary>
+            Tuple preserving the range of gate positions that are locked and cannot host new gates.
+            </summary>
+        </member>
+        <member name="M:QuBoxEngine.Circuits.Tower.#ctor(System.Int32)">
+            <summary>
+            Constructor of the tower object.
+            </summary>
+            <param name="height">Integer size of the column</param>
+        </member>
+        <member name="M:QuBoxEngine.Circuits.Tower.IsEmpty">
+            <summary>
+            Method to verify if the tower in question is empty. Empty is defined as containing only NONE placeholders.
+            </summary>
+            <returns cref="T:System.Boolean">Boolean value denoting the answer</returns>
+        </member>
+        <member name="M:QuBoxEngine.Circuits.Tower.AcceptGate(QuBoxEngine.Gates.IGate)">
+            <summary>
+            Method to attempt the addition of a gate to the tower. If the gate cannot be added (not compatible with the tower) a false boolean flag is returned
+            </summary>
+            <param name="gate" cref="T:QuBoxEngine.Gates.IGate">Generic quantum gate to be added to the tower if possible</param>
+            <returns cref="T:System.Boolean">Boolean flag to reflect whether the operation was successful or not</returns>
+        </member>
+        <member name="F:QuBoxEngine.Circuits.Tower._isCompatible">
+            <summary>
+            Lambda function to verify if a given gate is compatible with the tower i.e. if range of incoming gate is occupied only by NONE placeholders and the range is not locked for additions.
+            </summary>
+        </member>
+        <member name="F:QuBoxEngine.Circuits.Tower._isSubstitute">
+            <summary>
+            Lambda function to detect the placeholders to be substituted by the incoming gate for insertion.
+            </summary>
+        </member>
+        <member name="M:QuBoxEngine.Circuits.Tower.ToString">
+            <summary>
+            Method to stringify the tower object in a meaningful way.
+            </summary>
+            <returns>String representation of the tower object</returns>
+        </member>
+        <member name="T:QuBoxEngine.Circuits.StatementVisitor">
+            <summary>
+            Visitor class for the base operator type of the AST.
+            </summary>
+        </member>
+        <member name="M:QuBoxEngine.Circuits.StatementVisitor.#ctor(QuLangProcessor.AST.Memory)">
+            <summary>
+            Constructor of the statement visitor object for given memory context
+            </summary>
+            <param name="memory" cref="T:QuLangProcessor.AST.Memory">Context memory obtained during compilation</param>
+        </member>
+        <member name="M:QuBoxEngine.Circuits.StatementVisitor.GetPhaseTuple(QuLangProcessor.AST.ArithExpr)">
+            <summary>
+            Helper method to get the phase angle and the string representation from arithmetic AST.
+            </summary>
+            <param name="ast">Converted arithmetic expression</param>
+            <returns>Tuple of computed value and formed string</returns>
+        </member>
+        <member name="M:QuBoxEngine.Circuits.StatementVisitor.Visit(QuLangProcessor.AST.Statement)">
+            <summary>
+            Interface method implementation interpreting operators to gate objects.
+            </summary>
+            <param name="ast">Operator Abstract Syntax Tree</param>
+            <returns>List of gates obtained in interpreter</returns>
+        </member>
+        <member name="T:QuBoxEngine.Circuits.ArithmeticVisitor">
+            <summary>
+            Visitor class for arithmetic expressions
+            </summary>
+        </member>
+        <member name="M:QuBoxEngine.Circuits.ArithmeticVisitor.Visit(QuLangProcessor.AST.ArithExpr)">
+            <summary>
+            Interface method implementation for visiting arithmetic AST
+            </summary>
+            <param name="expr">Expression to be computed</param>
+            <returns>Result of arithmetic computation</returns>
+        </member>
+        <member name="T:QuBoxEngine.Gates.GateFactory">
+            <summary>
+            Factory class for creation of parameterised quantum gates
+            </summary>
+        </member>
+        <member name="F:QuBoxEngine.Gates.GateFactory.SingleGates">
+            <summary>
+            Dictionary of single qubit gate tags and associated matrices
+            </summary>
+        </member>
+        <member name="M:QuBoxEngine.Gates.GateFactory.ParamGates(System.Double)">
+            <summary>
+            Method to generate the dictionary of parametric gate tags and corresponding matrices based on the Θ argument
+            </summary>
+            <param name="phase">Phase argument for matrix construction</param>
+            <returns cref="T:System.Collections.Generic.IDictionary`2">Dictionary of parametric matrices</returns>
+        </member>
+        <member name="F:QuBoxEngine.Gates.GateFactory.DoubleGates">
+            <summary>
+            Dictionary of double qubit gates and associated matrices
+            </summary>
+        </member>
+        <member name="M:QuBoxEngine.Gates.GateFactory.DoubleParamGates(System.Double)">
+            <summary>
+            Method to generate the dictionary of double qubit parametric gate tags and corresponding matrices based on the Θ argument
+            </summary>
+            <param name="phase">Phase argument for matrix construction</param>
+            <returns cref="T:System.Collections.Generic.IDictionary`2">Dictionary of double parametric matrices</returns>
+        </member>
+        <member name="M:QuBoxEngine.Gates.GateFactory.CreateGate(QuLangProcessor.Tags.UTag,System.Int32)">
+            <summary>
+            Factory method for creation of single qubit gate class
+            </summary>
+            <param name="token" cref="T:QuLangProcessor.Tags.UTag">Unary tag determining the concrete gate</param>
+            <param name="target">Index of qubit on which gate is applied</param>
+            <returns cref="T:QuBoxEngine.Gates.IMatrixGate">Created quantum gate object</returns>
+        </member>
+        <member name="M:QuBoxEngine.Gates.GateFactory.CreateGate(QuLangProcessor.Tags.PTag,System.Int32,System.Tuple{System.Double,System.String})">
+            <summary>
+            Factory method for creation in single qubit parametric gate class 
+            </summary>
+            <param name="token" cref="T:QuLangProcessor.Tags.PTag">Parametric tag determining concrete gate</param>
+            <param name="target">Index of qubit on which gate is applied</param>
+            <param name="phase">Tuple of value/string for the Θ phase argument</param>
+            <returns cref="T:QuBoxEngine.Gates.IMatrixGate">Created quantum gate object</returns>
+        </member>
+        <member name="M:QuBoxEngine.Gates.GateFactory.CreateGate(QuBoxEngine.Gates.SupportType,System.Int32,System.Int32)">
+            <summary>
+            Factory method for creation of support blocks (gates without matrix representation)
+            </summary>
+            <param name="token" cref="T:QuBoxEngine.Gates.SupportType">Token for the type of support</param>
+            <param name="target">Index of qubit on which gate is applied</param>
+            <param name="classic">Optional index of cbit on which measurement is recorded</param>
+            <returns cref="T:QuBoxEngine.Gates.ISupportGate">Created quantum support block</returns>
+        </member>
+        <member name="M:QuBoxEngine.Gates.GateFactory.CreateGate(QuLangProcessor.Tags.BTag,System.Int32,System.Int32)">
+            <summary>
+            Factory method for creation of double qubit gate class
+            </summary>
+            <param name="token" cref="T:QuLangProcessor.Tags.BTag">Binary tag determining concrete gate</param>
+            <param name="target1">Index of first target qubit (often controlled)</param>
+            <param name="target2">Index of second target qubit</param>
+            <returns cref="T:QuBoxEngine.Gates.IMatrixGate">Created quantum gate object</returns>
+        </member>
+        <member name="M:QuBoxEngine.Gates.GateFactory.CreateGate(QuLangProcessor.Tags.BPTag,System.Int32,System.Int32,System.Tuple{System.Double,System.String})">
+            <summary>
+            Factory method for creation of double qubit parametric gate class
+            </summary>
+            <param name="token" cref="T:QuLangProcessor.Tags.BPTag"></param>
+            <param name="target1">Index of first target qubit</param>
+            <param name="target2">Index of second target qubit</param>
+            <param name="phase">Tuple of Θ phase argument value/string</param>
+            <returns cref="T:QuBoxEngine.Gates.IMatrixGate">Created quantum gate object</returns>
+        </member>
+        <member name="M:QuBoxEngine.Gates.GateFactory.CreateGate(System.Tuple{System.Double,System.String}[],System.Int32)">
+            <summary>
+            Factory method for creation of Unitary gate
+            </summary>
+            <param name="args">Array of gate arguments(3 different phases)</param>
+            <param name="target">Index of target qubit</param>
+            <returns cref="T:QuBoxEngine.Gates.IMatrixGate">Created quantum gate object</returns>
+        </member>
+        <member name="M:QuBoxEngine.Gates.GateFactory.CreateGate(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Factory method for creation of Toffoli (CCX or CCNOT) gate
+            </summary>
+            <param name="target1">Index of first control qubit</param>
+            <param name="target2">Index of second control qubit</param>
+            <param name="target3">Index of target qubit</param>
+            <returns cref="T:QuBoxEngine.Gates.IMatrixGate">Created quantum gate object</returns>
+        </member>
+        <!-- Badly formed XML comment ignored for member "T:QuBoxEngine.Gates.IGate" -->
+        <member name="T:QuBoxEngine.Gates.ISupportGate">
+            <summary>
+            Interface for support quantum gates (barrier, reset, measurement)
+            </summary>
+        </member>
+        <member name="T:QuBoxEngine.Gates.GateType">
+            <summary>
+            Enumeration type of the supported quantum gate classes.
+            </summary>
+        </member>
+        <member name="T:QuBoxEngine.Gates.SupportType">
+            <summary>
+            Enumeration type of types of support commands
+            </summary>
+        </member>
+        <member name="T:QuBoxEngine.Gates.MatrixGate">
+            <summary>
+            Abstract class implementing the common fields of all matrix gates. Extends the IMatrixGate interface.
+            </summary>
+        </member>
+        <member name="T:QuBoxEngine.Gates.SingleQubitGate">
+            <summary>
+            Class of single qubit quantum gates. Extends the MatrixGate abstract class.
+            </summary>
+        </member>
+        <member name="P:QuBoxEngine.Gates.SingleQubitGate.Tag">
+            <summary>
+            Distinctive unary tag of the gate.
+            </summary>
+        </member>
+        <member name="M:QuBoxEngine.Gates.SingleQubitGate.#ctor(MathNet.Numerics.LinearAlgebra.Matrix{System.Numerics.Complex},QuLangProcessor.Tags.UTag,System.Int32,System.String)">
+            <summary>
+            Constructor of single qubit gates.
+            </summary>
+            <param name="matrix">Matrix associated with the gate</param>
+            <param name="tag" cref="T:QuLangProcessor.Tags.UTag">Distinctive unary tag</param>
+            <param name="target">Index of target qubit</param>
+            <param name="condition">Optional condition applied on the gate</param>
+        </member>
+        <member name="T:QuBoxEngine.Gates.DoubleQubitGate">
+            <summary>
+            Class of double qubit quantum gates. Extends the MatrixGate abstract class.
+            </summary>
+        </member>
+        <member name="P:QuBoxEngine.Gates.DoubleQubitGate.Tag">
+            <summary>
+            Distinctive binary tag of the gate.
+            </summary>
+        </member>
+        <member name="P:QuBoxEngine.Gates.DoubleQubitGate.Control">
+            <summary>
+            Tuple preserving order of control/target qubits.
+            </summary>
+        </member>
+        <member name="M:QuBoxEngine.Gates.DoubleQubitGate.#ctor(MathNet.Numerics.LinearAlgebra.Matrix{System.Numerics.Complex},QuLangProcessor.Tags.BTag,System.Int32,System.Int32)">
+            <summary>
+            Constructor of double qubit gates.
+            </summary>
+            <param name="matrix">Matrix associated with the gate</param>
+            <param name="tag" cref="T:QuLangProcessor.Tags.BTag">Distinctive binary tag</param>
+            <param name="control">Index of first target qubit</param>
+            <param name="target">Index of second target qubit</param>
+        </member>
+        <member name="T:QuBoxEngine.Gates.ToffoliGate">
+            <summary>
+            Class of Toffoli (CCX / CCNOT) triple qubit gate. Extends the MatrixGate abstract class.
+            </summary>
+        </member>
+        <member name="P:QuBoxEngine.Gates.ToffoliGate.Control">
+            <summary>
+            Tuple preserving order of target qubits.
+            </summary>
+        </member>
+        <member name="M:QuBoxEngine.Gates.ToffoliGate.#ctor(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Constructor of Toffoli gate.
+            </summary>
+            <param name="control1">Index of first qubit</param>
+            <param name="control2">Index of second qubit</param>
+            <param name="target">Index of third qubit</param>
+        </member>
+        <member name="T:QuBoxEngine.Gates.ParametricGate">
+            <summary>
+            Abstract class implementing the common fields of all parametric gates. Extends the IMatrixGate interface.
+            </summary>
+        </member>
+        <member name="T:QuBoxEngine.Gates.ParamSingleGate">
+            <summary>
+            Class of single qubit parametric gates. Extends the ParametricGate abstract class.
+            </summary>
+        </member>
+        <member name="P:QuBoxEngine.Gates.ParamSingleGate.Tag">
+            <summary>
+            Distinctive parametric tag of the gate.
+            </summary>
+        </member>
+        <member name="M:QuBoxEngine.Gates.ParamSingleGate.#ctor(MathNet.Numerics.LinearAlgebra.Matrix{System.Numerics.Complex},QuLangProcessor.Tags.PTag,System.Int32,System.Tuple{System.Double,System.String},System.String)">
+            <summary>
+            Constructor of single qubit parametric gates.
+            </summary>
+            <param name="matrix">Matrix associated with the matrix</param>
+            <param name="tag" cref="T:QuLangProcessor.Tags.PTag">Distinctive parametric tag</param>
+            <param name="target">Index of qubit on which gate is applied</param>
+            <param name="phase">Tuple of value/string for phase parameter</param>
+            <param name="condition">Optional string condition on the gate</param>
+        </member>
+        <member name="T:QuBoxEngine.Gates.UnitaryGate">
+            <summary>
+            Class of Unitary gate with 3 different phase parameters. Extends the ParametricGate abstract class.
+            </summary>
+        </member>
+        <member name="P:QuBoxEngine.Gates.UnitaryGate.Phi">
+            <summary>
+            Additional φ parameter of the gate.
+            </summary>
+        </member>
+        <member name="P:QuBoxEngine.Gates.UnitaryGate.Lambda">
+            <summary>
+            Additional λ parameters of the gate
+            </summary>
+        </member>
+        <member name="M:QuBoxEngine.Gates.UnitaryGate.#ctor(System.Tuple{System.Double,System.String}[],System.Int32)">
+            <summary>
+            Constructor for the Unitary gate.
+            </summary>
+            <param name="args">Array of argument tuples</param>
+            <param name="target">Index of target qubit</param>
+        </member>
+        <member name="T:QuBoxEngine.Gates.ParamDoubleGate">
+            <summary>
+            Class of double qubit parametric gates. Extends the ParametricGate abstract class.
+            </summary>
+        </member>
+        <member name="P:QuBoxEngine.Gates.ParamDoubleGate.Control">
+            <summary>
+            Tuple preserving the order of target qubits.
+            </summary>
+        </member>
+        <member name="P:QuBoxEngine.Gates.ParamDoubleGate.Tag">
+            <summary>
+            Distinctive binary parametric tag of the gate.
+            </summary>
+        </member>
+        <member name="M:QuBoxEngine.Gates.ParamDoubleGate.#ctor(MathNet.Numerics.LinearAlgebra.Matrix{System.Numerics.Complex},QuLangProcessor.Tags.BPTag,System.Int32,System.Int32,System.Tuple{System.Double,System.String})">
+            <summary>
+            Constructor of double qubit parametric gates.
+            </summary>
+            <param name="matrix">Matrix associated with the gate</param>
+            <param name="tag" cref="T:QuLangProcessor.Tags.BPTag">Distinctive binary parametric tag</param>
+            <param name="target1">Index of first target qubit</param>
+            <param name="target2">Index of second target qubit</param>
+            <param name="phase">Tuple of value/string for the phase parameter</param>
+        </member>
+        <member name="T:QuBoxEngine.Gates.SupportGate">
+            <summary>
+            Abstract class implementing the common fields of all support gates. Extends the ISupportGate interface.
+            </summary>
+        </member>
+        <member name="M:QuBoxEngine.Gates.SupportGate.SupportState(QuBoxEngine.State)">
+            <summary>
+            Abstract method for supporting a given state with the gate. By default the state is unchanged.
+            </summary>
+            <param name="state" cref="T:QuBoxEngine.State">Currently used state object</param>
+        </member>
+        <member name="T:QuBoxEngine.Gates.NoneGate">
+            <summary>
+            Gate placeholder in the circuit grid (no operation)
+            </summary>
+        </member>
+        <member name="M:QuBoxEngine.Gates.NoneGate.#ctor(System.Int32)">
+            <summary>
+            Constructor for the placeholder gate
+            </summary>
+            <param name="target">Index of target qubit</param>
+        </member>
+        <member name="T:QuBoxEngine.Gates.BarrierGate">
+            <summary>
+            Barrier for gate optimization triggers
+            </summary>
+        </member>
+        <member name="M:QuBoxEngine.Gates.BarrierGate.#ctor(System.Int32)">
+            <summary>
+            Constructor for Barrier gate
+            </summary>
+            <param name="target">Index of affected qubit</param>
+        </member>
+        <member name="T:QuBoxEngine.Gates.ResetGate">
+            <summary>
+            Qubit initializer to computational state |0> = (1,0)
+            </summary>
+        </member>
+        <member name="M:QuBoxEngine.Gates.ResetGate.#ctor(System.Int32)">
+            <summary>
+            Constructor of a reset gate
+            </summary>
+            <param name="target">Index of qubit for which quantum state is reset to |0> </param>
+        </member>
+        <member name="M:QuBoxEngine.Gates.ResetGate.SupportState(QuBoxEngine.State)">
+            <summary>
+            Overriden implementation of supporting given state with a reset
+            </summary>
+            <param name="state" cref="T:QuBoxEngine.State">Currently used state object</param>
+        </member>
+        <member name="T:QuBoxEngine.Gates.MeasureGate">
+            <summary>
+            Measurement gate from quantum to classical register
+            </summary>
+        </member>
+        <member name="M:QuBoxEngine.Gates.MeasureGate.#ctor(System.Int32,System.Int32)">
+            <summary>
+            Constructor of a measurement gate
+            </summary>
+            <param name="quantum">Index of qubit from which state probability is recorded</param>
+            <param name="classic">Index of classical bit to store the outcome probability</param>
+        </member>
+        <member name="M:QuBoxEngine.Gates.MeasureGate.SupportState(QuBoxEngine.State)">
+            <summary>
+            Overriden implementation of performing the state measurement
+            </summary>
+            <param name="state" cref="T:QuBoxEngine.State">Currently used state object</param>
+        </member>
+        <member name="T:QuBoxEngine.Gates.PhaseDisk">
+            <summary>
+            Visualizer for the phase distribution at any point in the circuit.
+            </summary>
+        </member>
+        <member name="M:QuBoxEngine.Gates.PhaseDisk.#ctor(System.Int32)">
+            <summary>
+            Constructor of a phase disk tracker
+            </summary>
+            <param name="qubitNo">Number of qubits in the circuit(system)</param>
+        </member>
+        <member name="M:QuBoxEngine.Gates.PhaseDisk.SupportState(QuBoxEngine.State)">
+            <summary>
+            Overriden implementation of performing the phase disk tracking
+            </summary>
+            <param name="state">Currently used state object</param>
+        </member>
+        <member name="T:QuBoxEngine.Interpreter">
+            <summary>
+            Class that handles the interpretation of QuLang to circuits. Acts as a facade for the entire QuBoxEngine package.
+            </summary>
+        </member>
+        <member name="M:QuBoxEngine.Interpreter.HandleLang(System.String)">
+            <summary>
+            API method that performs the compilation of QuLang input to optimized AST structure.
+            </summary>
+            <param name="quLangCode">Input string in QuLang format</param>
+        </member>
+        <member name="M:QuBoxEngine.Interpreter.Interpret">
+            <summary>
+            API method that interprets the compiled AST into a complete Circuit object.
+            </summary>
+            <returns cref="P:QuBoxEngine.Interpreter.Circuit"></returns>
+        </member>
+        <member name="M:QuBoxEngine.Interpreter.DecomposeCircuit(QuBoxEngine.Circuits.Circuit)">
+            <summary>
+            API method to deconstruct the circuit object into an AST structure.
+            </summary>
+            <param name="circuit" cref="P:QuBoxEngine.Interpreter.Circuit">Target circuit to be decomposed</param>
+            <returns cref="T:System.Tuple`2">AST structure formed out of an Allocation type and a Schema type</returns>
+        </member>
+        <member name="M:QuBoxEngine.Interpreter.BackCompileAst">
+            <summary>
+            API method to handle the back-compilation of AST to QuLang format.
+            </summary>
+            <returns>String representation in QuLang format</returns>
+        </member>
+        <member name="M:QuBoxEngine.Interpreter.TranslateQs">
+            <summary>
+            API method to handle the translation of AST to Q# format.
+            </summary>
+            <returns>String representation in Q# format</returns>
+        </member>
+        <member name="T:QuBoxEngine.Simulator">
+            <summary>
+            Class that represents the simulator engine
+            </summary>
+        </member>
+        <member name="M:QuBoxEngine.Simulator.#ctor(QuBoxEngine.Circuits.Circuit)">
+            <summary>
+            Constructor of a simulator engine for a specific circuit
+            </summary>
+            <param name="circuit" cref="T:QuBoxEngine.Circuits.Circuit">Target circuit on which simulation will be performed</param>
+        </member>
+        <member name="M:QuBoxEngine.Simulator.TowerOperation(QuBoxEngine.Circuits.Tower)">
+            <summary>
+            Executes a step of the circuit simulation by constructing the tensor product of gates in a tower. Global operation is applied on the quantum system state.
+            </summary>
+            <param name="tower" cref="T:QuBoxEngine.Circuits.Tower">Target column of gates in the circuit</param>
+        </member>
+        <member name="M:QuBoxEngine.Simulator.Run">
+            <summary>
+            Method to trigger/run the simulation of the circuit registered in the simulator engine
+            </summary>
+            <returns cref="T:QuBoxEngine.State">Global state after circuit unitary evolution</returns>
+        </member>
+        <member name="T:QuBoxEngine.State">
+            <summary>
+            Class for the quantum system state representation
+            </summary>
+        </member>
+        <member name="M:QuBoxEngine.State.#ctor(MathNet.Numerics.LinearAlgebra.Vector{System.Numerics.Complex},MathNet.Numerics.LinearAlgebra.Vector{System.Double})">
+            <summary>
+            Constructor for the state class from 2 vectors
+            </summary>
+            <param name="stateVector">Vector in Hilbert space</param>
+            <param name="probeVector">Measurement vector</param>
+        </member>
+        <member name="M:QuBoxEngine.State.ResetQubit(System.Int32)">
+            <summary>
+            Method resetting the state vector to |0> state for given qubit
+            </summary>
+            <param name="qubit">Integer index of qubit to have state reset</param>
+        </member>
+        <member name="M:QuBoxEngine.State.Measure(System.Int32,System.Int32)">
+            <summary>
+            Method to perform the state measurement from a qubit to a classical bit
+            </summary>
+            <param name="qubit">Index of qubit from which state is recorded</param>
+            <param name="cbit">Index of cbit to host the recorded outcome</param>
+        </member>
+        <member name="M:QuBoxEngine.State.TrackPhase">
+            <summary>
+            Method to record phase disk measurements of each qubit independently
+            </summary>
+        </member>
+        <member name="T:QuBoxEngine.SvgProvider">
+            <summary>
+            Static class to encapsulate the entire logic of SVG figure generation
+            </summary>
+        </member>
+        <member name="M:QuBoxEngine.SvgProvider.DrawBox(SkiaSharp.SKCanvas,System.Int32,System.Int32,System.Int32,System.Int32,System.String)">
+            <summary>
+            Method to draw a box shape with a text identifier in the middle
+            </summary>
+            <param name="svg" cref="T:SkiaSharp.SKCanvas">SVG canvas on which figure is drawn</param>
+            <param name="x">X-coordinate of region for the shape</param>
+            <param name="y">Y-coordinate of region for the shape</param>
+            <param name="width">Width of the shape</param>
+            <param name="height">Height of the shape</param>
+            <param name="id">Text identifier to pe placed on box</param>
+        </member>
+        <member name="M:QuBoxEngine.SvgProvider.DrawTower(SkiaSharp.SKCanvas,System.Int32,System.Int32,System.Int32,System.Int32,QuBoxEngine.Circuits.Tower)">
+            <summary>
+            Method to draw a tower of gates in the defined region
+            </summary>
+            <param name="svg" cref="T:SkiaSharp.SKCanvas">SVG canvas to draw on</param>
+            <param name="x">X-coordinate of region for tower</param>
+            <param name="y">Y-coordinate of region for tower</param>
+            <param name="height">Height of the tower structure</param>
+            <param name="width">Width of the tower structure</param>
+            <param name="tower" cref="T:QuBoxEngine.Circuits.Tower">Tower object to be represented on SVG</param>
+        </member>
+        <member name="M:QuBoxEngine.SvgProvider.DrawGate(SkiaSharp.SKCanvas,System.Int32,System.Int32,System.Int32,System.Int32,QuBoxEngine.Gates.IGate)">
+            <summary>
+            Method to draw a gate shape in the defined region
+            </summary>
+            <param name="svg" cref="T:SkiaSharp.SKCanvas">SVG canvas to draw on</param>
+            <param name="gWidth">Gate shape width</param>
+            <param name="gHeight">Gate shape height</param>
+            <param name="x">X-coordinate of shape</param>
+            <param name="y">Y-coordinate of shape</param>
+            <param name="gate" cref="T:QuBoxEngine.Gates.IGate"></param>
+        </member>
+        <member name="M:QuBoxEngine.SvgProvider.DrawTowerGrid(SkiaSharp.SKCanvas,System.Int32,System.Int32,System.Int32,System.Collections.Generic.List{QuBoxEngine.Circuits.Tower})">
+            <summary>
+            Method to draw a grid of towers in the defined region
+            </summary>
+            <param name="svg" cref="T:SkiaSharp.SKCanvas">SVG canvas to draw on</param>
+            <param name="leftOffset">Horizontal offset of grid region</param>
+            <param name="height">Height of schema</param>
+            <param name="width">Width of schema</param>
+            <param name="grid">List of Towers to be drawn on the schema</param>
+        </member>
+        <member name="M:QuBoxEngine.SvgProvider.DrawCircuitSvg(System.String,QuBoxEngine.Circuits.Circuit)">
+            <summary>
+            Method to draw a circuit on an SVG canvas and store it in a file
+            </summary>
+            <param name="path">SVG file relative path</param>
+            <param name="circuit" cref="T:QuBoxEngine.Circuits.Circuit">Target circuit object to be drawn</param>
+        </member>
+    </members>
+</doc>

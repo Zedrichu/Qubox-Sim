@@ -5,6 +5,22 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <Executable>true</Executable>
+        <Title>QuBoxEngine</Title>
+        <Authors>Zedrichu</Authors>
+        <Description>Modelling and Simulation Engine for Quantum Circuits defined in QuLang format</Description>
+        <PackageIcon>qubox-logo.png</PackageIcon>
+        <Company>QuBox</Company>
+        <AssemblyVersion>1.0</AssemblyVersion>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <OutputPath>bin\Debug/</OutputPath>
+      <DocumentationFile>QuBoxEngine.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <OutputPath>bin\Release/</OutputPath>
+      <DocumentationFile>bin\Release\QuBoxEngine.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
@@ -14,6 +30,13 @@
 
     <ItemGroup>
       <ProjectReference Include="..\QuLangProcessor\QuLangProcessor.fsproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="qubox-logo.png">
+        <Pack>True</Pack>
+        <PackagePath></PackagePath>
+      </None>
     </ItemGroup>
   
 </Project>

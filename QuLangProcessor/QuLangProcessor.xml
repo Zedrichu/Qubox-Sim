@@ -1,0 +1,493 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doc>
+<assembly><name>QuLangProcessor</name></assembly>
+<members>
+<member name="T:QuLangProcessor.Tags.PTag">
+<summary>
+ Disjoint union type of unary-parametric gates
+</summary>
+</member>
+<member name="T:QuLangProcessor.Tags.BPTag">
+<summary>
+ Disjoint union type of binary-parametric gates
+</summary>
+</member>
+<member name="T:QuLangProcessor.Tags.BTag">
+<summary>
+ Disjoint union type of binary gates
+</summary>
+</member>
+<member name="T:QuLangProcessor.Tags.UTag">
+<summary>
+ Disjoint union type of unary gates
+</summary>
+</member>
+<member name="T:QuLangProcessor.Tags">
+ <summary>
+ Declaration module containing the tags for different types of quantum gates
+ </summary>
+</member>
+<member name="T:QuLangProcessor.AST.Memory">
+ <summary>
+ Record type to hold the established memory bindings (arithmetic/boolean/classical/quantum)
+ </summary>
+</member>
+<member name="T:QuLangProcessor.AST.Circuit">
+<summary>
+ Type of program as unified allocation and circuit AST
+</summary>
+</member>
+<member name="T:QuLangProcessor.AST.Schema">
+<summary>
+ Type of quantum circuit AST as list of Statements
+</summary>
+</member>
+<member name="T:QuLangProcessor.AST.Allocation">
+<summary>
+ Type of quantum/classical register allocation
+</summary>
+</member>
+<member name="T:QuLangProcessor.AST.Statement.Toffoli">
+<summary>
+ Control-control-NOT gate (3-way entangler)
+</summary>
+</member>
+<member name="T:QuLangProcessor.AST.Statement.Unitary">
+<summary>
+ Unitary triple-parametric quantum gate
+</summary>
+</member>
+<member name="T:QuLangProcessor.AST.Statement.BinaryParamGate">
+<summary>
+ Binary parametric quantum gates
+</summary>
+</member>
+<member name="T:QuLangProcessor.AST.Statement.ParamGate">
+<summary>
+ Unary parametric quantum gates
+</summary>
+</member>
+<member name="T:QuLangProcessor.AST.Statement.BinaryGate">
+<summary>
+ Binary quantum gates
+</summary>
+</member>
+<member name="T:QuLangProcessor.AST.Statement.UnaryGate">
+<summary>
+ Unary quantum gates
+</summary>
+</member>
+<member name="T:QuLangProcessor.AST.Statement.PhaseDisk">
+<summary>
+ Phase disk computation on all qubits
+</summary>
+</member>
+<member name="T:QuLangProcessor.AST.Statement.Barrier">
+<summary>
+ Circuit barrier (isolate gates &amp; optimizations)
+</summary>
+</member>
+<member name="T:QuLangProcessor.AST.Statement.Reset">
+<summary>
+ Reset of qubit to |0⟩ - computational basis
+</summary>
+</member>
+<member name="T:QuLangProcessor.AST.Statement.Measure">
+<summary>
+ Measurement of qubit on classical bit (Z-basis)
+</summary>
+</member>
+<member name="T:QuLangProcessor.AST.Statement.Condition">
+<summary>
+ Conditional quantum gate application
+</summary>
+</member>
+<member name="T:QuLangProcessor.AST.Statement.AssignB">
+<summary>
+ Logical variable declaration
+</summary>
+</member>
+<member name="T:QuLangProcessor.AST.Statement.Assign">
+<summary>
+ Arithmetic variable assignment
+</summary>
+</member>
+<member name="T:QuLangProcessor.AST.Statement">
+<summary>
+ Discriminated type of quantum gates and operators
+</summary>
+</member>
+<member name="T:QuLangProcessor.AST.Error.EvaluationError">
+<summary>
+ Signals an evaluation error with message
+</summary>
+</member>
+<member name="T:QuLangProcessor.AST.Error.SemanticError">
+<summary>
+ Signals a semantic error with message
+</summary>
+</member>
+<member name="T:QuLangProcessor.AST.Error.SyntaxError">
+<summary>
+ Signals a syntax error in the input - invalid token at specific line/column
+</summary>
+</member>
+<member name="T:QuLangProcessor.AST.Error.Success">
+<summary>
+ Signals successful language processing
+</summary>
+</member>
+<member name="T:QuLangProcessor.AST.Error">
+<summary>
+Tagged type of errors in QuLang module (Accumulate grammar error (syntax/semantics/evaluations))
+</summary>
+</member>
+<member name="T:QuLangProcessor.AST.BoolExpr">
+<summary>
+ Discriminated type of basic logical expression
+</summary>
+</member>
+<member name="T:QuLangProcessor.AST.ROp">
+<summary>
+ Disjoint union type of relational operators
+</summary>
+</member>
+<member name="T:QuLangProcessor.AST.BOp">
+<summary>
+ Disjoint union type of logical operators
+</summary>
+</member>
+<member name="T:QuLangProcessor.AST.Result">
+<summary>
+ Tagged type of measurement results
+</summary>
+</member>
+<member name="T:QuLangProcessor.AST.Bit">
+<summary>
+ Tagged type of quantum/classical bit declarations
+</summary>
+</member>
+<member name="T:QuLangProcessor.AST.ArithExpr">
+<summary>
+ Discriminated type of basic arithmetic expressions
+</summary>
+</member>
+<member name="T:QuLangProcessor.AST.AOp">
+<summary>
+ Disjoint union type of arithmetic operators
+</summary>
+</member>
+<member name="T:QuLangProcessor.AST.IVisitable`1">
+<summary>
+ Interface for the visitable (visitor design pattern)
+</summary>
+</member>
+<member name="T:QuLangProcessor.AST.IVisitor`2">
+<summary>
+ Interface for the visitor (visitor design pattern)
+</summary>
+</member>
+<member name="T:QuLangProcessor.AST">
+ <summary>
+ Declaration module containing the types required to build the abstract syntax tree of QuLang.
+ </summary>
+</member>
+<member name="M:QuLangProcessor.Parser.token_to_string(QuLangProcessor.Parser.token)">
+<summary>
+ This function gets the name of a token as a string
+</summary>
+</member>
+<member name="M:QuLangProcessor.Parser.prodIdxToNonTerminal(System.Int32)">
+<summary>
+ This function maps production indexes returned in syntax errors to strings representing the non terminal that would be produced by that production
+</summary>
+</member>
+<member name="M:QuLangProcessor.Parser.tokenTagToTokenId(System.Int32)">
+<summary>
+ This function maps integer indexes to symbolic token ids
+</summary>
+</member>
+<member name="M:QuLangProcessor.Parser.tagOfToken(QuLangProcessor.Parser.token)">
+<summary>
+ This function maps tokens to integer indexes
+</summary>
+</member>
+<member name="M:QuLangProcessor.Compiler.semanticAnalyzer(Microsoft.FSharp.Collections.FSharpList{QuLangProcessor.AST.Statement},QuLangProcessor.AST.Memory)">
+ <summary>
+ Function to analyze the semantics of the defined flow AST (iterating statements)
+ </summary>
+ <param name="ast">Flow AST to be analyzed semantically</param>
+ <param name="memory">Record mappings of defined identifiers</param>
+ <exception cref="System.Exception">Invalid register definition (semantic)</exception>
+</member>
+<member name="M:QuLangProcessor.Compiler.analyseStatement(QuLangProcessor.AST.Statement,QuLangProcessor.AST.Memory)">
+ <summary>
+ Function to analyze the semantics of a Statement AST. Operators have to
+ be applied on quantum registers only, the measurement result is stored on classical register.
+ </summary>
+ <param name="st">Statement to be analyzed semantically (AST.Statement)</param>
+ <param name="memory">Record mappings of defined identifiers</param>
+ <exception cref="System.Exception">Invalid register definition (semantic)</exception>
+</member>
+<member name="M:QuLangProcessor.Compiler.peekRegister(QuLangProcessor.AST.BoolExpr,Microsoft.FSharp.Collections.FSharpSet{QuLangProcessor.AST.Bit})">
+ <summary>
+ Function to peek inside boolean expression and extract classical registers used.
+ </summary>
+ <param name="b">Boolean expression</param>
+ <param name="acc">Accumulator set of bits</param>
+</member>
+<member name="M:QuLangProcessor.Compiler.validateRegister(QuLangProcessor.AST.Bit,System.String,Microsoft.FSharp.Collections.FSharpMap{System.String,System.Tuple{System.Int32,System.Int32}})">
+ <summary>
+ Function to validate the target register of quantum operators.
+ </summary>
+ <param name="bit">Target register to be validated</param>
+ <param name="flag">Type of register expected</param>
+ <param name="memory">Memory mapping of corresponding types</param>
+ <exception cref="System.Exception">Invalid allocation of register</exception>
+</member>
+<member name="M:QuLangProcessor.Compiler.optimizeCircuit(Microsoft.FSharp.Collections.FSharpList{QuLangProcessor.AST.Statement},Microsoft.FSharp.Collections.FSharpMap{System.String,System.Tuple{QuLangProcessor.AST.ArithExpr,System.Int32}},Microsoft.FSharp.Collections.FSharpMap{System.String,System.Tuple{QuLangProcessor.AST.BoolExpr,System.Int32}},System.Int32)">
+ <summary>
+ Function to optimize the flow AST by reducing each statement in the list
+ </summary>
+ <param name="expr">Abstract Syntax Tree of circuit flow for optimization (AST.Elements)</param>
+ <param name="memArith">Initial arithmetic variable memory</param>
+ <param name="memBool">Initial boolean variable memory</param>
+ <param name="no">Ordering of assignments in circuit</param>
+ <returns>Tuple of arithmetic and boolean variable memories and optimized Flow</returns>
+</member>
+<member name="M:QuLangProcessor.Compiler.optimizeStatement(QuLangProcessor.AST.Statement,Microsoft.FSharp.Collections.FSharpMap{System.String,System.Tuple{QuLangProcessor.AST.ArithExpr,System.Int32}},Microsoft.FSharp.Collections.FSharpMap{System.String,System.Tuple{QuLangProcessor.AST.BoolExpr,System.Int32}},System.Int32)">
+ <summary>
+ Function to optimize statement AST by reducing expressions and building memory
+ </summary>
+ <param name="st">Abstract Syntax Tree of Statement for optimization (AST.Statement)</param>
+ <param name="memArith">Initial arithmetic variable memory</param>
+ <param name="memBool">Initial boolean variable memory</param>
+ <param name="no">Ordering of assignments in circuit</param>
+ <returns>Tuple of arithmetic and boolean variable memories and optimized Statement</returns>    
+</member>
+<member name="M:QuLangProcessor.Compiler.evalBool(QuLangProcessor.AST.BoolExpr,Microsoft.FSharp.Collections.FSharpMap{System.String,System.Tuple{QuLangProcessor.AST.BoolExpr,System.Int32}},Microsoft.FSharp.Collections.FSharpMap{System.String,System.Tuple{QuLangProcessor.AST.ArithExpr,System.Int32}})">
+ <summary>
+ Function to eager evaluate boolean expressions with reduction rules
+ </summary>
+ <param name="expr">Boolean expression to be reduced</param>
+ <param name="memoryB">Boolean mapping of identifiers</param>
+ <param name="memoryA">Arithmetic mapping of identifiers</param>
+ <exception cref="System.Exception">Boolean invalid variable access</exception>
+ <returns>Reduced evaluation of AST boolean expression</returns>
+</member>
+<member name="M:QuLangProcessor.Compiler.evalArith(QuLangProcessor.AST.ArithExpr,Microsoft.FSharp.Collections.FSharpMap{System.String,System.Tuple{QuLangProcessor.AST.ArithExpr,System.Int32}})">
+ <summary>
+ Function to eager evaluate arithmetic expressions with reduction rules.
+ </summary>
+ <param name="expr">Arithmetic expression to be reduced</param>
+ <param name="memory">Mapping of arithmetic variables to expressions</param>
+ <exception cref="System.Exception">Arithmetic invalid variable access, division by zero</exception>
+ <returns>Reduced evaluation of AST arithmetic expression</returns>
+</member>
+<member name="M:QuLangProcessor.Compiler.interopB(Microsoft.FSharp.Core.FSharpFunc{System.Double,Microsoft.FSharp.Core.FSharpFunc{System.Double,System.Boolean}},QuLangProcessor.AST.ArithExpr,QuLangProcessor.AST.ArithExpr)">
+<summary>
+ Helper functions to aid reductions
+</summary>
+</member>
+<member name="M:QuLangProcessor.Compiler.allocateBits(QuLangProcessor.AST.Allocation)">
+ <summary>
+ Function to collect allocated Quantum bits and Classical bits in 2 map structures.
+ </summary>
+ <param name="alloc">Allocation structure in the AST.operator type</param>
+ <exception cref="System.Exception">Invalid allocation (identifier already used for quantum)</exception>
+ <returns>Tuple of quantum bit mapping and classical bit mapping</returns>
+</member>
+<member name="M:QuLangProcessor.Compiler.unwrapBit(QuLangProcessor.AST.Bit,Microsoft.FSharp.Collections.FSharpMap{System.String,System.Tuple{System.Int32,System.Int32}},System.Int32)">
+ <summary>
+ Function to collect bit identifiers from AST structure to map
+ </summary>
+ <param name="bit">Bit structure (array form/single/sequenced)</param>
+ <param name="acc">Accumulator map of identifier/number pairs</param>
+ <param name="no">Current bit number</param>
+ <returns>Map of identifier/number pairs initialized</returns>
+</member>
+<member name="M:QuLangProcessor.Compiler.Map.intersect``3(Microsoft.FSharp.Collections.FSharpMap{``0,``1},Microsoft.FSharp.Collections.FSharpMap{``0,``2})">
+<summary>
+ Map intersect function
+</summary>
+</member>
+<member name="M:QuLangProcessor.Compiler.Map.union``2(Microsoft.FSharp.Collections.FSharpMap{``0,``1},Microsoft.FSharp.Collections.FSharpMap{``0,``1})">
+<summary>
+ Map union function
+</summary>
+</member>
+<member name="T:QuLangProcessor.Compiler">
+ <summary>
+ Module defining the compilation of QuLang AST to a quantum circuit.
+ </summary>
+</member>
+<member name="M:QuLangProcessor.BackCompiler.backCompileFlow(Microsoft.FSharp.Collections.FSharpList{QuLangProcessor.AST.Statement})">
+<summary>
+ Helper function to aggregate all statements in a flow.    
+</summary>
+</member>
+<member name="M:QuLangProcessor.BackCompiler.backCompileStatement(QuLangProcessor.AST.Statement)">
+ <summary>
+ Function to translate quantum statements to QuLang declaration.
+ </summary>
+ <param name="st">Statement AST to be translated</param>
+ <returns>QuLang string representation</returns>
+</member>
+<member name="M:QuLangProcessor.BackCompiler.backCompileBit(QuLangProcessor.AST.Bit)">
+ <summary>
+ Function to translate quantum bit to QuLang declaration.
+ </summary>
+ <param name="bit">Bit expression (AST.bit)</param>
+ <returns>QuLang string representation</returns>
+</member>
+<member name="T:QuLangProcessor.BackCompiler">
+ <summary>
+ Back-compiler module handling the conversion from AST back to QuLang code definition.
+ </summary>
+</member>
+<member name="M:QuLangProcessor.Translator.translateFlow(Microsoft.FSharp.Collections.FSharpList{QuLangProcessor.AST.Statement})">
+<summary>
+ Helper to aggregate translated statements in a flow    
+</summary>
+</member>
+<member name="M:QuLangProcessor.Translator.translateStatement(QuLangProcessor.AST.Statement)">
+ <summary>
+ Function to translate statement to Q# syntax.
+ Recursive on the Flow structure.
+ </summary>
+ <param name="expr">Statement expression (AST.Statement)</param>
+ <returns>Q# string representation</returns>
+</member>
+<member name="M:QuLangProcessor.Translator.translateBool(QuLangProcessor.AST.BoolExpr)">
+ <summary>
+ Function to translate boolean expressions to Q# syntax.
+ Recursive on the structure of type boolExpr
+ </summary>
+ <param name="expr">Boolean expression (AST.boolExpr)</param>
+ <returns>Q# string representation</returns>
+</member>
+<member name="M:QuLangProcessor.Translator.translateArith(QuLangProcessor.AST.ArithExpr)">
+ <summary>
+ Function to translate arithmetic expressions to Q# syntax.
+ Recursive on the structure of type arithExpr.
+ </summary>
+ <param name="expr">Arithmetic expression (AST.ArithExpr)</param>
+ <returns>Q# string representation</returns>
+</member>
+<member name="M:QuLangProcessor.Translator.translateBit(QuLangProcessor.AST.Bit)">
+ <summary>
+ Function to translate a single bit to Q# syntax.
+ </summary>
+ <param name="bit">Q# bit representation</param>
+</member>
+<member name="M:QuLangProcessor.Translator.translateAlloc(QuLangProcessor.AST.Bit,System.Boolean)">
+ <summary>
+ Function to translate bit structures to Q# syntax.
+ </summary>
+ <param name="expr">Bit expression (sequence, array-like or single)</param>
+ <param name="flag">True for qubits, false for classical bits</param>
+ <returns>Q# string representation</returns>
+</member>
+<member name="M:QuLangProcessor.Translator.translateResult(QuLangProcessor.AST.Result)">
+ <summary>
+ Function to compile the quantum results to Q# syntax.
+ </summary>
+ <param name="result">Result expression (AST.Result)</param>
+ <returns>Q# string representation</returns>
+</member>
+<member name="T:QuLangProcessor.Translator">
+ <summary>
+ Translator module handling the conversion from AST structure to Q# compiling code
+ </summary>
+</member>
+<member name="M:QuLangProcessor.Handler.execute(QuLangProcessor.AST.Allocation,QuLangProcessor.AST.Schema)">
+ <summary>
+ Internal method to execute tools on initial parsed AST
+ </summary>
+ <param name="ast">AST</param>
+</member>
+<member name="M:QuLangProcessor.Handler.getInputCode">
+ <summary>
+ Internal method to get user input as string
+ </summary>
+ <returns>String of user input</returns>
+</member>
+<member name="M:QuLangProcessor.Handler.getMenuInput">
+ <summary>
+ Internal method to get number of choice from user input
+ </summary>
+ <returns>Tuple of success bool value and choice value</returns>
+</member>
+<member name="M:QuLangProcessor.Handler.optimizeArithmetic(QuLangProcessor.AST.ArithExpr,QuLangProcessor.AST.Memory)">
+ <summary>
+ Interface method to optimize arithmetic expressions with eager evaluation and reduction rules
+ </summary>
+ <param name="a">Generated arithmetic expression for optimization</param>
+ <param name="memory">Initialized circuit memory</param>
+ <returns>Tuple of optimized arithmetic expression, updated circuit memory and error tag</returns>
+</member>
+<member name="M:QuLangProcessor.Handler.optimizeLogic(QuLangProcessor.AST.BoolExpr,QuLangProcessor.AST.Memory)">
+ <summary>
+ Interface method to optimize logical expressions with eager evaluation and reduction rules
+ </summary>
+ <param name="b">Generated boolean expression for optimization</param>
+ <param name="memory">Initialized circuit memory</param>
+ <returns>Tuple of optimized boolean expression, updated circuit memory and error tag</returns>
+</member>
+<member name="M:QuLangProcessor.Handler.optimizeAST(QuLangProcessor.AST.Allocation,QuLangProcessor.AST.Schema,QuLangProcessor.AST.Memory)">
+ <summary>
+ Interface method to optimize the generated AST with eager evaluation and reduction rules
+ </summary>
+ <param name="ast">Generated AST for optimization</param>
+ <param name="memory">Initialized circuit memory</param>
+ <returns>Tuple of optimized AST, updated circuit memory and error tag</returns>
+</member>
+<member name="M:QuLangProcessor.Handler.analyzeSemantics(QuLangProcessor.AST.Allocation,QuLangProcessor.AST.Schema)">
+ <summary>
+ Interface method to analyze the semantics of the generated circuit AST
+ </summary>
+ <param name="ast">Generated circuit AST for analysis</param>
+ <returns>Tuple of circuit memory and error tag</returns>
+</member>
+<member name="M:QuLangProcessor.Handler.translateCircuit(QuLangProcessor.AST.Allocation,QuLangProcessor.AST.Schema)">
+ <summary>
+ Interface method to translate generated AST to Q# code
+ </summary>
+ <param name="circuit">Generated circuit AST for compilation (AST.Circuit)</param>
+ <returns>Q# string representation</returns>
+</member>
+<member name="M:QuLangProcessor.Handler.backCompileCircuit(QuLangProcessor.AST.Allocation,QuLangProcessor.AST.Schema)">
+ <summary>
+ Interface method to back-compile generated circuit AST to QuLang code
+ </summary>
+ <param name="circuit">Generated AST for translation(AST.Circuit)</param>
+ <returns>QuLang string representation</returns>
+</member>
+<member name="M:QuLangProcessor.Handler.parseArith(System.String)">
+ <summary>
+ Interface method to parse arithmetic expression from string format to AST
+ </summary>
+ <param name="expr">String awaiting parsing</param>
+ <returns>Tuple of arithmetic AST and error tag</returns>
+</member>
+<member name="M:QuLangProcessor.Handler.parseBool(System.String)">
+ <summary>
+ Interface method to parse boolean expression from string format to AST
+ /// </summary>
+ <param name="expr">String awaiting parsing</param>
+ <returns>Tuple of boolean AST and error tag</returns>
+</member>
+<member name="M:QuLangProcessor.Handler.parseQuLang(System.String)">
+ <summary>
+ Interface method to parse QuLang code to circuit AST based on the grammar rules
+ </summary>
+ <param name="code">String in QuLang format awaiting parsing</param>
+ <returns>Tuple of AST for allocation and operation and error tag</returns>
+</member>
+<member name="T:QuLangProcessor.Handler">
+ <summary>
+ Interface to library assisting the compilation of QuLang input
+ </summary>
+</member>
+</members>
+</doc>

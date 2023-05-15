@@ -5,9 +5,22 @@
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <Authors>Zedrichu</Authors>
         <PackageIcon>qubox-logo.png</PackageIcon>
-        <Company>Qubox</Company>
+        <Company>QuBox</Company>
         <NeutralLanguage>en</NeutralLanguage>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Title>QuLangProcessor</Title>
+        <Description>Language Processor for the QuLang Quantum Circuit Definition Language</Description>
+        <AssemblyVersion>1.0</AssemblyVersion>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <OutputPath>bin\Debug/</OutputPath>
+      <DocumentationFile>QuLangProcessor.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <OutputPath>bin\Release/</OutputPath>
+      <DocumentationFile>obj\Release/QuLangProcessor.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
