@@ -1,9 +1,24 @@
-using MathNet.Numerics;
+namespace QuBoxEngine;
+/* C#
+ -*- coding: utf-8 -*-
+State
+
+Description: Module modelling the state of the quantum system
+
+@__Author --> Created by Adrian Zvizdenco aka Zedrichu
+@__Date & Time --> Created on 12/04/2023
+@__Email --> adrzvizdencojr@gmail.com
+@__Version --> 1.0
+@__Status --> DEV
+*/
+
 using MathNet.Numerics.LinearAlgebra;
 using Complex = System.Numerics.Complex;
+using MathNet.Numerics;
 
-namespace QuBoxEngine;
-
+/// <summary>
+/// Class for the quantum system state representation
+/// </summary>
 public class State
 {
     // Dimension of the Hilbert space
@@ -16,6 +31,11 @@ public class State
     // Result vector in measurement vector space
     public Vector<double> ProbeVector { get; set; }
     
+    /// <summary>
+    /// Constructor for the state class from 2 vectors
+    /// </summary>
+    /// <param name="stateVector">Vector in Hilbert space</param>
+    /// <param name="probeVector">Measurement vector</param>
     public State(Vector<Complex> stateVector, Vector<double> probeVector)
     {
         // Get the dimensions from the input vector lengths (logarithmic)
@@ -26,6 +46,10 @@ public class State
         ProbeVector = probeVector;
     }
     
+    /// <summary>
+    /// Method resetting the state vector to |0> state for given qubit
+    /// </summary>
+    /// <param name="qubit">Integer index of qubit to have state reset</param>
     public void ResetQubit(int qubit)
     {
         
@@ -44,6 +68,11 @@ public class State
         }
     }
 
+    /// <summary>
+    /// Method to perform the state measurement from a qubit to a classical bit
+    /// </summary>
+    /// <param name="qubit">Index of qubit from which state is recorded</param>
+    /// <param name="cbit">Index of cbit to host the recorded outcome</param>
     public void Measure(int qubit, int cbit)
     {
         // Bit mask for the qubit to be measured
@@ -101,6 +130,9 @@ public class State
         }
     }
     
+    /// <summary>
+    /// Method to record phase disk measurements of each qubit independently
+    /// </summary>
     public void TrackPhase()
     {
         var phaser = Vector<double>.Build.Dense((_dimH + _dimM) * 2, 0);

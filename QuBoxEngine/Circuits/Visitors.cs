@@ -1,6 +1,3 @@
-using QuBoxEngine.Gates;
-using static QuLangProcessor.AST;
-
 namespace QuBoxEngine.Circuits;
 /* C#
  -*- coding: utf-8 -*-
@@ -14,7 +11,8 @@ Description: Implementation of the Visitor Pattern for the AST structure.
 @__Version --> 1.0
 @__Status --> DEV
 */
-
+using Gates;
+using static QuLangProcessor.AST;
 
 /// <summary>
 /// Visitor class for the base operator type of the AST.
@@ -23,7 +21,11 @@ internal class StatementVisitor: IVisitor<Statement, IGate>
 {
     private readonly Memory _memory; 
     private readonly ArithmeticVisitor _arithVisitor;
-  
+    
+    /// <summary>
+    /// Constructor of the statement visitor object for given memory context
+    /// </summary>
+    /// <param name="memory" cref="Memory">Context memory obtained during compilation</param>
     internal StatementVisitor(Memory memory)
     {
         // Establish the contextual memory

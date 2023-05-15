@@ -1,21 +1,45 @@
+namespace QuBoxEngine.Circuits;
+/* C#
+ -*- coding: utf-8 -*-
+Generator
+
+Description: Module implementing the logic of decomposing the circuit into the AST structure from the QuLangProcessor package.
+
+@__Author --> Created by Adrian Zvizdenco aka Zedrichu
+@__Date & Time --> Created on 01/04/2023
+@__Email --> adrzvizdencojr@gmail.com
+@__Version --> 1.0
+@__Status --> DEV
+*/
+
 using Microsoft.FSharp.Collections;
 using Microsoft.FSharp.Core;
-using QuBoxEngine.Gates;
+using Gates;
 using QuLangProcessor;
 using static QuLangProcessor.AST;
 using static QuLangProcessor.Tags;
 
-namespace QuBoxEngine.Circuits;
-
+/// <summary>
+/// Class implementing the destructuring logic of the circuit into the AST structure.
+/// </summary>
 internal class Generator
 {
     private Register Reg { get; set; } = new (Memory.empty);
     private List<Tower> Towers { get; set; } = new();
+    /// <summary>
+    /// Constructor of the generator object.
+    /// </summary>
+    /// <param name="circuit" cref="Circuit">Target circuit for destruction</param>
     internal Generator(Circuit circuit)
     {
         Reg = circuit.Allocation;
         Towers = circuit.GateGrid;
     }
+    /// <summary>
+    /// Method to decompose a bit into AST representation.
+    /// </summary>
+    /// <param name="triplet" cref="KeyValuePair">Information about the bit from the memory allocation</param>
+    /// <returns cref="Bit">Bit typed structure in the AST</returns>
     private Bit FormBit(KeyValuePair<string, Tuple<int, int>> triplet)
     {
         var id = triplet.Key;
@@ -23,14 +47,32 @@ internal class Generator
         return num == 1 ? Bit.NewBitS(id) : 
             Bit.NewBitA(new Tuple<string, int>(id,num));
     }
+    /// <summary>
+    /// Method to perform the decomposition of an arithmetic assignment command.
+    /// </summary>
+    /// <param name="s">Variable on the LHS of the assignment</param>
+    /// <param name="exp">Arithmetic expression AST to be assigned</param>
+    /// <returns cref="Statement">AST representation of assignment statement</returns>
     private Statement FormAssign(string s, ArithExpr exp)
     {
         return Statement.NewAssign(new Tuple<string, ArithExpr>(s, exp));
     }
+    /// <summary>
+    /// Method to perform the decomposition of an logical assignment command.
+    /// </summary>
+    /// <param name="s">Variable on the LHS of the assignment</param>
+    /// <param name="exp">Logical expression AST to be assigned</param>
+    /// <returns cref="Statement">AST representation of assignment statement</returns>
     private Statement FormAssign(string s, BoolExpr exp)
     {
         return Statement.NewAssignB(new Tuple<string, BoolExpr>(s, exp));
     }
+    
+    /// <summary>
+    /// Method to obtain the quantum/classical register allocation into AST
+    /// </summary>
+    /// <param name="dict">Dictionary of register information</param>
+    /// <returns cref="Bit">Bit typed AST</returns>
     private Bit DestructBitRegister(Dictionary<string, Tuple<int, int>> dict)
     {
         var list = dict.ToList();
@@ -45,6 +87,11 @@ internal class Generator
         }
         return bitList.First();
     }
+    
+    /// <summary>
+    /// Method to destruct the arithmetic variables recorded in memory into AST
+    /// </summary>
+    /// <returns>List of statements obtained in AST format</returns>
     private IEnumerable<Statement> DestructArithmetic()
     {
         var dict = Reg.ArithVariables;
@@ -55,6 +102,11 @@ internal class Generator
             kvp => FormAssign(kvp.Key, kvp.Value.Item1)
             ).ToList();
     }
+    
+    /// <summary>
+    /// Method to destruct the logical variables recorded in memory into AST
+    /// </summary>
+    /// <returns>List of statements obtained in AST format</returns>
     private IEnumerable<Statement> DestructBoolean()
     {
         var dict = Reg.BoolVariables;
@@ -65,6 +117,11 @@ internal class Generator
             kvp => FormAssign(kvp.Key, kvp.Value.Item1)
         ).ToList();
     }
+    
+    /// <summary>
+    /// Method to completely decompose the register object within the circuit.
+    /// </summary>
+    /// <returns>Tuple of AST allocation and schema</returns>
     private Tuple<Allocation, List<Statement>> DestructRegister() {
         var qalloc = DestructBitRegister(Reg.Qubits);
         var calloc = DestructBitRegister(Reg.Cbits);
@@ -74,6 +131,12 @@ internal class Generator
         list.AddRange(DestructBoolean());
         return new Tuple<Allocation, List<Statement>>(alloc, list);
     }
+    
+    /// <summary>
+    /// Method to recover the bit information from the register object.
+    /// </summary>
+    /// <param name="index">Index of bit the query is for</param>
+    /// <returns cref="Bit">Bit typed AST</returns>
     private Bit RecoverBit(int index) {
         KeyValuePair<string, Tuple<int, int>> goal;
         if (index < Reg.QubitNumber)
@@ -95,7 +158,13 @@ internal class Generator
         var i = index - goal.Value.Item2;
         return Bit.NewBitA(new Tuple<string, int>(goal.Key, i));    
     }
-
+    
+    
+    /// <summary>
+    /// Method to decompose the support gate into AST representation.
+    /// </summary>
+    /// <param name="gate" cref="ISupportGate">Target support gate for decomposition</param>
+    /// <returns cref="Statement">Statement type in the AST</returns>
     private Statement? DestructSupport(ISupportGate gate)
     {
         var bit1 = gate.TargetRange.Item1;
@@ -115,7 +184,12 @@ internal class Generator
                 return null;
         }
     }
-
+    
+    /// <summary>
+    /// Method to decompose the generic gates into AST representation.
+    /// </summary>
+    /// <param name="gate" cref="IGate">Target quantum gate to be decomposed</param>
+    /// <returns cref="Statement">Statement type in the AST</returns>
     private Statement? DestructGate(IGate gate)
     {
         var bit1 = gate.TargetRange.Item1;
@@ -180,11 +254,21 @@ internal class Generator
         return Statement.NewCondition(
             new Tuple<BoolExpr, Statement?>(expr.Item1.Value, op));
     }
+    /// <summary>
+    /// Method to deconstruct an entire tower structure into AST representation.
+    /// </summary>
+    /// <param name="tower" cref="Tower">Target tower within circuit to be decomposed</param>
+    /// <returns>List of statements to be included in the schema AST</returns>
     private IEnumerable<Statement> DestructTower(Tower tower)
     {
         var statements = tower.Gates.Select(DestructGate).Where(op => op != null);
         return statements.ToList();
     }
+    
+    /// <summary>
+    /// Method to deconstruct the entire circuit into AST representation. Interface method for the generator, accessible only within the package.
+    /// </summary>
+    /// <returns cref="Tuple{Allocatin, Schema}">Complete AST structure formed from allocation and schema types</returns>
     internal Tuple<Allocation, Schema> DestructCircuit()
     {
         var list = new List<Statement>();

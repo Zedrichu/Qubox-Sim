@@ -17,7 +17,7 @@ Includes the declaration of the concrete support gates, supported by the simulat
 */
 
 /// <summary>
-/// Interface for generic quantum gates.
+/// Interface for generic quantum gates & commands.
 /// </summary>
 public interface IGate
 {

@@ -1,8 +1,21 @@
-using QuBoxEngine.Circuits;
 namespace QuBoxEngine;
+/* C#
+ -*- coding: utf-8 -*-
+QuBoxEngineDemo
 
+Description:  Demo application for QuBoxEngine library
+
+@__Author --> Created by Adrian Zvizdenco aka Zedrichu
+@__Date & Time --> Created on 14/04/2023
+@__Email --> adrzvizdencojr@gmail.com
+@__Version --> 1.0
+@__Status --> TEST
+*/
+
+using Circuits;
 public class ConsoleDemo
 {
+    // Main method for the demo application
     public static void Main(string[] args)
     {
         // Testing Interpreter

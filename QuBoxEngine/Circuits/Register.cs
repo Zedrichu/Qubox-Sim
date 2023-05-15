@@ -1,7 +1,22 @@
+namespace QuBoxEngine.Circuits;
+/* C#
+ -*- coding: utf-8 -*-
+Register
+
+Description: Manages the memory context for which the circuit is defined.
+
+@__Author --> Created by Adrian Zvizdenco aka Zedrichu
+@__Date & Time --> Created on 02/04/2023
+@__Email --> adrzvizdencojr@gmail.com
+@__Version --> 1.0
+@__Status --> DEV
+*/
+
 using QuLangProcessor;
 
-namespace QuBoxEngine.Circuits;
-
+/// <summary>
+/// Class that models the memory context for which the circuit is defined.
+/// </summary>
 public class Register
 {
     public int QubitNumber { get; } = 0;
@@ -15,6 +30,10 @@ public class Register
     
     public Dictionary<string, Tuple<AST.ArithExpr, int>> ArithVariables { get; } = new();
 
+    /// <summary>
+    /// Constructor for the register class given a memory type obtained during compilation.
+    /// </summary>
+    /// <param name="memory" cref="AST.Memory">Memory type from the QuLangProcessor package</param>
     public Register(AST.Memory memory)
     {
         QubitNumber = memory.CountQuantum;
@@ -32,6 +51,11 @@ public class Register
         return dictionary.Aggregate("", (current, pair) => current + $"{pair.Key} {pair.Value} \n");
     }
 
+    /// <summary>
+    /// Method to retrieve the name string for a given index of the bit.
+    /// </summary>
+    /// <param name="index">Index of bit the query is for</param>
+    /// <returns>String name of the queried bit index</returns>
     public string GetBitName(int index)
     {
         KeyValuePair<string, Tuple<int, int>> goal;
@@ -55,6 +79,10 @@ public class Register
 
     }
     
+    /// <summary>
+    /// Method to stringify the register class for debugging purposes.
+    /// </summary>
+    /// <returns>String representation of the register object</returns>
     public override string ToString()
     {
         return $"Qubits: {QubitNumber} Bits: {CbitNumber} \n" +

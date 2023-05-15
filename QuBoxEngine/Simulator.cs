@@ -3,7 +3,7 @@ namespace QuBoxEngine;
  -*- coding: utf-8 -*-
 Simulator Engine
 
-Description: Declaration of the simulator engine class that can run circuits
+Description: Declaration of the simulator engine module that can run circuit evolutions
 
 @__Author --> Created by Adrian Zvizdenco aka Zedrichu
 @__Date & Time --> Created on 06/04/2023
@@ -12,12 +12,14 @@ Description: Declaration of the simulator engine class that can run circuits
 @__Status --> DEV
 */
 
-
 using MathNet.Numerics.LinearAlgebra;
 using Complex = System.Numerics.Complex;
 using Circuits;
 using Gates;
 
+/// <summary>
+/// Class that represents the simulator engine
+/// </summary>
 public class Simulator
 {
     private readonly Circuit _circuit;
@@ -28,19 +30,29 @@ public class Simulator
     private State _state;
     public List<Tuple<double, double>> PhaseDisks { get; } = new ();
 
+    /// <summary>
+    /// Constructor of a simulator engine for a specific circuit
+    /// </summary>
+    /// <param name="circuit" cref="Circuit">Target circuit on which simulation will be performed</param>
     public Simulator(Circuit circuit)
     {
         _circuit = circuit;
         _qubits = _circuit.Allocation.QubitNumber;
         
+        // Initialize the state vector and the probability vector
         var probability = Vector<double>.Build.
                 Dense(0b1 << circuit.Allocation.CbitNumber, 0);
         probability[0] = 1;
         var stateVector = Vector<Complex>.Build.Dense(0b1 << _qubits, 0);
         stateVector[0] = 1;
+        // Initialize the state object with given vectors
         _state = new State(stateVector, probability);
     }
     
+    /// <summary>
+    /// Executes a step of the circuit simulation by constructing the tensor product of gates in a tower. Global operation is applied on the quantum system state.
+    /// </summary>
+    /// <param name="tower" cref="Tower">Target column of gates in the circuit</param>
     private void TowerOperation(Tower tower)
     {
         var tensor = Matrix<Complex>.Build.DiagonalIdentity(1);
@@ -71,7 +83,6 @@ public class Simulator
                     }
                     _state.ProbeVector = tempResult;
                 }
-                    
             }
             else
             {
@@ -83,6 +94,10 @@ public class Simulator
         _state.StateVector = tensor * _state.StateVector;
     }
     
+    /// <summary>
+    /// Method to trigger/run the simulation of the circuit registered in the simulator engine
+    /// </summary>
+    /// <returns cref="State">Global state after circuit unitary evolution</returns>
     public State Run()
     {
         foreach (var tower in _circuit.GateGrid)
