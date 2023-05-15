@@ -13,18 +13,30 @@
 </div>
 
 @code {
-
+    
+    /// <summary>
+    /// String contained in the code editor passed as a parameter from the parent component.
+    /// </summary>
     [Parameter]
     public string CodeContent { get; set; } = "";
     
+    /// <summary>
+    /// Reference to the Monaco editor component.
+    /// </summary>
     private StandaloneCodeEditor _editor = null!;
     
+    /// <summary>
+    /// Event callback to the parent component when the code content changes. Notify whole page about update.
+    /// </summary>
     [Parameter]
     public EventCallback<string> CodeContentChanged { get; set; }
     
     [Parameter]
     public string ValueToSet { get; set; } = "";
-
+    
+    /// <summary>
+    /// Instance creation for the editor component with specific configuration such as theme, font, initial value etc.
+    /// </summary>
     private StandaloneEditorConstructionOptions EditorConstructionOptions(StandaloneCodeEditor editor)
     {
         return new StandaloneEditorConstructionOptions
@@ -43,6 +55,10 @@
         };
     }
     
+    
+    /// <summary>
+    /// Asynchronous task triggered when the cursor position changes inside the editor.
+    /// </summary>
     private async void EditorChangedPosition(CursorPositionChangedEvent eventArg)
     {
         CodeContent = await _editor.GetValue();
@@ -50,6 +66,9 @@
         await UpdateContent(new MouseEventArgs());
     }
     
+    /// <summary>
+    /// Asynchronous task triggered when the content of the editor changes.
+    /// </summary>
     private async Task EditorChangedContent(ModelContentChangedEvent eventArg)
     {
         CodeContent = await _editor.GetValue();
@@ -57,19 +76,27 @@
         await UpdateContent(new MouseEventArgs());        
     }
     
-    
+    /// <summary>
+    /// Task executed when the mouse pointer leaves the area of the editor. Action-binding to the @onmouseleave event.
+    /// </summary>
     private Task UpdateContent(MouseEventArgs eventArg)
     {
         //Console.WriteLine("Content is updated!");
         return CodeContentChanged.InvokeAsync(CodeContent);
     }
-
+    
+    /// <summary>
+    /// Synchronous update of code editor content with new value.
+    /// </summary>
     private async Task SetValue()
     {
         Console.WriteLine($"setting value to: {ValueToSet}");
         await _editor.SetValue(ValueToSet);
     }
-
+    
+    /// <summary>
+    /// Synchronous retrieval of code editor content.
+    /// </summary>
     private async Task GetValue()
     {
         var val = await _editor.GetValue();

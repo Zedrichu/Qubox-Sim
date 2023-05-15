@@ -52,15 +52,28 @@
 
 @code {
     
+    /// <summary>
+    /// Saved reference to the circuit object built on the platform
+    /// </summary>
     private Circuit? _circuit { get; set; }
     
+    /// <summary>
+    /// Saved reference of the error tag during processing
+    /// </summary>
     private AST.Error Error { get; set; } = AST.Error.Success;
-
+    
+    
+    /// <summary>
+    /// Upon initialization, subscribe to the state container
+    /// </summary>
     protected override void OnInitialized()
     {
         StateContainer.OnChange += StateHasChanged;
     }
 
+    /// <summary>
+    /// Mouse hovering binding function to update the circuit object
+    /// </summary>
     private async void UpdateCircuit(MouseEventArgs e)
     {
         Interpreter.HandleLang(Content);
@@ -77,13 +90,19 @@
         StateContainer.Property = _circuit;
     }
     
+    /// <summary>
+    /// Unsubscribe from the state container when the component is disposed
+    /// </summary>
     public void Dispose()
     {
         StateContainer.OnChange -= StateHasChanged;
     }
-
+    
     private string Content { get; set; } = "...Try typing something in the editor or switch focus...";
 
+    /// <summary>
+    /// Function to obtain a stream of data containing the translated Q# code
+    /// </summary>
     private Stream GetStreamData()
     {   
         Interpreter.DecomposeCircuit(_circuit);
@@ -92,7 +111,10 @@
         var fileStream = new MemoryStream(Encoding.UTF8.GetBytes(translated));
         return fileStream;
     }
-
+    
+    /// <summary>
+    /// Function to trigger the download the Q# code as a file, by invoking a JS function
+    /// </summary>
     private async Task DownloadFile()
     {
         var stream = GetStreamData();

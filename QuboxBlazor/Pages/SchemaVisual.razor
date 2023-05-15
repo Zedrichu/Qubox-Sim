@@ -20,7 +20,11 @@
 </div>
 
 @code {
-
+    
+    
+    /// <summary>
+    /// Parameter object received from the parent component for data-binding.
+    /// </summary>
     [Parameter]
     public Circuit Circuit { get; set; }
 
@@ -31,13 +35,19 @@
 
     private readonly int InterGatePadding = 20;
 
+    /// <summary>
+    /// Trigger a task to render the visualisation for the first time after circuit update.
+    /// </summary>
     protected override Task OnAfterRenderAsync(bool firstRender)
     {
         skiaView.EnableRenderLoop = true;
         skiaView.EnableRenderLoop = false;
         return base.OnAfterRenderAsync(firstRender);
     }
-
+    
+    /// <summary>
+    /// Method to construct the SVG visualisation of the circuit.
+    /// </summary>
     private void PaintSurface(SKPaintSurfaceEventArgs e)
     {
         var svg = e.Surface.Canvas;

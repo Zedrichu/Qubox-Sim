@@ -11,6 +11,11 @@
         <Title>QuLangProcessor</Title>
         <Description>Language Processor for the QuLang Quantum Circuit Definition Language</Description>
         <AssemblyVersion>1.0</AssemblyVersion>
+        <Version>1.0.1</Version>
+        <Copyright>Copyright (c) Zedrichu 2023</Copyright>
+        <PackageProjectUrl>https://github.com/Zedrichu/Qubox-Sim</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/Zedrichu/Qubox-Sim/blob/main/LICENSE</PackageLicenseUrl>
+        <RepositoryUrl>https://github.com/Zedrichu/Qubox-Sim</RepositoryUrl>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

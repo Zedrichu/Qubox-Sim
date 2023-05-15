@@ -1,3 +1,19 @@
+/* Vanilla JavaScript
+ -*- coding: utf-8 -*-
+monacoSetup
+
+Description: This file is used to setup the Monaco editor. The tokens used in the QuLang format are registered to a 
+new language within the Monaco configuration. Using the token providers a color theme for the language is defined along
+with code completion feature for the language.
+
+@__Author --> Created by Adrian Zvizdenco aka Zedrichu
+@__Date & Time --> Created on 29/03/2023
+@__Email --> adrzvizdencojr@gmail.com
+@__Version --> 1.0
+@__Status --> DEV
+*/
+
+
 require.config({ paths: { 'vs': '_content/BlazorMonaco/lib/monaco-editor/min/vs' }});
 
 let gate = ["H","X","Z","ID","Y","S","T","SDG","TDG","SX","SXDG","P","RZ","RY","RX","U"];

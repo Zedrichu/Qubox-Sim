@@ -11,6 +11,15 @@
         <PackageIcon>qubox-logo.png</PackageIcon>
         <Company>QuBox</Company>
         <AssemblyVersion>1.0</AssemblyVersion>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Copyright>Copyright (c) Zedrichu 2023</Copyright>
+        <PackageProjectUrl>https://github.com/Zedrichu/Qubox-Sim</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/Zedrichu/Qubox-Sim/blob/main/LICENSE</PackageLicenseUrl>
+        <RepositoryUrl>https://github.com/Zedrichu/Qubox-Sim</RepositoryUrl>
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>Zedrichu.snk</AssemblyOriginatorKeyFile>
+        <PublicSign>true</PublicSign>
+        <Version>1.0.1</Version>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

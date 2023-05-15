@@ -71,17 +71,27 @@
 
 @code {
     private State state;
-
+    
+    
+    /// <summary>
+    /// Subscribe to the injected state container to be notified when the state changes.
+    /// </summary>
     protected override void OnInitialized()
     {
         StateContainer.OnChange += StateHasChanged;
     }
-
+    
+    /// <summary>
+    /// Unsubscribe from the injected state container when the component is disposed.
+    /// </summary>
     public void Dispose()
     {
         StateContainer.OnChange -= StateHasChanged;
     }
     
+    /// <summary>
+    /// Trigger an asynchronous task to execute the circuit simulation.
+    /// </summary>
     private async void SimCircuit()
     {
         await Task.Delay(500);
@@ -96,6 +106,9 @@
         StateHasChanged();
     }
     
+    /// <summary>
+    /// Method to display the results of the simulation.
+    /// </summary>
     private string DisplayResults(State results )
     {
         if (results == null)
