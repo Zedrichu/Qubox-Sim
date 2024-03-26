@@ -6,3 +6,11 @@ riderModule.iml
 /_ReSharper.Caches/
 .DS_Store/
 /GrammarTestCoverage/*
+*/.DS_Store
+
+QuBoxEngine/.DS_Store
+QuLangProcessor/.DS_Store
+QuboxBlazor/.DS_Store
+IonQApp/.DS_Store
+QuboxBlazor/wwwroot/.DS_Store
+QuboxBlazor/wwwroot/css/.DS_Store
